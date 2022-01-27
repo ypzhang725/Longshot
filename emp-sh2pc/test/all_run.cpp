@@ -152,8 +152,9 @@ int main(int argc, char** argv) {
     // option4: add noise to all nodes on the path of current leaf node + enforceConsistency
     std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
     if (constantDP) { 
-      lapVect = {1, 1, 1, 1, 1};
-     // lapVect = {0, 0, 0, 0, 0};
+      // std::vector<int> lapVect_(bins, 0);
+      std::vector<int> lapVect_(bins, 1);
+      lapVect = lapVect_;
     } else {
       if (option != 1) {
         double levels = log2(t);  // double or int?
