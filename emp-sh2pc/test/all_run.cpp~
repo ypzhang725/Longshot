@@ -1,0 +1,362 @@
+#include <vector>
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <cmath>
+#include "emp-sh2pc/emp-sh2pc.h"
+#include "merge2SortedArrs.cpp"
+#include "histGens.cpp"
+using namespace emp;
+using namespace std;
+
+Integer memconcat(Integer int1, Integer int2){
+  Integer res(64, 0, ALICE);
+  memcpy(res.bits.data(), int1.bits.data(), 32* sizeof(block));
+  memcpy(res.bits.data()+32, int2.bits.data(), 32 * sizeof(block));
+  return res;
+}
+
+std::pair<Integer, Integer> memseperate(Integer res){
+  Integer res1(32, 0, ALICE);
+  Integer res2(32, 0, BOB);
+  memcpy(res1.bits.data(), res.bits.data(), 32* sizeof(block));
+  memcpy(res2.bits.data(), res.bits.data()+32, 32 * sizeof(block));
+  return std::make_pair(res1, res2);
+}
+
+Integer * assignBin(Integer *res, Integer *res_d, int size, int bins, std::vector<int> counter){
+  // bin mark                                                                                        
+  Integer *res_b = new Integer[size];
+  for(int i = 0; i < size; ++i)
+    res_b[i] = Integer(32, bins, ALICE); // ??
+  
+  // todo: 1. compute bin 2. IF
+  // first round: real records                                                                       
+  for(int i = 0; i < size; ++i){
+    if(res_d[i].reveal<int32_t>() == 1){  //real record                                              
+      Integer bin_num(32, res[i].reveal<int32_t>()-1, BOB);// assum                                  
+      for(int j = 0; j < bins; ++j){ //each bin                                                     
+        if(bin_num.reveal<int32_t>() == j){
+          if(counter[j] > 0){
+            res_b[i] = bin_num;
+          }
+          counter[j] = counter[j] - 1;
+        }
+      }
+    }
+  }
+
+  //  cout << "after round1 counter for each bin" << ' ';                                            
+  // printArray(counter, bins);                                                                      
+  // second round: dummy records                                                                     
+  for(int i = 0; i < size; ++i){  // Integer one(32, 0, PUBLIC);                                     
+    if(res_d[i].reveal<int32_t>() == 0){  //dummy                                                    
+      //  Integer bin_num(32, res[i].reveal<int32_t>(), BOB);// assum                                
+      for(int j = 0; j < bins; ++j){ //each bin                                                      
+        if(res_b[i].reveal<int32_t>() == bins){
+          if(counter[j] > 0){
+            res_b[i] = Integer(32, j, ALICE);
+          }
+          counter[j] = counter[j] - 1;
+        }
+      }
+    }
+  }
+  return res_b;
+}
+
+std::pair<Integer, Integer> *sort2(Integer *res, Integer *res_d, Integer *res_b, int size){
+  std::pair<Integer, Integer> *res_seperate;
+  Integer *res_2 = new Integer[size];
+  for(int i = 0; i < size; ++i){
+    res_2[i] = memconcat(res[i], res_d[i]);
+  }
+
+  sort(res_b, size, res_2);
+  for(int i = 0; i < size; ++i){
+    res_seperate[i] = memseperate(res_2[i]);
+  }
+  return res_seperate;
+    
+}
+
+std::pair<std::vector<int>, std::vector<int> > copy2two(std::vector<int> num, int index){
+  int size = num.size();
+  std::vector<int> vect1;
+  std::vector<int> vect2;
+  for(int i = 0; i < index; ++i){
+    vect1.push_back(num[i]);
+  }
+  for(int i = index; i < size; ++i){
+    vect2.push_back(num[i]);
+  }
+  return std::make_pair(vect1, vect2);
+}
+
+Integer * toIntegerArray(std::vector<int> num, int party){
+  int size = num.size();
+  Integer * numInt = new Integer[size];
+  for(int i = 0; i < size; ++i){
+    numInt[i] = Integer(32, num[i], party);
+  }
+  return numInt;
+}
+
+Integer* copyArray(Integer* array, int size){
+  Integer * copy = new Integer[size];
+  for(int i = 0; i < size; ++i){
+    copy[i] = array[i];
+  }
+  return copy; 
+}
+
+std::pair<std::vector<int>, std::vector<int> > sortDP(int party, std::vector<int> number, std::vector<int> number2, std::vector<int> number3, int size, int bins, int totalRecords) {
+  cout<< "secret shares" << endl; 
+  printArrayPlaintext(number);
+  Integer *A = toIntegerArray(number, ALICE);
+  Integer *B = toIntegerArray(number, BOB);
+  Integer *D_A = toIntegerArray(number2, ALICE);
+  Integer *D_B = toIntegerArray(number2, BOB);
+  
+  std::vector<int> counter = number3; 
+  
+  // reconstruct original data                                                                      
+  Integer *res = reconstructArray(number);
+  // reconstruct dummy mark                                                                         
+  Integer *res_d = reconstructArray(number2);
+  
+  Integer *res_b = assignBin(res, res_d, size, bins, counter);
+  cout << "assigned bin number for each records" << ' ';
+  printArray(res_b, size);
+
+  Integer * res_b_copy = copyArray(res_b, size);
+  Integer * res_b_copy2 = copyArray(res_b, size);
+  Integer * res_b_copy3 = copyArray(res_b, size);
+  Integer * res_b_copy4 = copyArray(res_b, size);
+  
+  
+  // for debug
+  Integer *res_2 = new Integer[size];
+  for(int i = 0; i < size; ++i){
+    res_2[i] = memconcat(res[i], res_d[i]);
+  }
+  
+  sort(res_b, size, res_2);
+  for(int i = 0; i < size; ++i){
+    std::pair<Integer, Integer> res_temp = memseperate(res_2[i]);
+    res[i] = res_temp.first;
+    res_d[i] = res_temp.second;
+  }
+  
+  cout << "original records" << ' ';
+  printArray(res, size);
+  cout << "dummy marker" << ' ';
+  printArray(res_d, size);
+  cout << "assigned bin" << ' ';
+  printArray(res_b, size);
+  
+
+  sort(res_b_copy, size, A);
+  sort(res_b_copy2, size, B);
+  sort(res_b_copy3, size, D_A);
+  sort(res_b_copy4, size, D_B);
+  
+  cout<< "secret shares" << endl;
+  printArray(A, size);
+  printArray(B, size);
+  printArray(D_A, size);
+  printArray(D_B, size);
+
+  std::vector<int> A_reveal = revealSh(A, size);
+  std::vector<int> B_reveal = revealSh(B, size);
+  std::vector<int> D_A_reveal = revealSh(D_A, size);
+  std::vector<int> D_B_reveal = revealSh(D_B, size);
+  if (party == ALICE) {
+    return std::make_pair(A_reveal, D_A_reveal);
+  }
+  else {
+    return std::make_pair(B_reveal, D_B_reveal);
+  }
+  
+}
+
+std::vector<int> addTwoVectors(std::vector<int> vect1, std::vector<int> vect2){
+  std::vector<int> res;
+  for (int i = 0; i < vect1.size(); i++) {
+    res.push_back(vect1[i] + vect2[i]);
+  }
+  return res;
+}
+
+std::vector<int> minusTwoVectors(std::vector<int> vect1, std::vector<int> vect2){
+  std::vector<int> res;
+  for (int i = 0; i < vect1.size(); i++) {
+    res.push_back(vect1[i] - vect2[i]);
+  }
+  return res;
+}
+
+int nodesSubtree(int i){
+  i += 1;
+  int j = 1;
+  int k = i;
+  int rootLeft = i;
+  while (k % 2 == 0) {
+    rootLeft = i - std::pow(2, j) + 1;
+    k = k / 2;
+    j += 1;
+  }
+  return rootLeft - 1;
+}
+
+std::vector<int> nonNegative(std::vector<int> vect){
+  std::vector<int> res;
+  for (int i = 0; i < vect.size(); i++) {
+    if (vect[i] < 0){
+      res.push_back(0);
+    } else {
+      res.push_back(vect[i] );
+    }
+  }
+  return res;
+}
+
+int main(int argc, char** argv) {
+  int port, party;
+  string fileName1 = argv[3]; // original
+  string fileName2 = argv[4]; // dummy marker
+  string fileName3 = argv[5]; // random
+  string fileName4 = argv[6]; // lap   
+  string t_string = argv[7]; // t 
+  string option_string = argv[8]; // tree or ?
+  int bins = 5;
+  int t = atoi(t_string.c_str());
+  int option = atoi(option_string.c_str()); // 1, 2, 3
+
+  parse_party_and_port(argv, &party, &port);
+  NetIO * io = new NetIO(party==ALICE ? nullptr : "127.0.0.1", port);
+  
+  // read inputs from external file.
+  std::vector<int> vect = readInputs(fileName1); // original
+  std::vector<int> vect2 = readInputs(fileName2); // dummy marker
+  std::vector<int> vect3 = readInputs(fileName3); // random
+  std::vector<int> vect4 = readInputs(fileName4); // lap   
+  
+  setup_semi_honest(io, party);
+
+  std::vector<std::vector<int> > originalData;
+  std::vector<std::vector<int> > originalDummyMarkers;
+  for (int i = 0; i < t; i++) {
+    originalData.push_back(vect);
+    originalDummyMarkers.push_back(vect2);
+  }
+
+  std::vector<int> mainData;
+  std::vector<int> mainDummyMarker;
+  std::vector<std::vector<int> > trueHists;
+  std::vector<std::vector<int> > dpHists;
+  std::vector<int> leftCacheData;
+  std::vector<int> leftCacheDummyMarker;
+  int mainSize = 0;
+  for (int i = 0; i < t; i++) {
+    cout<< "index: " << i << endl;
+    int size = vect.size();
+    // step1: trueHistGen
+    // vect3 : todo re-gennerate random value; remove node
+    std::vector<int> sh = trueHistGen(party, originalData[i], originalDummyMarkers[i], vect3, size, bins); 
+    trueHists.push_back(sh);
+
+    // step2: dpHistGen
+    // option1: add noise to leaf node
+    // option2: add noise to all
+    // option3: add noise to root of subtree
+    // todo: re-generate dp noise
+    std::vector<int> dp;
+    if (option == 1) {
+      std::vector<std::vector<int> > trueHistgrams;
+      trueHistgrams.push_back(trueHists[i]);
+      dp = dpHistGen(party, trueHistgrams, vect4, bins);  
+    } else if (option == 2) {
+      std::vector<std::vector<int> > trueHistgrams;
+      for (int j = 0; j <= i; j++) { 
+        trueHistgrams.push_back(trueHists[j]);
+      }
+      dp = dpHistGen(party, trueHistgrams, vect4, bins);  
+      for (int j = 0; j <= i - 1; j++) { 
+        dp = minusTwoVectors(dp, dpHists[j]);
+      }
+    } else {
+      std::vector<std::vector<int> > trueHistgrams;
+      int rootLeft = nodesSubtree(i);
+      for (int j = rootLeft; j <= i; j++) { 
+        trueHistgrams.push_back(trueHists[j]);
+      }
+      dp = dpHistGen(party, trueHistgrams, vect4, bins);  
+      for (int j = rootLeft; j <= i - 1; j++) { 
+        dp = minusTwoVectors(dp, dpHists[j]);
+      }
+    }
+
+    dpHists.push_back(nonNegative(dp));
+    //debug
+    cout << "dpHists" << endl;
+    for (int j = 0; j < bins; j++) {
+      cout << dpHists[i][j] << ' ';
+    }
+    cout << "dpHists" << endl;
+    cout <<  endl;
+    //debug
+
+    // step3: sortUsingDP
+    leftCacheData.insert(leftCacheData.end(), originalData[i].begin(), originalData[i].end());
+    leftCacheDummyMarker.insert(leftCacheDummyMarker.end(), originalDummyMarkers[i].begin(), originalDummyMarkers[i].end());
+    int totalRecords = accumulate(dpHists[i].begin(), dpHists[i].end(), 0);
+    mainSize += totalRecords;
+    int sizeCache = leftCacheData.size();
+    std::pair<std::vector<int>, std::vector<int> > sorted = sortDP(party, leftCacheData, leftCacheDummyMarker, dpHists[i], sizeCache, bins, totalRecords);
+
+    std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(sorted.first, totalRecords);
+    std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(sorted.second, totalRecords);
+    std::vector<int> sortedRecord = seperatedRecord.first;
+    leftCacheData = seperatedRecord.second;
+    std::vector<int> sortedDummy = seperatedDummyMarker.first;
+    leftCacheDummyMarker = seperatedDummyMarker.second;
+
+    //debug
+    cout << "**************" << endl;
+    Integer *sortedRecordsortedRecord = reconstructArray(sortedRecord);
+    Integer *leftRecordleftRecord = reconstructArray(leftCacheData);
+    printArray(sortedRecordsortedRecord, sortedRecord.size());
+    printArray(leftRecordleftRecord, leftCacheData.size());
+    cout << "&&&&&&&&&&&&&" << endl;
+    Integer *sortedDummysortedDummy = reconstructArray(sortedDummy);
+    Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
+    printArray(sortedDummysortedDummy, sortedDummy.size());
+    printArray(leftDummyleftDummy, leftCacheDummyMarker.size());
+    //debug
+
+    cout << "sortedRecord.size(): " << sortedRecord.size() << endl;
+
+    // step4: dpMerge
+    std::vector<int> dp_main(bins, 0);
+    for (int j = 0; j < i; j++) { 
+      dp_main = addTwoVectors(dp_main, dpHists[j]);
+    }
+ 
+    mainData = merge2SortedArr(dp_main, dpHists[i], mainData, sortedRecord, bins);
+    mainDummyMarker = merge2SortedArr(dp_main, dpHists[i], mainDummyMarker, sortedDummy, bins);
+
+  }
+  cout << "mainData.size(): " << mainData.size() << "mainDummyMarker.size(): " << mainDummyMarker.size() << endl;
+  //debug
+  Integer *mainmain = reconstructArray(mainData);
+  Integer *mainDummyMarkermain = reconstructArray(mainDummyMarker);
+  printArray(mainmain, mainData.size());
+  printArray(mainDummyMarkermain, mainSize);
+  //debug
+
+  finalize_semi_honest();
+  delete io;
+}
