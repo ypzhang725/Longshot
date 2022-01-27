@@ -44,7 +44,6 @@ int main(int argc, char** argv) {
   NetIO * io = new NetIO(party==ALICE ? nullptr : "127.0.0.1", port);
   setup_semi_honest(io, party);
 
-  // todo: secret shares of nyc dataset
   // read real data from external file.
   string fileName_real = argv[3]; // original
   std::vector<int> vect = readInputs(fileName_real); // original
@@ -105,7 +104,7 @@ int main(int argc, char** argv) {
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), dummyMarker.begin(), dummyMarker.end()); //v_originalDummyMarkers: 1s+0s
     } else {
-      std::vector<int> dummyRecord(num_dummy, 446);  // 0s
+      std::vector<int> dummyRecord(num_dummy, 446);  // dummy(0s)
       v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
 
       std::vector<int> realMarkers(num_real, 624);  // real(1s)
