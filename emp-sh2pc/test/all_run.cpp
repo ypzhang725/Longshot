@@ -66,14 +66,16 @@ int main(int argc, char** argv) {
   int bins = 0;
   // !warning: if there are not enough dummy records, then sortDP and copy2two are incorrect
   int num_real = 0;  
-  int num_dummy = 10; // make sure there are enough dummy records
+  int num_dummy = 0; // make sure there are enough dummy records
    // nyc taxi dataset: 1271413 rows; 4 bins; payment_type
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
     num_real = 100; 
+    num_dummy = 100; 
   } else {
     bins = 5; // bin number
     num_real = 10;  
+    num_dummy = 100; 
     std::vector<int> vect_ = vect;
     for (int i = 0; i < t; i++) { 
       vect.insert(vect.end(), vect_.begin(), vect_.end());
