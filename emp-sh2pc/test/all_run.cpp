@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
   // how to make it consistent
   int inconsistConst = 1; //  
   // constant dp noise
-  bool constantDP = false; 
+  bool constantDP = true; 
   // privacy budget
   double eps = 10;
   // bin number 
@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
   } else {
     bins = 5; // bin number
     num_real = 10;  
-    num_dummy = 100; 
+    num_dummy = 10; 
     std::vector<int> vect_ = vect;
     for (int i = 0; i < t; i++) { 
       vect.insert(vect.end(), vect_.begin(), vect_.end());
@@ -130,26 +130,22 @@ int main(int argc, char** argv) {
   std::vector<int> mainDataEncodedNot;
   std::vector<int> mainDummyMarker;
   std::vector<std::vector<int> > trueHists;
-  std::vector<std::vector<int> > dpHists;
+  std::map<std::string, std::vector<int> > dpHists;
   std::map<std::string, std::vector<int> > inconsistDPHists;
   std::vector<int> leftCacheData;
   std::vector<int> leftCacheDataEncodedNot;
   std::vector<int> leftCacheDummyMarker;
-  int mainSize = 0;
+  int mainSize = 0; //debug
   // for each update: 
   for (int i = 0; i < t; i++) {
     cout<< "index: " << i << endl;
-    // step1: trueHistGen
+    // step1: trueHistGen for the path
     int size = originalData[i].size();   
     std::vector<int> randomVect = uniformGenVector(bins);
     std::vector<int> sh = trueHistGen(party, originalData[i], originalDummyMarkers[i], randomVect, size, bins); 
     trueHists.push_back(sh);
 
-    // step2: dpHistGen
-    // option1: add noise to leaf node
-    // option2: add noise to all --  X    // this will be removed 
-    // option3: add noise to root of subtree
-    // option4: add noise to all nodes on the path of current leaf node + enforceConsistency
+    // step2: dpHistGen for the root of the subtree
     std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
     if (constantDP) { 
       // std::vector<int> lapVect_(bins, 0);
@@ -163,79 +159,54 @@ int main(int argc, char** argv) {
       lapVect = lapGenVector(bins, 1 / eps); 
     }
     std::vector<int> dp;
-    if (option == 1) {
-      std::vector<std::vector<int> > trueHistgrams;
-      trueHistgrams.push_back(trueHists[i]);
-      dp = dpHistGen(party, trueHistgrams, lapVect, bins);  
-    } else if (option == 2) {  // this will be removed 
-      std::vector<std::vector<int> > trueHistgrams;
-      for (int j = 0; j <= i; j++) { 
-        trueHistgrams.push_back(trueHists[j]);
-      }
-      dp = dpHistGen(party, trueHistgrams, lapVect, bins);  
-      for (int j = 0; j <= i - 1; j++) { 
-        dp = minusTwoVectors(dp, dpHists[j]);
-      }
-    } else if (option == 3) {
-      std::vector<std::vector<int> > trueHistgrams;
-      int rootLeft = nodesSubtree(i);
-      for (int j = rootLeft; j <= i; j++) { 
-        trueHistgrams.push_back(trueHists[j]);
-      }
-      dp = dpHistGen(party, trueHistgrams, lapVect, bins);  
-      for (int j = rootLeft; j <= i - 1; j++) { 
-        dp = minusTwoVectors(dp, dpHists[j]);
-      }
-    } else { // b = 2  todo: check nonNegative
-      std::vector<std::vector<int> > dpAllNodes; // all nodes on the path
-      std::vector<std::vector<int> > constantNodes;  // all constant nodes
+    if (true) { // b = 2  todo: check nonNegative
+      // step2.1 and step2.2: generate DP hists of nodes on the current path (current leaf to root)
       int rootLeft = nodesSubtree(i);
       int gap = i - rootLeft + 1;
-      while ((gap / 2 >= 1) or (gap >= 1)) {
-        // node on the path
+   //   cout << "rootLeft: " << rootLeft << " gap: " <<  gap << " i: " << i << endl;
+      while ((gap / 2 >= 1) or (gap >= 1)) {  
+        // step2.1: true hists of nodes on the path
         std::vector<std::vector<int> > trueHistgrams;
         for (int j = rootLeft; j <= i; j++) { 
           trueHistgrams.push_back(trueHists[j]);
         }
+        // step2.2: DP hists of nodes on the path
         std::vector<int> dpNode = dpHistGen(party, trueHistgrams, lapVect, bins);
-        dpAllNodes.push_back(nonNegative(dpNode));
-        if (inconsistConst == 1) {
-          string intervalDP = std::to_string(rootLeft) + ',' + std::to_string(i);
-          inconsistDPHists[intervalDP] = nonNegative(dpNode);
-        } 
+        string intervalDP = std::to_string(rootLeft) + ',' + std::to_string(i);
+        inconsistDPHists[intervalDP] = nonNegative(dpNode);
 
-        // constant node 
-        std::vector<int> dpNodeConstant(bins, 0);
-        if (inconsistConst == 0) {
-          for (int j = rootLeft; j < int(rootLeft + (gap / 2)); j++) { 
-            cout << "rootLeft: " << rootLeft << endl;    
-            cout << "constRight: " << int(rootLeft + (gap / 2)) << endl;  
-            dpNodeConstant = addTwoVectors(dpNodeConstant, dpHists[j]);
-          }
-        }
-        if (rootLeft < int(rootLeft + (gap / 2))){
-          if (inconsistConst == 1) {
-            string intervalConst = std::to_string(rootLeft) + ',' + std::to_string(int(rootLeft + (gap / 2)) - 1);
-            dpNodeConstant = inconsistDPHists[intervalConst];  
-          } 
-          constantNodes.push_back(nonNegative(dpNodeConstant));
-        }
         rootLeft += (gap / 2);
         gap /= 2;
       }
-      dp = enforceConsistency(dpAllNodes, constantNodes);
+      // step2.3: DP hists of all nodes in the subtree
+      std::vector<std::vector<int> > dpAllNodes; // all nodes on the subtree
+      int rootLeftAgain= nodesSubtree(i);
+      int gapAgain = i - rootLeftAgain + 1;
+      int height = int(log2(gapAgain)) + 1;
+    //  cout << "log2(gap_: " << log2(gapAgain) << " i:" << i << endl;
+     // cout << "rootLeft_: " << rootLeftAgain << " gap_: " <<  gapAgain << " height: " << height << endl;
+      for (int j = 0; j < height; j++) { 
+        int interval = std::pow(2, j);
+     //   cout << "interval: " << interval <<  endl;
+        for (int k = rootLeftAgain; k < (i+1); (k += interval)) { 
+          string intervalDP = std::to_string(k) + ',' + std::to_string(k + interval - 1);
+     //     cout << "intervalDP: " << intervalDP <<  endl;
+          dpAllNodes.push_back(inconsistDPHists[intervalDP]);
+        }
+      }
+      // step2.4: make these nodes on this tree consistent and return the DP hist for the root
+      dp = enforceConsistencyH(dpAllNodes, gapAgain);
+      string intervalDP = std::to_string(rootLeftAgain) + ',' + std::to_string(i);
+      dpHists[intervalDP] = nonNegative(dp);
+      //debug
+      for (int j = 0; j < bins; j++) {
+      cout << dp[j] << ' ';
+      }
+      cout << endl;
+      //debug
     }
-    dpHists.push_back(nonNegative(dp));
 
-    //debug
-    cout << "dpHists" << ' ';
-    for (int j = 0; j < bins; j++) {
-      cout << dpHists[i][j] << ' ';
-    }
-    cout <<  endl;
-    //debug
-
-    if (dpMerge == 1) {
+    /*if (dpMerge == 1) {
       // step3: sortCacheUsingDP
       // previously left records + new records in the cache --> sort using DP histogram
       leftCacheData.insert(leftCacheData.end(), originalData[i].begin(), originalData[i].end());
@@ -327,10 +298,10 @@ int main(int argc, char** argv) {
       leftCacheDummyMarker = seperatedDummyMarker.second;
       mainDataEncodedNot = seperatedRecordEncodedNot.first;
       leftCacheDataEncodedNot = seperatedRecordEncodedNot.second;
-    }
+    }*/
   }
 
-  //debug
+ /* //debug
   cout << "******************************************* " << endl;
   std::vector<int> dp_main(bins, 0);
   for (int j = 0; j < t; j++) { 
@@ -375,7 +346,7 @@ int main(int argc, char** argv) {
   cout << "**********totalRecordsLeft_dummy: " << dummyNumLeft << endl;
   cout << "**********computed true(main+left): " << (mainData.size() + leftCacheData.size() - dummyNum - dummyNumLeft) << endl;
   //debug
-
+*/
   finalize_semi_honest();
   delete io;
 }
