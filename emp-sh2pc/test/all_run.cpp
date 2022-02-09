@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
    // nyc taxi dataset: 1271413 rows; 4 bins; payment_type
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
-    num_real = 100; 
+    num_real = 1000; 
     num_dummy = 100; 
   } else {
     bins = 5; // bin number
@@ -126,9 +126,9 @@ int main(int argc, char** argv) {
 
 
   // secure part 
-  std::vector<int> mainData;
-  std::vector<int> mainDataEncodedNot;
-  std::vector<int> mainDummyMarker;
+  std::map<std::string, std::vector<int> > mainData;
+  std::map<std::string, std::vector<int> > mainDataEncodedNot;
+  std::map<std::string, std::vector<int> > mainDummyMarker;
   std::vector<std::vector<int> > trueHists;
   std::map<std::string, std::vector<int> > dpHists;
   std::map<std::string, std::vector<int> > inconsistDPHists;
@@ -145,11 +145,11 @@ int main(int argc, char** argv) {
     std::vector<int> sh = trueHistGen(party, originalData[i], originalDummyMarkers[i], randomVect, size, bins); 
     trueHists.push_back(sh);
 
-    // step2: dpHistGen for the root of the subtree
+    // DP noise 
     std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
     if (constantDP) { 
-      // std::vector<int> lapVect_(bins, 0);
-      std::vector<int> lapVect_(bins, 1);
+      std::vector<int> lapVect_(bins, 0);
+     // std::vector<int> lapVect_(bins, 1);
       lapVect = lapVect_;
     } else {
       if (option != 1) {
@@ -158,6 +158,7 @@ int main(int argc, char** argv) {
       }
       lapVect = lapGenVector(bins, 1 / eps); 
     }
+    // step2: dpHistGen for the root of the subtree
     std::vector<int> dp;
     if (true) { // b = 2  todo: check nonNegative
       // step2.1 and step2.2: generate DP hists of nodes on the current path (current leaf to root)
@@ -178,7 +179,8 @@ int main(int argc, char** argv) {
         rootLeft += (gap / 2);
         gap /= 2;
       }
-      // step2.3: DP hists of all nodes in the subtree
+    // step3: compute the consistent DP histogram of the root of the subtree
+    // step3.1: DP hists of all nodes in the subtree
       std::vector<std::vector<int> > dpAllNodes; // all nodes on the subtree
       int rootLeftAgain= nodesSubtree(i);
       int gapAgain = i - rootLeftAgain + 1;
@@ -194,7 +196,7 @@ int main(int argc, char** argv) {
           dpAllNodes.push_back(inconsistDPHists[intervalDP]);
         }
       }
-      // step2.4: make these nodes on this tree consistent and return the DP hist for the root
+      // step3.2: make these nodes on this tree consistent and return the DP hist for the root
       dp = enforceConsistencyH(dpAllNodes, gapAgain);
       string intervalDP = std::to_string(rootLeftAgain) + ',' + std::to_string(i);
       dpHists[intervalDP] = nonNegative(dp);
@@ -205,6 +207,95 @@ int main(int argc, char** argv) {
       cout << endl;
       //debug
     }
+
+    // step4: get the sorted array of the root node 
+    // step4.1: retrieve the DP histogram of the root node 
+    int rootLeft = nodesSubtree(i);
+    string intervalRootDP = std::to_string(rootLeft) + ',' + std::to_string(i);
+    std::vector<int> dpRoot = dpHists[intervalRootDP];
+    int gapAgain = i - rootLeft + 1;
+    // step4.2: compute the interval of previous nodes
+    std::vector<string> intervalPrevious;
+    int gap = i - rootLeft + 1;
+    while ((gap / 2 >= 1) or (gap >= 1)) {
+      if (rootLeft < int(rootLeft + (gap / 2))){
+        string interval = std::to_string(rootLeft) + ',' + std::to_string(int(rootLeft + (gap / 2)) - 1);
+        intervalPrevious.push_back(interval);
+      }
+      rootLeft += (gap / 2);
+      gap /= 2;
+    }
+    // step4.3: retrieve the data and DP histograms of previous nodes in this subtree
+    // step4.3: get the sorted array of the root node
+    // option 1 
+    if (gapAgain <= 1000) {
+      cout << "intervalPrevious------------------------------------: " << intervalPrevious.size() << endl;
+      // previously left records in cache + previous nodes --> sort using DP histogram of root node
+      // put these data together 
+      std::vector<int> dataToSort = leftCacheData;
+      std::vector<int> dataEncodedNotToSort = leftCacheDataEncodedNot;
+      std::vector<int> dummyMarkerToSort = leftCacheDummyMarker;
+      for (string& interval: intervalPrevious){
+        dataToSort.insert(dataToSort.end(), mainData[interval].begin(), mainData[interval].end());
+        dataEncodedNotToSort.insert(dataEncodedNotToSort.end(), mainDataEncodedNot[interval].begin(), mainDataEncodedNot[interval].end());
+        dummyMarkerToSort.insert(dummyMarkerToSort.end(), mainDummyMarker[interval].begin(), mainDummyMarker[interval].end());
+      }
+      dataToSort.insert(dataToSort.end(), originalData[i].begin(), originalData[i].end());
+      dataEncodedNotToSort.insert(dataEncodedNotToSort.end(), originalDataEncodedNot[i].begin(), originalDataEncodedNot[i].end());
+      dummyMarkerToSort.insert(dummyMarkerToSort.end(), originalDummyMarkers[i].begin(), originalDummyMarkers[i].end());
+
+      int sizeSort = dataToSort.size();
+      cout << "ssizeSort------------------------------------: " << sizeSort << endl;
+      //debug
+      for (int j = 0; j < bins; j++) {
+      cout << dpRoot[j] << ' ';
+      }
+      cout << endl;
+      //debug
+      // sort according to the DP hist of root 
+      std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
+      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, dataToSort, dummyMarkerToSort, dataEncodedNotToSort, dpRoot, sizeSort, bins);
+      // total DP count = #records we want to retrieve --> sorted root + left cache 
+      int totalRecords = accumulate(dpRoot.begin(), dpRoot.end(), 0);
+      std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords);
+      std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords);
+      std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords);
+      // sorted root + left cache
+      mainData[intervalRootDP] = seperatedRecord.first;
+      leftCacheData = seperatedRecord.second;
+      mainDummyMarker[intervalRootDP] = seperatedDummyMarker.first;
+      leftCacheDummyMarker = seperatedDummyMarker.second;
+      mainDataEncodedNot[intervalRootDP] = seperatedRecordEncodedNot.first;
+      leftCacheDataEncodedNot = seperatedRecordEncodedNot.second;
+
+      // debug
+      Integer *sortedRecordsortedRecord = reconstructArray(mainData[intervalRootDP]);
+      Integer *leftRecordleftRecord = reconstructArray(leftCacheData);
+      cout << "sortedRecordsortedRecord" << ' ';
+      printArray(sortedRecordsortedRecord, mainData[intervalRootDP].size());
+      cout << "leftRecordleftRecord" << ' ';
+      printArray(leftRecordleftRecord, leftCacheData.size());
+
+      Integer *sortedDummysortedDummy = reconstructArray(mainDummyMarker[intervalRootDP]);
+      Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
+      cout << "sortedDummysortedDummy" << ' ';
+      printArray(sortedDummysortedDummy, mainDummyMarker[intervalRootDP].size());
+      cout << "leftDummyleftDummy" << ' ';
+      printArray(leftDummyleftDummy, leftCacheDummyMarker.size());
+
+      Integer *sortedRecordsortedRecordEncodedNot = reconstructArray(mainDataEncodedNot[intervalRootDP]);
+      Integer *leftRecordleftRecordEncodedNot = reconstructArray(leftCacheDataEncodedNot);
+      cout << "sortedRecordsortedRecordEncodedNot" << ' ';
+      printArray(sortedRecordsortedRecordEncodedNot, mainDataEncodedNot[intervalRootDP].size());
+      cout << "leftRecordleftRecordEncodedNot" << ' ';
+      printArray(leftRecordleftRecordEncodedNot, leftCacheDataEncodedNot.size());
+      cout << "sortedRecord.size(): " << mainData[intervalRootDP].size() << endl;
+      // debug
+    } //else {
+   // }
+
+
+
 
     /*if (dpMerge == 1) {
       // step3: sortCacheUsingDP
