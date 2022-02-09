@@ -225,10 +225,10 @@ int main(int argc, char** argv) {
       rootLeft += (gap / 2);
       gap /= 2;
     }
-    // step4.3: retrieve the data and DP histograms of previous nodes in this subtree
+  
     // step4.3: get the sorted array of the root node
-    // option 1 
-    if (gapAgain <= 1000) {
+    if (gapAgain <= 6) {
+      // option 1: the subtree is small, so resort the root 
       cout << "intervalPrevious------------------------------------: " << intervalPrevious.size() << endl;
       // previously left records in cache + previous nodes --> sort using DP histogram of root node
       // put these data together 
@@ -248,12 +248,13 @@ int main(int argc, char** argv) {
       cout << "ssizeSort------------------------------------: " << sizeSort << endl;
       //debug
       for (int j = 0; j < bins; j++) {
-      cout << dpRoot[j] << ' ';
+        cout << dpRoot[j] << ' ';
       }
       cout << endl;
       //debug
       // sort according to the DP hist of root 
       std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
+      // do we need to re-encrypt????
       std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, dataToSort, dummyMarkerToSort, dataEncodedNotToSort, dpRoot, sizeSort, bins);
       // total DP count = #records we want to retrieve --> sorted root + left cache 
       int totalRecords = accumulate(dpRoot.begin(), dpRoot.end(), 0);
@@ -291,8 +292,47 @@ int main(int argc, char** argv) {
       printArray(leftRecordleftRecordEncodedNot, leftCacheDataEncodedNot.size());
       cout << "sortedRecord.size(): " << mainData[intervalRootDP].size() << endl;
       // debug
-    } //else {
-   // }
+    } else {
+    // option2: 
+      // #leaf nodes in this subtree should be at least one
+      // cache <-- left cache + current leaf node
+      std::vector<int> dataCache = leftCacheData;
+      std::vector<int> dataEncodedNotCache = leftCacheDataEncodedNot;
+      std::vector<int> dummyMarkerCache = leftCacheDummyMarker;
+      dataCache.insert(dataCache.end(), originalData[i].begin(), originalData[i].end());
+      dataEncodedNotCache.insert(dataEncodedNotCache.end(), originalDataEncodedNot[i].begin(), originalDataEncodedNot[i].end());
+      dummyMarkerCache.insert(dummyMarkerCache.end(), originalDummyMarkers[i].begin(), originalDummyMarkers[i].end());
+      // retrieve the data and DP histograms of previous nodes in this subtree
+      std::vector<int> dataMergedPrevious = mainData[intervalPrevious[0]];
+      std::vector<int> dataEncodedNotMergedPrevious = mainDataEncodedNot[intervalPrevious[0]];
+      std::vector<int> dummyMarkerMergedPrevious = mainDummyMarker[intervalPrevious[0]];
+      std::vector<int> dpMergedPrevious = dpHists[intervalPrevious[0]];
+      // merge these previous nodes using their DP histograms
+      for (int j = 1; j < intervalPrevious.size() ; j++){
+        dataMergedPrevious = merge2SortedArr(dpMergedPrevious, dpHists[intervalPrevious[j]], dataMergedPrevious, mainData[intervalPrevious[j]], bins);
+        dataEncodedNotMergedPrevious = merge2SortedArr(dpMergedPrevious, dpHists[intervalPrevious[j]], dataEncodedNotMergedPrevious, mainDataEncodedNot[intervalPrevious[j]], bins);
+        dummyMarkerMergedPrevious = merge2SortedArr(dpMergedPrevious, dpHists[intervalPrevious[j]], dummyMarkerMergedPrevious, mainDummyMarker[intervalPrevious[j]], bins);
+        dpMergedPrevious = addTwoVectors(dpMergedPrevious, dpHists[intervalPrevious[j]]);
+      }
+      // debug
+      Integer *sortedRecordsortedRecord = reconstructArray(dataMergedPrevious);
+      cout << "sortedRecordsortedRecord" << ' ';
+      printArray(sortedRecordsortedRecord, dataMergedPrevious.size());
+     
+      Integer *sortedDummysortedDummy = reconstructArray(dummyMarkerMergedPrevious);
+      cout << "sortedDummysortedDummy" << ' ';
+      printArray(sortedDummysortedDummy, dummyMarkerMergedPrevious.size());
+
+      Integer *sortedRecordsortedRecordEncodedNot = reconstructArray(dataEncodedNotMergedPrevious);
+      cout << "sortedRecordsortedRecordEncodedNot" << ' ';
+      printArray(sortedRecordsortedRecordEncodedNot, dataEncodedNotMergedPrevious.size());
+      cout << "sortedRecord.size(): " << dataMergedPrevious.size() << endl;
+      // for each bin, put the records for this bin of previous node and cache together, and sort
+      
+      for (int j = 0; j < bins; j++) {
+        
+      }
+    }
 
 
 
