@@ -95,7 +95,7 @@ std::vector<int> trueHistGen(int party, std::vector<int> number, std::vector<int
   // compute histogram
   Integer *res_h = computeHist(res_d, res, bins, size);
     
-  cout << "random number" << ' ';
+  /*cout << "random number" << ' ';
   printArray(sh1, bins);
 
   cout << "original data" << ' ';
@@ -108,25 +108,25 @@ std::vector<int> trueHistGen(int party, std::vector<int> number, std::vector<int
   for (int i = 0; i < bins; i++) {
     cout << res_h[i].reveal<int32_t>() << ' ';
   }
-  cout << endl;
+  cout << endl;*/
 
   // generate secret shares      
   Integer *sh2 = generateSh2(sh1, res_h, bins);
  
   // for debug
-  cout << "counter for each bin" << ' ';
+ /* cout << "counter for each bin" << ' ';
   for (int i = 0; i < bins; i++) {
     cout << (sh1[i] ^ sh2[i]).reveal<int32_t>() << ' ';
   }
-  cout <<  endl;
+  cout <<  endl;*/
 
   std::vector<int> realSh1 = revealSh(sh1, bins, ALICE);
   std::vector<int> realSh2 = revealSh(sh2, bins, BOB);
   
-  cout << "sh1" << ' ';
+  /*cout << "sh1" << ' ';
   printArray(sh1, bins);
   cout << "sh2" << ' ';
-  printArray(sh2, bins);
+  printArray(sh2, bins);*/
 
   if (party == ALICE) {
     return realSh1;
@@ -171,19 +171,19 @@ std::vector<int> dpHistGen(int party, std::vector<std::vector<int> > number, std
   // reconstruct dp noise
   Integer *res_lap = addedNoise(number2);
 
-  cout << "true hist" << ' ';
-  printArray(res, bins);
+  /*cout << "true hist" << ' ';
+  printArray(res, bins);*/
   
   // add noise
   for(int i = 0; i < bins; ++i){
     res[i] = res[i] + res_lap[i];
   }
 
-  cout << "added noise" << ' ';
+  /*cout << "added noise" << ' ';
   printArray(res_lap, bins);
 
   cout << "after adding noise" << ' ';
-  printArray(res, bins);
+  printArray(res, bins);*/
   
   std::vector<int> dpHist;
   for (int i = 0; i < bins; i++) {

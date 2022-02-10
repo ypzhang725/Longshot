@@ -50,16 +50,10 @@ int main(int argc, char** argv) {
   // the number of updates
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
-  // construct tree?
-  string option_string = argv[5]; // tree or 
-  int option = atoi(option_string.c_str()); // 1, 2, 3, 4 how to DP histgrams; 1:leaf; 4:tree; 3:treeminus
-  // how to sort main data
-  string dpMerge_string = argv[6];;    // 1: merge; 0: sort all
-  int dpMerge = atoi(dpMerge_string.c_str());
-  // how to make it consistent
-  int inconsistConst = 1; //  
   // constant dp noise
-  bool constantDP = true; 
+  bool constantDP = false; 
+  // print 
+  bool debugPrint = true;
   // privacy budget
   double eps = 10;
   // bin number 
@@ -71,7 +65,7 @@ int main(int argc, char** argv) {
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
     num_real = 1000; 
-    num_dummy = 100; 
+    num_dummy = 10; 
   } else {
     bins = 5; // bin number
     num_real = 10;  
@@ -123,8 +117,6 @@ int main(int argc, char** argv) {
     originalDummyMarkers.push_back(v_originalDummyMarkers);
   }
 
-
-
   // secure part 
   std::map<std::string, std::vector<int> > mainData;
   std::map<std::string, std::vector<int> > mainDataEncodedNot;
@@ -135,10 +127,9 @@ int main(int argc, char** argv) {
   std::vector<int> leftCacheData;
   std::vector<int> leftCacheDataEncodedNot;
   std::vector<int> leftCacheDummyMarker;
-  int mainSize = 0; //debug
   // for each update: 
   for (int i = 0; i < t; i++) {
-    cout<< "index: " << i << endl;
+    cout<< "index---------------------------------------------------------------------------: " << i << endl;
     // step1: trueHistGen for the path
     int size = originalData[i].size();   
     std::vector<int> randomVect = uniformGenVector(bins);
@@ -152,10 +143,8 @@ int main(int argc, char** argv) {
      // std::vector<int> lapVect_(bins, 1);
       lapVect = lapVect_;
     } else {
-      if (option != 1) {
-        double levels = log2(t);  // double or int?
-        eps = 1 / levels;
-      }
+      double levels = log2(t);  // double or int?
+      eps = 1 / levels;
       lapVect = lapGenVector(bins, 1 / eps); 
     }
     // step2: dpHistGen for the root of the subtree
@@ -192,7 +181,11 @@ int main(int argc, char** argv) {
      //   cout << "interval: " << interval <<  endl;
         for (int k = rootLeftAgain; k < (i+1); (k += interval)) { 
           string intervalDP = std::to_string(k) + ',' + std::to_string(k + interval - 1);
-     //     cout << "intervalDP: " << intervalDP <<  endl;
+        //  cout << "intervalDP: " << intervalDP <<  endl;
+         /* for (int j = 0; j < bins; j++) {
+            cout << inconsistDPHists[intervalDP][j] << ' ';
+          }
+          cout << endl;*/
           dpAllNodes.push_back(inconsistDPHists[intervalDP]);
         }
       }
@@ -201,10 +194,13 @@ int main(int argc, char** argv) {
       string intervalDP = std::to_string(rootLeftAgain) + ',' + std::to_string(i);
       dpHists[intervalDP] = nonNegative(dp);
       //debug
-      for (int j = 0; j < bins; j++) {
-      cout << dp[j] << ' ';
+      if (debugPrint) {
+        cout << "Consistent root: ";
+        for (int j = 0; j < bins; j++) {
+        cout << dp[j] << ' ';
+        }
+        cout << endl;
       }
-      cout << endl;
       //debug
     }
 
@@ -227,9 +223,9 @@ int main(int argc, char** argv) {
     }
   
     // step4.3: get the sorted array of the root node
-    if (gapAgain <= 6) {
+    if (gapAgain >= 0) {
       // option 1: the subtree is small, so resort the root 
-      cout << "intervalPrevious------------------------------------: " << intervalPrevious.size() << endl;
+    //  cout << "intervalPrevious------------------------------------: " << intervalPrevious.size() << endl;
       // previously left records in cache + previous nodes --> sort using DP histogram of root node
       // put these data together 
       std::vector<int> dataToSort = leftCacheData;
@@ -245,16 +241,19 @@ int main(int argc, char** argv) {
       dummyMarkerToSort.insert(dummyMarkerToSort.end(), originalDummyMarkers[i].begin(), originalDummyMarkers[i].end());
 
       int sizeSort = dataToSort.size();
-      cout << "ssizeSort------------------------------------: " << sizeSort << endl;
       //debug
-      for (int j = 0; j < bins; j++) {
-        cout << dpRoot[j] << ' ';
+      if (debugPrint) {
+        cout << "ssizeSort " << sizeSort << endl;
+        cout << "Consistent root sort: ";
+        for (int j = 0; j < bins; j++) {
+          cout << dpRoot[j] << ' ';
+        }
+        cout << endl;
       }
-      cout << endl;
       //debug
+      
       // sort according to the DP hist of root 
       std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
-      // do we need to re-encrypt????
       std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, dataToSort, dummyMarkerToSort, dataEncodedNotToSort, dpRoot, sizeSort, bins);
       // total DP count = #records we want to retrieve --> sorted root + left cache 
       int totalRecords = accumulate(dpRoot.begin(), dpRoot.end(), 0);
@@ -270,27 +269,29 @@ int main(int argc, char** argv) {
       leftCacheDataEncodedNot = seperatedRecordEncodedNot.second;
 
       // debug
-      Integer *sortedRecordsortedRecord = reconstructArray(mainData[intervalRootDP]);
-      Integer *leftRecordleftRecord = reconstructArray(leftCacheData);
-      cout << "sortedRecordsortedRecord" << ' ';
-      printArray(sortedRecordsortedRecord, mainData[intervalRootDP].size());
-      cout << "leftRecordleftRecord" << ' ';
-      printArray(leftRecordleftRecord, leftCacheData.size());
+      if (debugPrint) {
+        Integer *sortedRecordsortedRecord = reconstructArray(mainData[intervalRootDP]);
+        Integer *leftRecordleftRecord = reconstructArray(leftCacheData);
+        cout << "sortedRecords for " << intervalRootDP << ": ";
+        printArray(sortedRecordsortedRecord, mainData[intervalRootDP].size());
+        cout << "leftRecord for " << intervalRootDP << ": ";
+        printArray(leftRecordleftRecord, leftCacheData.size());
 
-      Integer *sortedDummysortedDummy = reconstructArray(mainDummyMarker[intervalRootDP]);
-      Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
-      cout << "sortedDummysortedDummy" << ' ';
-      printArray(sortedDummysortedDummy, mainDummyMarker[intervalRootDP].size());
-      cout << "leftDummyleftDummy" << ' ';
-      printArray(leftDummyleftDummy, leftCacheDummyMarker.size());
+        Integer *sortedDummysortedDummy = reconstructArray(mainDummyMarker[intervalRootDP]);
+        Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
+        cout << "sortedDummy for " << intervalRootDP << ": ";
+        printArray(sortedDummysortedDummy, mainDummyMarker[intervalRootDP].size());
+        cout << "leftDummy for " << intervalRootDP << ": ";
+        printArray(leftDummyleftDummy, leftCacheDummyMarker.size());
 
-      Integer *sortedRecordsortedRecordEncodedNot = reconstructArray(mainDataEncodedNot[intervalRootDP]);
-      Integer *leftRecordleftRecordEncodedNot = reconstructArray(leftCacheDataEncodedNot);
-      cout << "sortedRecordsortedRecordEncodedNot" << ' ';
-      printArray(sortedRecordsortedRecordEncodedNot, mainDataEncodedNot[intervalRootDP].size());
-      cout << "leftRecordleftRecordEncodedNot" << ' ';
-      printArray(leftRecordleftRecordEncodedNot, leftCacheDataEncodedNot.size());
-      cout << "sortedRecord.size(): " << mainData[intervalRootDP].size() << endl;
+        Integer *sortedRecordsortedRecordEncodedNot = reconstructArray(mainDataEncodedNot[intervalRootDP]);
+        Integer *leftRecordleftRecordEncodedNot = reconstructArray(leftCacheDataEncodedNot);
+        cout << "sortedRecordEncodedNot for " << intervalRootDP << ": ";
+        printArray(sortedRecordsortedRecordEncodedNot, mainDataEncodedNot[intervalRootDP].size());
+        cout << "leftRecordEncodedNot for " << intervalRootDP << ": ";
+        printArray(leftRecordleftRecordEncodedNot, leftCacheDataEncodedNot.size());
+        cout << "sortedRecord.size(): " << mainData[intervalRootDP].size() << endl;
+      }
       // debug
     } else {
     // option2: 
@@ -315,121 +316,27 @@ int main(int argc, char** argv) {
         dpMergedPrevious = addTwoVectors(dpMergedPrevious, dpHists[intervalPrevious[j]]);
       }
       // debug
-      Integer *sortedRecordsortedRecord = reconstructArray(dataMergedPrevious);
-      cout << "sortedRecordsortedRecord" << ' ';
-      printArray(sortedRecordsortedRecord, dataMergedPrevious.size());
-     
-      Integer *sortedDummysortedDummy = reconstructArray(dummyMarkerMergedPrevious);
-      cout << "sortedDummysortedDummy" << ' ';
-      printArray(sortedDummysortedDummy, dummyMarkerMergedPrevious.size());
-
-      Integer *sortedRecordsortedRecordEncodedNot = reconstructArray(dataEncodedNotMergedPrevious);
-      cout << "sortedRecordsortedRecordEncodedNot" << ' ';
-      printArray(sortedRecordsortedRecordEncodedNot, dataEncodedNotMergedPrevious.size());
-      cout << "sortedRecord.size(): " << dataMergedPrevious.size() << endl;
-      // for each bin, put the records for this bin of previous node and cache together, and sort
+      if (debugPrint) {
+        Integer *sortedRecordsortedRecord = reconstructArray(dataMergedPrevious);
+        cout << "sortedRecords for" << intervalRootDP << ": ";
+        printArray(sortedRecordsortedRecord, dataMergedPrevious.size());
       
+        Integer *sortedDummysortedDummy = reconstructArray(dummyMarkerMergedPrevious);
+        cout << "sortedDummy for " << intervalRootDP << ": ";
+        printArray(sortedDummysortedDummy, dummyMarkerMergedPrevious.size());
+
+        Integer *sortedRecordsortedRecordEncodedNot = reconstructArray(dataEncodedNotMergedPrevious);
+        cout << "sortedRecordEncodedNot for " << intervalRootDP << ": ";
+        printArray(sortedRecordsortedRecordEncodedNot, dataEncodedNotMergedPrevious.size());
+        cout << "sortedRecord.size(): " << dataMergedPrevious.size() << endl;
+      }
+      // debug 
+
+      // for each bin, put the records for this bin of previous node and cache together, and sort
       for (int j = 0; j < bins; j++) {
         
       }
     }
-
-
-
-
-    /*if (dpMerge == 1) {
-      // step3: sortCacheUsingDP
-      // previously left records + new records in the cache --> sort using DP histogram
-      leftCacheData.insert(leftCacheData.end(), originalData[i].begin(), originalData[i].end());
-      leftCacheDataEncodedNot.insert(leftCacheDataEncodedNot.end(), originalDataEncodedNot[i].begin(), originalDataEncodedNot[i].end());
-      leftCacheDummyMarker.insert(leftCacheDummyMarker.end(), originalDummyMarkers[i].begin(), originalDummyMarkers[i].end());
-      int sizeCache = leftCacheData.size();
-      std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
-      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins);
-
-      // total DP count = #records we want to retrieve --> sorted cache + left cache 
-      int totalRecords = accumulate(dpHists[i].begin(), dpHists[i].end(), 0);
-      std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords);
-      std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords);
-      std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords);
-
-      std::vector<int> sortedRecord = seperatedRecord.first;
-      leftCacheData = seperatedRecord.second;
-      std::vector<int> sortedDummy = seperatedDummyMarker.first;
-      leftCacheDummyMarker = seperatedDummyMarker.second;
-      std::vector<int> sortedRecordEncodedNot = seperatedRecordEncodedNot.first;
-      leftCacheDataEncodedNot = seperatedRecordEncodedNot.second;
-
-      //debug
-      mainSize += totalRecords;
-      Integer *sortedRecordsortedRecord = reconstructArray(sortedRecord);
-      Integer *leftRecordleftRecord = reconstructArray(leftCacheData);
-      cout << "sortedRecordsortedRecord" << ' ';
-      printArray(sortedRecordsortedRecord, sortedRecord.size());
-      cout << "leftRecordleftRecord" << ' ';
-      printArray(leftRecordleftRecord, leftCacheData.size());
-      Integer *sortedDummysortedDummy = reconstructArray(sortedDummy);
-      Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
-      cout << "sortedDummysortedDummy" << ' ';
-      printArray(sortedDummysortedDummy, sortedDummy.size());
-      cout << "leftDummyleftDummy" << ' ';
-      printArray(leftDummyleftDummy, leftCacheDummyMarker.size());
-      Integer *sortedRecordsortedRecordEncodedNot = reconstructArray(sortedRecordEncodedNot);
-      Integer *leftRecordleftRecordEncodedNot = reconstructArray(leftCacheDataEncodedNot);
-      cout << "sortedRecordsortedRecordEncodedNot" << ' ';
-      printArray(sortedRecordsortedRecordEncodedNot, sortedRecordEncodedNot.size());
-      cout << "leftRecordleftRecordEncodedNot" << ' ';
-      printArray(leftRecordleftRecordEncodedNot, leftCacheDataEncodedNot.size());
-      cout << "sortedRecord.size(): " << sortedRecord.size() << endl;
-      //debug
-
-      // step4: dpMerge
-      // DP histogram for main data store
-      std::vector<int> dp_main(bins, 0);
-      for (int j = 0; j < i; j++) { 
-        dp_main = addTwoVectors(dp_main, dpHists[j]);
-      }
-      // merge main and cache
-      mainData = merge2SortedArr(dp_main, dpHists[i], mainData, sortedRecord, bins);
-      mainDummyMarker = merge2SortedArr(dp_main, dpHists[i], mainDummyMarker, sortedDummy, bins);
-      mainDataEncodedNot = merge2SortedArr(dp_main, dpHists[i], mainDataEncodedNot, sortedRecordEncodedNot, bins);
-      Integer *mainmain = reconstructArray(mainData);
-      cout << "mainmain: " << ' ';
-      printArray(mainmain, mainData.size());
-    }
-    // alternative to step3 + step4: re-sort all
-    else if (dpMerge == 0) {
-    // dp hist of all
-    // sort DP
-    // main + left cache + current records+cache 
-      leftCacheData.insert(leftCacheData.end(), originalData[i].begin(), originalData[i].end());
-      leftCacheDataEncodedNot.insert(leftCacheDataEncodedNot.end(), originalDataEncodedNot[i].begin(), originalDataEncodedNot[i].end());
-      leftCacheDummyMarker.insert(leftCacheDummyMarker.end(), originalDummyMarkers[i].begin(), originalDummyMarkers[i].end());
-      mainData.insert(mainData.end(), leftCacheData.begin(), leftCacheData.end());
-      mainDataEncodedNot.insert(mainDataEncodedNot.end(), leftCacheDataEncodedNot.begin(), leftCacheDataEncodedNot.end());
-      mainDummyMarker.insert(mainDummyMarker.end(), leftCacheDummyMarker.begin(), leftCacheDummyMarker.end());
-      int sizeCache = mainData.size();
-      std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
-      std::vector<int> dp_main(bins, 0);
-      for (int j = 0; j <= i; j++) { 
-        dp_main = addTwoVectors(dp_main, dpHists[j]);
-      }
-      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, mainData, mainDummyMarker, mainDataEncodedNot, dp_main, sizeCache, bins);
-
-      // total DP count = #records we want to retrieve --> sorted main + left cache 
-      // DP histogram for main data store
-      int totalRecords = accumulate(dp_main.begin(), dp_main.end(), 0);
-      std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords);
-      std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords);
-      std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords);
-
-      mainData = seperatedRecord.first;
-      leftCacheData = seperatedRecord.second;
-      mainDummyMarker = seperatedDummyMarker.first;
-      leftCacheDummyMarker = seperatedDummyMarker.second;
-      mainDataEncodedNot = seperatedRecordEncodedNot.first;
-      leftCacheDataEncodedNot = seperatedRecordEncodedNot.second;
-    }*/
   }
 
  /* //debug

@@ -18,6 +18,21 @@ Integer memconcat(Integer int1, Integer int2){
 }
 
 // for debug
+  /*Integer *res_2 = new Integer[size];
+  for(int i = 0; i < size; ++i){
+    res_2[i] = memconcat(res[i], res_d[i]);
+  }
+  
+  sort(res_b, size, res_2);
+  for(int i = 0; i < size; ++i){
+    std::pair<Integer, Integer> res_temp = memseperate(res_2[i]);
+    res[i] = res_temp.first;
+    res_d[i] = res_temp.second;
+  }*/
+
+  // for debug
+
+// for debug
 std::pair<Integer, Integer> memseperate(Integer res){
   Integer res1(32, 0, ALICE);
   Integer res2(32, 0, BOB);
@@ -65,8 +80,8 @@ Integer * assignBin(Integer *res, Integer *res_d, int size, int bins, std::vecto
       res_counter[j] = If(eq_bin_count_real, res_counter[j] - one, res_counter[j]);    
     }
   }    
-  cout << "assigned bin number for each records after first round" << ' ';
-  printArray(res_b, size);                                   
+ // cout << "assigned bin number for each records after first round" << ' ';
+ // printArray(res_b, size);                                   
   // second round: dummy records   
   // warning: the dummy records should be enough, otherwise real records will be retrieved as dummy                                                                  
   for(int i = 0; i < size; ++i){   
@@ -79,6 +94,8 @@ Integer * assignBin(Integer *res, Integer *res_d, int size, int bins, std::vecto
       res_counter[j] = If(eq_bin_count_dummy, res_counter[j] - one, res_counter[j]);                         
     }
   }
+ // cout << "assigned bin number for each records" << ' ';
+ // printArray(res_b, size);
   return res_b;
 }
 
@@ -124,72 +141,54 @@ Integer* copyArray(Integer* array, int size){
 }
 
 std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDP(int party, std::vector<int> encodedData, std::vector<int> dummyMarker, std::vector<int> notEncodedData, std::vector<int> dpHist, int size, int bins) {
-  cout<< "secret shares" << ' ';
-  printArrayPlaintext(encodedData);
-  Integer *A = toIntegerArray(encodedData, ALICE);
-  Integer *B = toIntegerArray(encodedData, BOB);
-  Integer *D_A = toIntegerArray(dummyMarker, ALICE);
-  Integer *D_B = toIntegerArray(dummyMarker, BOB);
-  Integer *A_NotEn = toIntegerArray(notEncodedData, ALICE);
-  Integer *B_NotEn = toIntegerArray(notEncodedData, BOB);
+ // cout<< "secret shares" << ' ';
+ // printArrayPlaintext(encodedData);
+
+  // reconstruct random     
+  std::vector<int> randomVect_res = uniformGenVector(size);                                                            
+  Integer *sh1_res = reconstructArray(randomVect_res);
+  std::vector<int> randomVect_res_d = uniformGenVector(size);                                                            
+  Integer *sh1_res_d = reconstructArray(randomVect_res_d);
+  std::vector<int> randomVect_res_NotEn = uniformGenVector(size);                                                            
+  Integer *sh1_res_NotEn = reconstructArray(randomVect_res_NotEn);
 
   std::vector<int> counter = dpHist; 
   // reconstruct original data                                                                      
   Integer *res = reconstructArray(encodedData);
   // reconstruct dummy mark                                                                         
   Integer *res_d = reconstructArray(dummyMarker);
+  // reconstruct original data not encoded     
+  Integer *res_NotEn = reconstructArray(notEncodedData);
   Integer *res_b = assignBin(res, res_d, size, bins, counter);
-  cout << "assigned bin number for each records" << ' ';
-  printArray(res_b, size);
 
   Integer * res_b_copy = copyArray(res_b, size);
   Integer * res_b_copy2 = copyArray(res_b, size);
   Integer * res_b_copy3 = copyArray(res_b, size);
-  Integer * res_b_copy4 = copyArray(res_b, size);
-  Integer * res_b_copy5 = copyArray(res_b, size);
-  Integer * res_b_copy6 = copyArray(res_b, size);
-  
-  
-  // for debug
-  Integer *res_2 = new Integer[size];
-  for(int i = 0; i < size; ++i){
-    res_2[i] = memconcat(res[i], res_d[i]);
-  }
-  
-  sort(res_b, size, res_2);
-  for(int i = 0; i < size; ++i){
-    std::pair<Integer, Integer> res_temp = memseperate(res_2[i]);
-    res[i] = res_temp.first;
-    res_d[i] = res_temp.second;
-  }
-  
+
+  sort(res_b_copy, size, res);
+  sort(res_b_copy2, size, res_d);
+  sort(res_b_copy3, size, res_NotEn);
+
+  /*cout << "after sort" << ' ';
   cout << "original records" << ' ';
   printArray(res, size);
   cout << "dummy marker" << ' ';
   printArray(res_d, size);
   cout << "assigned bin" << ' ';
-  printArray(res_b, size);
-  // for debug
+  printArray(res_b_copy, size);*/
 
-  sort(res_b_copy, size, A);
-  sort(res_b_copy2, size, B);
-  sort(res_b_copy3, size, D_A);
-  sort(res_b_copy4, size, D_B); 
-  sort(res_b_copy5, size, A_NotEn);
-  sort(res_b_copy6, size, B_NotEn);
+  // generate secret shares      
+  Integer *sh2_res = generateSh2(sh1_res, res, size);
+  Integer *sh2_res_d = generateSh2(sh1_res_d, res_d, size);
+  Integer *sh2_res_NotEn = generateSh2(sh1_res_NotEn, res_NotEn, size);
 
-  /*cout<< "secret shares" << ' ';
-  printArray(A, size);
-  printArray(B, size);
-  printArray(D_A, size);
-  printArray(D_B, size);*/
+  std::vector<int> A_reveal = revealSh(sh1_res, size, ALICE);
+  std::vector<int> B_reveal = revealSh(sh2_res, size, BOB);
+  std::vector<int> D_A_reveal = revealSh(sh1_res_d, size, ALICE);
+  std::vector<int> D_B_reveal = revealSh(sh2_res_d, size, BOB);
+  std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
+  std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
 
-  std::vector<int> A_reveal = revealSh(A, size, ALICE);
-  std::vector<int> B_reveal = revealSh(B, size, BOB);
-  std::vector<int> A_reveal_notEn = revealSh(A_NotEn, size, ALICE);
-  std::vector<int> B_reveal_notEn = revealSh(B_NotEn, size, BOB);
-  std::vector<int> D_A_reveal = revealSh(D_A, size, ALICE);
-  std::vector<int> D_B_reveal = revealSh(D_B, size, BOB);
   if (party == ALICE) {
     return std::make_tuple(A_reveal, D_A_reveal, A_reveal_notEn);
   }

@@ -118,24 +118,30 @@ std::vector<int> enforceConsistencyH(std::vector<std::vector<int> > dpNodes, int
       for (int k = 0; k < gap_again; k++){
         consist[k] = a * now[k] + b * succ_new[k];
       }
-      /*cout << "now" << endl;
+      /*
+      cout << "now: ";
       for (int k = 0; k < gap_again; k++){
         cout<<now[k]<<",";
       }
-      cout << "succ_new" << endl;
+      cout << endl;;
+      cout << "succ_new: ";
       for (int k = 0; k < gap_again; k++){
         cout<<succ_new[k]<<",";
       }
+      cout << endl;
+      cout << "consist: ";
       for (int k = 0; k < gap_again; k++){
         cout<<consist[k]<<",";
       }
-      cout<<endl;
-      */
+      cout<<endl;*/
+      
       pt += gap_again;
       succ = consist;
     }
-
-    int dpConsistent = int(consist[0]);
+    
+    int dpConsistent = int(consist[0]);  //here double to int 124 -> 123
+   // cout << "dpConsistent int: " << dpConsistent <<"," << endl;
+   // cout << "dpConsistent double: " << consist[0] <<"," << endl;;
     dp.push_back(dpConsistent);
   }     
   return dp;
