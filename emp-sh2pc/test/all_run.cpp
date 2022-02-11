@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
   // print 
   bool debugPrint = true;
   // privacy budget
-  double eps = 10;
+  double epsALL = 10;
   // bin number 
   int bins = 0;
   // !warning: if there are not enough dummy records, then sortDP and copy2two are incorrect
@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
       lapVect = lapVect_;
     } else {
       double levels = log2(t);  // double or int?
-      eps = 1 / levels;
+      double eps = epsALL / levels;
       lapVect = lapGenVector(bins, 1 / eps); 
     }
     // step2: dpHistGen for the root of the subtree
@@ -251,7 +251,7 @@ int main(int argc, char** argv) {
         cout << endl;
       }
       //debug
-      
+
       // sort according to the DP hist of root 
       std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
       std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, dataToSort, dummyMarkerToSort, dataEncodedNotToSort, dpRoot, sizeSort, bins);
@@ -277,7 +277,7 @@ int main(int argc, char** argv) {
         cout << "leftRecord for " << intervalRootDP << ": ";
         printArray(leftRecordleftRecord, leftCacheData.size());
 
-        Integer *sortedDummysortedDummy = reconstructArray(mainDummyMarker[intervalRootDP]);
+       /* Integer *sortedDummysortedDummy = reconstructArray(mainDummyMarker[intervalRootDP]);
         Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
         cout << "sortedDummy for " << intervalRootDP << ": ";
         printArray(sortedDummysortedDummy, mainDummyMarker[intervalRootDP].size());
@@ -290,7 +290,7 @@ int main(int argc, char** argv) {
         printArray(sortedRecordsortedRecordEncodedNot, mainDataEncodedNot[intervalRootDP].size());
         cout << "leftRecordEncodedNot for " << intervalRootDP << ": ";
         printArray(leftRecordleftRecordEncodedNot, leftCacheDataEncodedNot.size());
-        cout << "sortedRecord.size(): " << mainData[intervalRootDP].size() << endl;
+        cout << "sortedRecord.size(): " << mainData[intervalRootDP].size() << endl;*/
       }
       // debug
     } else {
