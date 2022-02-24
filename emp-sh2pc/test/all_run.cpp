@@ -12,6 +12,8 @@
 #include "enforceConsistency.cpp"
 #include "sortCacheDP.cpp"
 #include "merge2SortedArrs.cpp"
+#include <chrono>
+using namespace std::chrono;
 using namespace emp;
 using namespace std;
 
@@ -51,7 +53,7 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = true; 
+  bool constantDP = false; 
   // print 
   bool debugPrint = true;
   // privacy budget
@@ -117,6 +119,11 @@ int main(int argc, char** argv) {
     originalDummyMarkers.push_back(v_originalDummyMarkers);
   }
 
+  // metric
+  std::vector<double> metricRunTimeDP;
+  std::vector<double> metricRunTimeDPSort;
+  std::vector<double> metricDPError;
+
   // secure part 
   std::map<std::string, std::vector<int> > mainData;
   std::map<std::string, std::vector<int> > mainDataEncodedNot;
@@ -130,6 +137,7 @@ int main(int argc, char** argv) {
   // for each update: 
   for (int i = 0; i < t; i++) {
     cout<< "index---------------------------------------------------------------------------: " << i << endl;
+    auto start = high_resolution_clock::now();
     // step1: trueHistGen for the path
     int size = originalData[i].size();   
     std::vector<int> randomVect = uniformGenVector(bins);
@@ -139,8 +147,8 @@ int main(int argc, char** argv) {
     // DP noise 
     std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
     if (constantDP) { 
-     // std::vector<int> lapVect_(bins, 0);
-      std::vector<int> lapVect_(bins, 1);
+      std::vector<int> lapVect_(bins, 0);
+      //std::vector<int> lapVect_(bins, 1);
       lapVect = lapVect_;
     } else {
       double levels = log2(t);  // double or int?
@@ -203,7 +211,7 @@ int main(int argc, char** argv) {
       }
       //debug
     }
-
+    auto afterDP = high_resolution_clock::now();
     // step4: get the sorted array of the root node 
     // step4.1: retrieve the DP histogram of the root node 
     int rootLeft = nodesSubtree(i);
@@ -391,10 +399,84 @@ int main(int argc, char** argv) {
       // debug
       }
       // leftCache = leftCache 
-
-
     }
+
+    
+    // metric 1: run time
+    auto afterDPSort = high_resolution_clock::now();
+    auto durationDP = duration_cast<microseconds>(afterDP - start);
+    auto durationDPSort = duration_cast<microseconds>(afterDPSort - afterDP);
+    cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
+    metricRunTimeDP.push_back(durationDP.count() / 1000000);
+    metricRunTimeDPSort.push_back(durationDPSort.count() / 1000000);
+
+    // metric 2: DP accuracy for query 0 -- i
+    // step1: add DP histograms that cover 0 -- i 
+    std::vector<int> dpI(bins, 0);
+    int rightI = i;
+    while (rightI >= 0) {
+      int rootLeftI = nodesSubtree(rightI);
+      string intervalRootDPI = std::to_string(rootLeftI) + ',' + std::to_string(rightI);
+      cout << "intervalRootDPI: " << intervalRootDPI << endl;
+      dpI = addTwoVectors(dpI, dpHists[intervalRootDPI]);
+      rightI = rootLeftI - 1;
+    } 
+    // step2: compute true histograms that cover 0 -- i
+    std::vector<std::vector<int> > trueHistgrams;
+    for (int j = 0; j <= i; j++) { 
+     trueHistgrams.push_back(trueHists[j]);
+    }
+    std::vector<int> trueI = computeTrueNumber(trueHistgrams, bins);
+    double DPCountError = 0;
+    for (int j = 0; j <= i; j++) { 
+      DPCountError += (dpI[j] - trueI[j]) * (dpI[j] - trueI[j]);
+    }
+    cout << "DPCountError: " << DPCountError << endl;
+    metricDPError.push_back(DPCountError);
+
+
+    //debug
+    if (debugPrint) {
+      cout << "dp count";
+      for (int j = 0; j < bins; j++) {
+        cout << dpI[j] << ' ';
+      }
+      cout << endl;
+      cout << "true count";
+      for (int j = 0; j < bins; j++) {
+        cout << trueI[j] << ' ';
+      }
+      cout << endl;
+    }
+    //debug
+
+    // todo
+    // metric 3: sort errors = (dp count - true count) - #dummy 
+    // step 1: compute (dp count - true count)
+   /* double dpNoise = 0;
+    for (int j = 0; j <= i; j++) { 
+      dpNoise += (pI[j] - trueI[j];
+    }*/
+    // step 2: #dummy 
+    // for each datastore: compute #dummy(metri2:step1) and add them together 
   }
+  cout << "********************************************************************* " << endl;
+  cout << "metricRunTimeDP: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRunTimeDP[i] << ", ";
+  } 
+  cout << endl;
+  cout << "metricRunTimeDPSort: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRunTimeDPSort[i] << ", ";
+  } 
+  cout << endl;
+  cout << "metricDPError: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricDPError[i] << ", ";
+  } 
+  cout << endl;
+
 
  /* //debug
   cout << "******************************************* " << endl;
