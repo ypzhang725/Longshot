@@ -428,7 +428,7 @@ int main(int argc, char** argv) {
     }
     std::vector<int> trueI = computeTrueNumber(trueHistgrams, bins);
     double DPCountError = 0;
-    for (int j = 0; j <= i; j++) { 
+    for (int j = 0; j < bins; j++) { 
       DPCountError += (dpI[j] - trueI[j]) * (dpI[j] - trueI[j]);
     }
     cout << "DPCountError: " << DPCountError << endl;
@@ -437,12 +437,12 @@ int main(int argc, char** argv) {
 
     //debug
     if (debugPrint) {
-      cout << "dp count";
+      cout << "dp count: ";
       for (int j = 0; j < bins; j++) {
         cout << dpI[j] << ' ';
       }
       cout << endl;
-      cout << "true count";
+      cout << "true count: ";
       for (int j = 0; j < bins; j++) {
         cout << trueI[j] << ' ';
       }
