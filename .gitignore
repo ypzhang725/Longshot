@@ -1,0 +1,11 @@
+# General
+*.~
+
+# compile files
+Makefile
+install_manifest.txt
+*CTestTestfile.cmake
+CMakeCache.txt
+cmake_install.cmake
+bin/
+CMakeFiles/
