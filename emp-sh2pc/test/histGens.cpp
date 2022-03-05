@@ -12,7 +12,7 @@ using namespace std;
 
 
 Integer * addedNoise(std::vector<int> number){
-  int size = number.size();
+  int size = int(number.size());
   Integer *A = new Integer[size];
   Integer *B = new Integer[size];
   Integer *res = new Integer[size];
@@ -143,7 +143,7 @@ std::vector<int> computeTrueNumber(std::vector<std::vector<int> > number, int bi
   for(int i = 0; i < bins; ++i){
     res[i] = Integer(32, 0, ALICE);
   }
-  for (int j = 0; j < number.size(); j++) { 
+  for (int j = 0; j < int(number.size()); j++) { 
     Integer *hist = reconstructArray(number[j]);
     for(int i = 0; i < bins; ++i){
       res[i] = hist[i] + res[i];
@@ -162,7 +162,7 @@ std::vector<int> dpHistGen(int party, std::vector<std::vector<int> > number, std
   for(int i = 0; i < bins; ++i){
     res[i] = Integer(32, 0, ALICE);
   }
-  for (int j = 0; j < number.size(); j++) { 
+  for (int j = 0; j < int(number.size()); j++) { 
     Integer *hist = reconstructArray(number[j]);
     for(int i = 0; i < bins; ++i){
       res[i] = hist[i] + res[i];

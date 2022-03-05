@@ -9,7 +9,7 @@ using namespace std;
 
 std::vector<int> addTwoVectors(std::vector<int> vect1, std::vector<int> vect2){
   std::vector<int> res;
-  for (int i = 0; i < vect1.size(); i++) {
+  for (int i = 0; i < int(vect1.size()); i++) {
     res.push_back(vect1[i] + vect2[i]);
   }
   return res;
@@ -17,7 +17,7 @@ std::vector<int> addTwoVectors(std::vector<int> vect1, std::vector<int> vect2){
 
 std::vector<int> minusTwoVectors(std::vector<int> vect1, std::vector<int> vect2){
   std::vector<int> res;
-  for (int i = 0; i < vect1.size(); i++) {
+  for (int i = 0; i < int(vect1.size()); i++) {
     res.push_back(vect1[i] - vect2[i]);
   }
   return res;
@@ -38,7 +38,7 @@ int nodesSubtree(int i){
 
 std::vector<int> nonNegative(std::vector<int> vect){
   std::vector<int> res;
-  for (int i = 0; i < vect.size(); i++) {
+  for (int i = 0; i < int(vect.size()); i++) {
     if (vect[i] < 0){
       res.push_back(0);
     } else {

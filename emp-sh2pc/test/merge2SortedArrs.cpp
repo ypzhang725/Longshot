@@ -10,7 +10,7 @@ using namespace std;
 std::vector<int> computePrefix(std::vector<int> vect){
   std::vector<int> res;
   res.push_back(vect[0]);
-  for (int i = 1; i < vect.size(); i++) {
+  for (int i = 1; i < int(vect.size()); i++) {
     res.push_back(res[i - 1] + vect[i]);
   }
   return res;
@@ -51,4 +51,32 @@ std::vector<int> merge2SortedArr(std::vector<int> dp_main, std::vector<int> dp_c
     merged.insert(merged.end(), insertedCache.begin(), insertedCache.end());
   }
   return merged;
+}
+
+std::vector<int> computeTrueRecords(std::vector<int> dpHist, std::vector<int> dpStore){
+  int binNum = dpHist.size();
+  int recordNum = dpStore.size();
+  Integer * dpStoreI = reconstructArray(dpStore);
+  std::vector<int> dpStorePublic = revealSh(dpStoreI, recordNum, PUBLIC);
+   
+  // prefix 
+  std::vector<int> dpHistPrefix_tmp = computePrefix(dpHist);
+  dpHistPrefix_tmp[binNum-1] = recordNum;  // cut DP hist to be consistent with the dpStore; assume that only last bin
+  std::vector<int> dpHistPrefix(binNum+1, 0); 
+  for (int j = 0; j < binNum; j++) {
+    dpHistPrefix[j+1] = dpHistPrefix_tmp[j];
+  }
+    
+  // compute the number of true records 
+  std::vector<int> trueR(binNum, 0);
+  for (int i = 0; i < binNum; i++){
+    int num = 0;
+    for (int j = dpHistPrefix[i]; j < dpHistPrefix[i+1]; j++){
+       if ((dpStorePublic[j]-1) == i){ //dpStorePublic[j]: 1122334455
+        num++;
+      }
+    }
+    trueR[i] = num;
+  }
+  return trueR;
 }

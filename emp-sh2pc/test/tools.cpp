@@ -42,7 +42,7 @@ int computeDummyNumber(Integer * array, int size){
 
 // for debug
 void printArrayPlaintext(std::vector<int> array){
-  for (int i = 0; i < array.size(); i++) {
+  for (int i = 0; i < int(array.size()); i++) {
     cout << array[i]<< ' ';
   }
   cout <<  endl;

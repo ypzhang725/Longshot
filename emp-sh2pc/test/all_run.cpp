@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = false; 
+  bool constantDP = true; 
   // print 
   bool debugPrint = true;
   // privacy budget
@@ -77,9 +77,12 @@ int main(int argc, char** argv) {
       vect.insert(vect.end(), vect_.begin(), vect_.end());
     }
   }
-  
- 
 
+  // how to sort
+  // 0: sort subroot together; 1: sort each bin seperatly; 2: sort each bin and only the last d records 
+  int sortOption = 0; 
+  // option3: d --> depends on epsilon???
+  int d = 0;
 
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
@@ -123,6 +126,7 @@ int main(int argc, char** argv) {
   std::vector<double> metricRunTimeDP;
   std::vector<double> metricRunTimeDPSort;
   std::vector<double> metricDPError;
+  std::vector<double> metricDPStoreError;
 
   // secure part 
   std::map<std::string, std::vector<int> > mainData;
@@ -147,8 +151,8 @@ int main(int argc, char** argv) {
     // DP noise 
     std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
     if (constantDP) { 
-      std::vector<int> lapVect_(bins, 0);
-      //std::vector<int> lapVect_(bins, 1);
+     //std::vector<int> lapVect_(bins, 0);
+      std::vector<int> lapVect_(bins, 1);
       lapVect = lapVect_;
     } else {
       double levels = log2(t);  // double or int?
@@ -231,7 +235,11 @@ int main(int argc, char** argv) {
     }
   
     // step4.3: get the sorted array of the root node
-    if (gapAgain <= 6) {
+    // option0: if sortOption == 0 or gapAgain <= x
+    // option1: else if sortOption == 1 
+    // option2: else sortOption == 2 
+    // gapAgain <= 6 -->  to be a parameter 
+    if (sortOption == 0 or gapAgain <= 6) {
       // option 1: the subtree is small, so resort the root 
     //  cout << "intervalPrevious------------------------------------: " << intervalPrevious.size() << endl;
       // previously left records in cache + previous nodes --> sort using DP histogram of root node
@@ -301,7 +309,7 @@ int main(int argc, char** argv) {
         cout << "sortedRecord.size(): " << mainData[intervalRootDP].size() << endl;*/
       }
       // debug
-    } else {
+    } else if (sortOption == 1) {
     // option2: 
       // #leaf nodes in this subtree should be at least one
       // cache <-- left cache + current leaf node
@@ -317,7 +325,7 @@ int main(int argc, char** argv) {
       std::vector<int> dummyMarkerMergedPrevious = mainDummyMarker[intervalPrevious[0]];
       std::vector<int> dpMergedPrevious = dpHists[intervalPrevious[0]];
       // merge these previous nodes using their DP histograms
-      for (int j = 1; j < intervalPrevious.size() ; j++){
+      for (int j = 1; j < int(intervalPrevious.size()) ; j++){
         dataMergedPrevious = merge2SortedArr(dpMergedPrevious, dpHists[intervalPrevious[j]], dataMergedPrevious, mainData[intervalPrevious[j]], bins);
         dataEncodedNotMergedPrevious = merge2SortedArr(dpMergedPrevious, dpHists[intervalPrevious[j]], dataEncodedNotMergedPrevious, mainDataEncodedNot[intervalPrevious[j]], bins);
         dummyMarkerMergedPrevious = merge2SortedArr(dpMergedPrevious, dpHists[intervalPrevious[j]], dummyMarkerMergedPrevious, mainDummyMarker[intervalPrevious[j]], bins);
@@ -399,6 +407,10 @@ int main(int argc, char** argv) {
       // debug
       }
       // leftCache = leftCache 
+    } else {
+
+
+
     }
 
     
@@ -407,33 +419,53 @@ int main(int argc, char** argv) {
     auto durationDP = duration_cast<microseconds>(afterDP - start);
     auto durationDPSort = duration_cast<microseconds>(afterDPSort - afterDP);
     cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
-    metricRunTimeDP.push_back(durationDP.count() / 1000000);
+    metricRunTimeDP.push_back(durationDP.count() / 1000);
     metricRunTimeDPSort.push_back(durationDPSort.count() / 1000000);
 
     // metric 2: DP accuracy for query 0 -- i
     // step1: add DP histograms that cover 0 -- i 
+    std::vector<string> intervalss;
     std::vector<int> dpI(bins, 0);
     int rightI = i;
     while (rightI >= 0) {
       int rootLeftI = nodesSubtree(rightI);
       string intervalRootDPI = std::to_string(rootLeftI) + ',' + std::to_string(rightI);
       cout << "intervalRootDPI: " << intervalRootDPI << endl;
-      dpI = addTwoVectors(dpI, dpHists[intervalRootDPI]);
+      intervalss.push_back(intervalRootDPI);
+     
       rightI = rootLeftI - 1;
     } 
+    for (int j = 0; j < int(intervalss.size()); j++) { 
+      dpI = addTwoVectors(dpI, dpHists[intervalss[j]]);
+    }
     // step2: compute true histograms that cover 0 -- i
     std::vector<std::vector<int> > trueHistgrams;
     for (int j = 0; j <= i; j++) { 
      trueHistgrams.push_back(trueHists[j]);
     }
     std::vector<int> trueI = computeTrueNumber(trueHistgrams, bins);
+    // step3: compute the error for DP count 
     double DPCountError = 0;
     for (int j = 0; j < bins; j++) { 
-      DPCountError += (dpI[j] - trueI[j]) * (dpI[j] - trueI[j]);
+      DPCountError += (dpI[j] - trueI[j]);
     }
     cout << "DPCountError: " << DPCountError << endl;
     metricDPError.push_back(DPCountError);
 
+    // metric 3: sort errors = (dp count - true records)  
+    // step1: compute the #true for each interval's data and then add them up 
+    std::vector<int> trueR(bins, 0);
+    for (int j = 0; j < int(intervalss.size()); j++) { 
+      std::vector<int> trueRecords = computeTrueRecords(dpHists[intervalss[j]], mainData[intervalss[j]]); 
+      trueR = addTwoVectors(trueR, trueRecords);
+    }
+    // step2: compute the error for DP store 
+    double DPStoreError = 0;
+    for (int j = 0; j < bins; j++) { 
+      DPStoreError += (dpI[j] - trueR[j]);
+    }
+    cout << "DPStoreError: " << DPStoreError << endl;
+    metricDPStoreError.push_back(DPStoreError);
 
     //debug
     if (debugPrint) {
@@ -447,83 +479,48 @@ int main(int argc, char** argv) {
         cout << trueI[j] << ' ';
       }
       cout << endl;
+      cout << "true record: ";
+      for (int j = 0; j < bins; j++) {
+        cout << trueR[j] << ' ';
+      }
+      cout << endl;
     }
     //debug
-
-    // todo
-    // metric 3: sort errors = (dp count - true count) - #dummy 
-    // step 1: compute (dp count - true count)
-   /* double dpNoise = 0;
-    for (int j = 0; j <= i; j++) { 
-      dpNoise += (pI[j] - trueI[j];
-    }*/
-    // step 2: #dummy 
-    // for each datastore: compute #dummy(metri2:step1) and add them together 
   }
   cout << "********************************************************************* " << endl;
   cout << "metricRunTimeDP: ";
   for (int i = 0; i < t; i++) {
-    cout << metricRunTimeDP[i] << ", ";
+    cout << metricRunTimeDP[i];
+    if (i != t-1){
+     cout << ", ";
+    }
   } 
   cout << endl;
   cout << "metricRunTimeDPSort: ";
   for (int i = 0; i < t; i++) {
-    cout << metricRunTimeDPSort[i] << ", ";
+    cout << metricRunTimeDPSort[i]; 
+    if (i != t-1){
+     cout << ", ";
+    }
   } 
   cout << endl;
   cout << "metricDPError: ";
   for (int i = 0; i < t; i++) {
-    cout << metricDPError[i] << ", ";
+    cout << metricDPError[i];
+    if (i != t-1){
+     cout << ", ";
+    }
+  } 
+  cout << endl;
+  cout << "metricDPStoreError: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricDPStoreError[i];
+    if (i != t-1){
+     cout << ", ";
+    }
   } 
   cout << endl;
 
-
- /* //debug
-  cout << "******************************************* " << endl;
-  std::vector<int> dp_main(bins, 0);
-  for (int j = 0; j < t; j++) { 
-    dp_main = addTwoVectors(dp_main, dpHists[j]);
-  }
-  std::vector<std::vector<int> > trueHistgrams;
-  for (int j = 0; j < t; j++) { 
-    trueHistgrams.push_back(trueHists[j]);
-  }
-  std::vector<int> true_main = computeTrueNumber(trueHistgrams, bins);
-  cout << "DP count" << endl;
-  for (int j = 0; j < bins; j++) { 
-    cout << dp_main[j] << "; ";
-  }
-  cout << endl;
-  cout << "true count" << endl;
-  for (int j = 0; j < bins; j++) { 
-    cout << true_main[j] << "; ";
-  }
-  cout << endl;
-  int totalRecordsDP = accumulate(dp_main.begin(), dp_main.end(), 0);
-  int totalRecordsTrue = accumulate(true_main.begin(), true_main.end(), 0);
-  cout << "**********totalRecords_DP: " << totalRecordsDP << endl;
-  cout << "**********totalRecords_True: " << totalRecordsTrue << endl;
-  cout << "**********mainData.size(): " << mainData.size() << endl;
-  cout << "**********mainDataLeft.size(): " << leftCacheData.size() << endl;
-  cout << "mainDummyMarker.size(): " << mainDummyMarker.size() << endl;
-  cout << "mainDataEncodedNot.size(): " << mainDataEncodedNot.size() << endl;
-  Integer *mainmain = reconstructArray(mainData);
-  Integer *mainDummyMarkermain = reconstructArray(mainDummyMarker);
-  Integer *mainmainEncodedNot = reconstructArray(mainDataEncodedNot);
-  cout << "mainmain: " << ' ';
-  printArray(mainmain, mainData.size());
-  cout << "mainDummyMarkermain: " << ' ';
-  printArray(mainDummyMarkermain, mainDummyMarker.size());
-  cout << "mainmainEncodedNot: " << ' ';
-  printArray(mainmainEncodedNot, mainDataEncodedNot.size());
-  int dummyNum = computeDummyNumber(mainDummyMarkermain, mainDummyMarker.size());
-  cout << "**********totalRecords_dummy: " << dummyNum << endl;
-  Integer *leftCacheDummyMarker_Int = reconstructArray(leftCacheDummyMarker);
-  int dummyNumLeft = computeDummyNumber(leftCacheDummyMarker_Int, leftCacheDummyMarker.size());
-  cout << "**********totalRecordsLeft_dummy: " << dummyNumLeft << endl;
-  cout << "**********computed true(main+left): " << (mainData.size() + leftCacheData.size() - dummyNum - dummyNumLeft) << endl;
-  //debug
-*/
   finalize_semi_honest();
   delete io;
 }
