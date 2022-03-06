@@ -18,6 +18,9 @@ std::vector<int> computePrefix(std::vector<int> vect){
 
 std::vector<int> slicing(vector<int>& arr, int X, int Y)
 {
+  if (X > Y){
+    return {};
+  }
   // Starting and Ending iterators
   auto start = arr.begin() + X;
   auto end = arr.begin() + Y + 1;
@@ -79,4 +82,28 @@ std::vector<int> computeTrueRecords(std::vector<int> dpHist, std::vector<int> dp
     trueR[i] = num;
   }
   return trueR;
+}
+
+std::pair<std::vector<std::vector<int> >, std::vector<std::vector<int> > > seperateD(std::vector<std::vector<int> > dpMergedPrevious, std::vector<std::vector<int> > dataMergedPrevious, int d, int bins){
+  std::vector<std::vector<int> > vectFirst;
+  std::vector<std::vector<int> > vectSecond; 
+  int intervals = dpMergedPrevious.size();
+  for (int i = 0; i < bins; i++){  // for each bin 
+    std::vector<int> first;
+    std::vector<int> second;
+    for (int j = 0; j < intervals; j++){  // for each interval
+      std::vector<int> dpHistPrefix(bins+1, 0); 
+      for (int k = 0; k < bins; k++) {
+        dpHistPrefix[k+1] = dpMergedPrevious[j][k];
+      }
+      std::vector<int> begining = slicing(dataMergedPrevious[j], dpHistPrefix[i], dpHistPrefix[i+1] - d - 1);
+      std::vector<int> ending = slicing(dataMergedPrevious[j], dpHistPrefix[i+1] - d, dpHistPrefix[i+1] - 1);
+      first.insert(first.end(), begining.begin(), begining.end());  // the first n-d
+      second.insert(second.end(), ending.begin(), ending.end());   // the last d 
+    }
+    vectFirst.push_back(first);
+    vectSecond.push_back(second);
+  }  
+
+  return std::make_pair(vectFirst, vectSecond);
 }
