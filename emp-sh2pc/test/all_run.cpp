@@ -528,7 +528,7 @@ int main(int argc, char** argv) {
     auto afterDPSort = high_resolution_clock::now();
     auto durationDP = duration_cast<microseconds>(afterDP - start);
     auto durationDPSort = duration_cast<microseconds>(afterDPSort - afterDP);
-    cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
+   // cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
     metricRunTimeDP.push_back(durationDP.count() / 1000);
     metricRunTimeDPSort.push_back(durationDPSort.count() / 1000000);
 
@@ -540,7 +540,7 @@ int main(int argc, char** argv) {
     while (rightI >= 0) {
       int rootLeftI = nodesSubtree(rightI);
       string intervalRootDPI = std::to_string(rootLeftI) + ',' + std::to_string(rightI);
-      cout << "intervalRootDPI: " << intervalRootDPI << endl;
+   //   cout << "intervalRootDPI: " << intervalRootDPI << endl;
       intervalss.push_back(intervalRootDPI);
      
       rightI = rootLeftI - 1;
@@ -559,7 +559,7 @@ int main(int argc, char** argv) {
     for (int j = 0; j < bins; j++) { 
       DPCountError += abs(dpI[j] - trueI[j]);
     }
-    cout << "DPCountError: " << DPCountError << endl;
+  //  cout << "DPCountError: " << DPCountError << endl;
     metricDPError.push_back(DPCountError);  
 
     // metric 3: sort errors = (dp count - true records)  
@@ -574,7 +574,7 @@ int main(int argc, char** argv) {
     for (int j = 0; j < bins; j++) { 
       DPStoreError += abs(dpI[j] - trueR[j]);
     }
-    cout << "DPStoreError: " << DPStoreError << endl;
+   // cout << "DPStoreError: " << DPStoreError << endl;
     metricDPStoreError.push_back(DPStoreError);
 
     //debug
