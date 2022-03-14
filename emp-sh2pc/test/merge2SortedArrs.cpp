@@ -88,16 +88,27 @@ std::pair<std::vector<std::vector<int> >, std::vector<std::vector<int> > > seper
   std::vector<std::vector<int> > vectFirst;
   std::vector<std::vector<int> > vectSecond; 
   int intervals = dpMergedPrevious.size();
+
+  // preprocess preefix --> cut last bin if no enough records 
+  // preprocess prefixsum
+  std::vector<std::vector<int> > dpHistPrefixIntrevals; 
+  for (int i = 0; i < intervals; i++){  // for each interval
+    int sizeInterval = dataMergedPrevious[i].size();
+    dpMergedPrevious[i][bins] = sizeInterval;
+    std::vector<int> dpHistPrefix(bins+1, 0); 
+    for (int j = 0; j < bins; j++) {
+      dpHistPrefix[j+1] = dpMergedPrevious[i][j];
+    }
+    dpHistPrefixIntrevals.push_back(dpHistPrefix);
+  }
+
   for (int i = 0; i < bins; i++){  // for each bin 
     std::vector<int> first;
     std::vector<int> second;
     for (int j = 0; j < intervals; j++){  // for each interval
-      std::vector<int> dpHistPrefix(bins+1, 0); 
-      for (int k = 0; k < bins; k++) {
-        dpHistPrefix[k+1] = dpMergedPrevious[j][k];
-      }
-      std::vector<int> begining = slicing(dataMergedPrevious[j], dpHistPrefix[i], dpHistPrefix[i+1] - d - 1);
-      std::vector<int> ending = slicing(dataMergedPrevious[j], dpHistPrefix[i+1] - d, dpHistPrefix[i+1] - 1);
+      std::vector<int> begining = slicing(dataMergedPrevious[j], dpHistPrefixIntrevals[j][i], dpHistPrefixIntrevals[j][i+1] - d - 1);
+      int left = (dpHistPrefixIntrevals[j][i] < dpHistPrefixIntrevals[j][i+1] - d) ? dpHistPrefixIntrevals[j][i+1] - d: dpHistPrefixIntrevals[j][i];
+      std::vector<int> ending = slicing(dataMergedPrevious[j], left, dpHistPrefixIntrevals[j][i+1] - 1);
       first.insert(first.end(), begining.begin(), begining.end());  // the first n-d
       second.insert(second.end(), ending.begin(), ending.end());   // the last d 
     }

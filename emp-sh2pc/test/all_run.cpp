@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = false; 
+  bool constantDP = true; 
   // print 
   bool debugPrint = true;
   // privacy budget
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
   // 0: sort subroot together; 1: sort each bin seperatly; 2: sort each bin and only the last d records 
   int sortOption = 2; 
   // option3: d --> depends on epsilon???
-  int d = 10;
+  int d = 1;
   int gapAgainThreshold = 1;
 
   // prepare input data: original data contains real and dummy records
@@ -470,9 +470,10 @@ int main(int argc, char** argv) {
         // d should be not too small!
         int sortDPd = dpRoot[j];
         for (int k = 0; k < int(intervalPrevious.size()); k++) {
-          sortDPd = sortDPd - (dpHists[intervalPrevious[k]][j] - d);
+          int leftAfterCutD = ((dpHists[intervalPrevious[k]][j] - d) < 0) ? 0: (dpHists[intervalPrevious[k]][j] - d);
+          sortDPd = sortDPd - leftAfterCutD;
         }
-        sortDPd = (sortDPd < 0) ? 0: sortDPd;
+        sortDPd = (sortDPd < 0) ? 0: sortDPd;   // todo: increase d if sortDPd<0
         // sort 
         std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortBinDP(party, toSortMergedPrevious, toSortMarkerMergedPrevious, toSortEncodedNotMergedPrevious, sortDPd, sizeSort, j);
         std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, sortDPd);
