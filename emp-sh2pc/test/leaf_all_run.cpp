@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
   // constant dp noise
   bool constantDP = false; 
   // print 
-  bool debugPrint = false;
+  bool debugPrint = true;
   // privacy budget
   string eps_string = argv[5]; // eps
   double eps = std::stod(eps_string);
@@ -128,8 +128,9 @@ int main(int argc, char** argv) {
   // metric
   std::vector<double> metricRunTimeDP;
   std::vector<double> metricRunTimeDPSort;
-  std::vector<double> metricDPError;
-  std::vector<double> metricDPStoreError;
+  std::vector<double> metricDPError;  // |DP count - true count|
+  std::vector<double> metricDPStoreError;  // |DP count - true record|
+  std::vector<double> metricTTStoreError;  // |true count - true record|
 
   // secure part 
   std::vector<int> mainData;
@@ -287,6 +288,13 @@ int main(int argc, char** argv) {
    // cout << "DPStoreError: " << DPStoreError << endl;
     metricDPStoreError.push_back(DPStoreError);
 
+    // metric errors = (true count - true records)  
+    double TTStoreError = 0;
+    for (int j = 0; j < bins; j++) { 
+      TTStoreError += abs(trueI[j] - trueR[j]);
+    }
+    metricTTStoreError.push_back(TTStoreError);
+
     //debug
     if (debugPrint) {
       cout << "dp count: ";
@@ -361,6 +369,19 @@ int main(int argc, char** argv) {
   } 
   cout << endl;
   outFile << endl; 
+  cout << "metricTTStoreError: ";
+  outFile << "metricTTStoreError: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricTTStoreError[i];
+    outFile << metricTTStoreError[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+
   finalize_semi_honest();
   delete io;
 }
