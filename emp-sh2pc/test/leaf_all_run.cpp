@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
   // constant dp noise
   bool constantDP = false; 
   // print 
-  bool debugPrint = true;
+  bool debugPrint = false;
   // privacy budget
   string eps_string = argv[5]; // eps
   double eps = std::stod(eps_string);
@@ -312,6 +312,7 @@ int main(int argc, char** argv) {
   outFile.open(fileNameOut, std::ios_base::app);//std::ios_base::app
  
   cout << "********************************************************************* " << endl;
+  outFile << "********************************************************************* " << endl;
   cout << "metricRunTimeDP: ";
   outFile << "metricRunTimeDP: ";
   for (int i = 0; i < t; i++) {
