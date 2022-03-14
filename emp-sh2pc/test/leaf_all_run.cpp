@@ -67,7 +67,10 @@ int main(int argc, char** argv) {
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
     num_real = 100; 
-    num_dummy = 100; 
+    //num_dummy = 10;
+    double b = 1 / eps;
+    double t = log((1/0.1));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
+    num_dummy = bins * int(b * t);
   } else {
     bins = 5; // bin number
     num_real = 10;  
@@ -132,7 +135,7 @@ int main(int argc, char** argv) {
   std::vector<int> leftCacheData;
   std::vector<int> leftCacheDataEncodedNot;
   std::vector<int> leftCacheDummyMarker;
-  int mainSize = 0;
+ // int mainSize = 0;
   // for each update: 
   for (int i = 0; i < t; i++) {
     cout<< "index---------------------------------------------------------------------------: " << i << endl;

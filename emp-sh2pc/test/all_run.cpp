@@ -58,6 +58,8 @@ int main(int argc, char** argv) {
   bool debugPrint = true;
   // privacy budget
   double epsALL = 10;
+  double levels = log2(t);  // double or int?
+  double eps = epsALL / levels;
   // bin number 
   int bins = 0;
   // !warning: if there are not enough dummy records, then sortDP and copy2two are incorrect
@@ -67,7 +69,10 @@ int main(int argc, char** argv) {
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
     num_real = 1000; 
-    num_dummy = 10; 
+    //num_dummy = 10;
+    double b = 1 / eps;
+    double t = log((1/0.1));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
+    num_dummy = bins * int(b * t);
   } else {
     bins = 5; // bin number
     num_real = 10;  
@@ -81,8 +86,10 @@ int main(int argc, char** argv) {
   // how to sort
   // 0: sort subroot together; 1: sort each bin seperatly; 2: sort each bin and only the last d records 
   int sortOption = 2; 
-  // option3: d --> depends on epsilon???
-  int d = 1;
+  // option2: d --> depends on epsilon???
+  double b = 1 / eps;
+  double t_ = log((1/0.1));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
+  int d = int(b * t_);
   int gapAgainThreshold = 1;
 
   // prepare input data: original data contains real and dummy records
@@ -156,8 +163,6 @@ int main(int argc, char** argv) {
      // std::vector<int> lapVect_(bins, 1);
       lapVect = lapVect_;
     } else {
-      double levels = log2(t);  // double or int?
-      double eps = epsALL / levels;
       lapVect = lapGenVector(bins, 1 / eps); 
     }
     // step2: dpHistGen for the root of the subtree
