@@ -53,20 +53,22 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = true; 
+  bool constantDP = false; 
   // print 
-  bool debugPrint = false;
+  bool debugPrint = true;
   // privacy budget
-  double eps = 10;
+  string eps_string = argv[5]; // eps
+  double eps = std::stod(eps_string);
   // bin number 
   int bins = 0;
   // !warning: if there are not enough dummy records, then sortDP and copy2two are incorrect
   int num_real = 0;  
   int num_dummy = 0; // make sure there are enough dummy records
+  string N_string = argv[6]; // num of reals for each cache
    // nyc taxi dataset: 1271413 rows; 4 bins; payment_type
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
-    num_real = 100; 
+    num_real = std::stod(N_string);
     //num_dummy = 10;
     double b = 1 / eps;
     double t = log((1/0.1));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
@@ -124,6 +126,8 @@ int main(int argc, char** argv) {
   std::vector<double> metricRunTimeDPSort;
   std::vector<double> metricDPError;
   std::vector<double> metricDPStoreError;
+
+  cout << "fileName: " << fileName_real << "  T: " << t << "  eps: " << eps << "  N: " << num_real << endl;
 
   // secure part 
   std::vector<int> mainData;

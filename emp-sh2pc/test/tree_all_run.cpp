@@ -53,11 +53,12 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = true; 
+  bool constantDP = false; 
   // print 
   bool debugPrint = true;
   // privacy budget
-  double epsALL = 10;
+  string eps_string = argv[5]; // eps
+  double epsALL = std::stod(eps_string);
   double levels = log2(t);  // double or int?
   double eps = epsALL / levels;
   // bin number 
@@ -65,10 +66,11 @@ int main(int argc, char** argv) {
   // !warning: if there are not enough dummy records, then sortDP and copy2two are incorrect
   int num_real = 0;  
   int num_dummy = 0; // make sure there are enough dummy records
+  string N_string = argv[6]; // num of reals for each cache
    // nyc taxi dataset: 1271413 rows; 4 bins; payment_type
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
-    num_real = 1000; 
+    num_real = std::stod(N_string);
     //num_dummy = 10;
     double b = 1 / eps;
     double t = log((1/0.1));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
@@ -85,7 +87,8 @@ int main(int argc, char** argv) {
 
   // how to sort
   // 0: sort subroot together; 1: sort each bin seperatly; 2: sort each bin and only the last d records 
-  int sortOption = 2; 
+  string sortOption_string = argv[7]; // eps
+  int sortOption = std::stod(sortOption_string);
   // option2: d --> depends on epsilon???
   double b = 1 / eps;
   double t_ = log((1/0.1));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
@@ -135,6 +138,8 @@ int main(int argc, char** argv) {
   std::vector<double> metricRunTimeDPSort;
   std::vector<double> metricDPError;
   std::vector<double> metricDPStoreError;
+
+  cout << "fileName: " << fileName_real << "  T: " << t << "  eps: " << eps << "  N: " << num_real << endl;
 
   // secure part 
   std::map<std::string, std::vector<int> > mainData;
@@ -244,7 +249,6 @@ int main(int argc, char** argv) {
     // option0: if sortOption == 0 or gapAgain <= x
     // option1: else if sortOption == 1 
     // option2: else sortOption == 2 
-    // gapAgain <= 6 -->  to be a parameter 
     if (sortOption == 0 or gapAgain <= gapAgainThreshold) {
       // option 1: the subtree is small, so resort the root 
     //  cout << "intervalPrevious------------------------------------: " << intervalPrevious.size() << endl;
