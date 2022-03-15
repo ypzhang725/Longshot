@@ -49,9 +49,9 @@ void printArrayPlaintext(std::vector<int> array){
 }
 
 std::vector<int> revealSh(Integer * sh, int bins, int party){ //todo: ALICE BOB
-  std::vector<int> real;
+  std::vector<int> real(bins);
   for (int i = 0; i < bins; ++i) {
-    real.push_back(sh[i].reveal<int32_t>(party));
+    real[i] = sh[i].reveal<int32_t>(party);
   }
   return real;
 }
