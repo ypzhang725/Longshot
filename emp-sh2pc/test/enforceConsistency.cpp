@@ -8,17 +8,19 @@
 using namespace std;
 
 std::vector<int> addTwoVectors(std::vector<int> vect1, std::vector<int> vect2){
-  std::vector<int> res;
-  for (int i = 0; i < int(vect1.size()); i++) {
-    res.push_back(vect1[i] + vect2[i]);
+  int vectSize = int(vect1.size());
+  std::vector<int> res(vectSize);
+  for (int i = 0; i < vectSize; i++) {
+    res[i] = vect1[i] + vect2[i];
   }
   return res;
 }
 
 std::vector<int> minusTwoVectors(std::vector<int> vect1, std::vector<int> vect2){
-  std::vector<int> res;
-  for (int i = 0; i < int(vect1.size()); i++) {
-    res.push_back(vect1[i] - vect2[i]);
+  int vectSize = int(vect1.size());
+  std::vector<int> res(vectSize);
+  for (int i = 0; i < vectSize; i++) {
+    res[i] = vect1[i] - vect2[i];
   }
   return res;
 }
@@ -37,12 +39,13 @@ int nodesSubtree(int i){
 }
 
 std::vector<int> nonNegative(std::vector<int> vect){
-  std::vector<int> res;
-  for (int i = 0; i < int(vect.size()); i++) {
+  int vectSize = int(vect.size());
+  std::vector<int> res(vectSize);
+  for (int i = 0; i < vectSize; i++) {
     if (vect[i] < 0){
-      res.push_back(0);
+      res[i] = 0;
     } else {
-      res.push_back(vect[i]);
+      res[i] = vect[i];
     }
   }
   return res;
@@ -56,7 +59,7 @@ std::vector<int> enforceConsistency(std::vector<std::vector<int> > dpNodes, std:
   if (constSize == 0) {
     return dpNodes[nodeSize - 1];
   }
-  std::vector<int> dp;
+  std::vector<int> dp(binSize);
   for (int i = 0; i < binSize; i++) {
     int dpCounts = 0;
     for (int j = 0; j < nodeSize; j++) {
@@ -69,7 +72,7 @@ std::vector<int> enforceConsistency(std::vector<std::vector<int> > dpNodes, std:
     }
 
     int dpConsistent = int((dpCounts - constCounts) / nodeSize);
-    dp.push_back(dpConsistent);
+    dp[i] = dpConsistent;
   }     
 
   return dp;
@@ -95,7 +98,7 @@ std::vector<int> enforceConsistencyH(std::vector<std::vector<int> > dpNodes, int
   if (height == 1){
     return dpNodes[0];
   }
-  std::vector<int> dp;
+  std::vector<int> dp(binSize);
   for (int i = 0; i < binSize; i++) {
     std::vector<double> dpNodesBin(nodeSize, 0);
     for (int j = 0; j < nodeSize; j++){
@@ -142,7 +145,7 @@ std::vector<int> enforceConsistencyH(std::vector<std::vector<int> > dpNodes, int
     int dpConsistent = int(consist[0]);  //here double to int 124 -> 123
    // cout << "dpConsistent int: " << dpConsistent <<"," << endl;
    // cout << "dpConsistent double: " << consist[0] <<"," << endl;;
-    dp.push_back(dpConsistent);
+    dp[i] = dpConsistent;
   }     
   return dp;
 }

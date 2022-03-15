@@ -8,10 +8,11 @@
 using namespace std;
 
 std::vector<int> computePrefix(std::vector<int> vect){
-  std::vector<int> res;
-  res.push_back(vect[0]);
+  int vectSize = int(vect.size());
+  std::vector<int> res(vectSize);
+  res[0] = vect[0];
   for (int i = 1; i < int(vect.size()); i++) {
-    res.push_back(res[i - 1] + vect[i]);
+    res[i] = res[i - 1] + vect[i];
   }
   return res;
 }
@@ -85,13 +86,13 @@ std::vector<int> computeTrueRecords(std::vector<int> dpHist, std::vector<int> dp
 }
 
 std::pair<std::vector<std::vector<int> >, std::vector<std::vector<int> > > seperateD(std::vector<std::vector<int> > dpMergedPrevious, std::vector<std::vector<int> > dataMergedPrevious, int d, int bins){
-  std::vector<std::vector<int> > vectFirst;
-  std::vector<std::vector<int> > vectSecond; 
+  std::vector<std::vector<int> > vectFirst(bins);
+  std::vector<std::vector<int> > vectSecond(bins); 
   int intervals = dpMergedPrevious.size();
 
   // preprocess preefix --> cut last bin if no enough records 
   // preprocess prefixsum
-  std::vector<std::vector<int> > dpHistPrefixIntrevals; 
+  std::vector<std::vector<int> > dpHistPrefixIntrevals(intervals); 
   for (int i = 0; i < intervals; i++){  // for each interval
     int sizeInterval = dataMergedPrevious[i].size();
     dpMergedPrevious[i][bins] = sizeInterval;
@@ -99,7 +100,7 @@ std::pair<std::vector<std::vector<int> >, std::vector<std::vector<int> > > seper
     for (int j = 0; j < bins; j++) {
       dpHistPrefix[j+1] = dpMergedPrevious[i][j];
     }
-    dpHistPrefixIntrevals.push_back(dpHistPrefix);
+    dpHistPrefixIntrevals[i] = dpHistPrefix;
   }
 
   for (int i = 0; i < bins; i++){  // for each bin 
@@ -112,8 +113,8 @@ std::pair<std::vector<std::vector<int> >, std::vector<std::vector<int> > > seper
       first.insert(first.end(), begining.begin(), begining.end());  // the first n-d
       second.insert(second.end(), ending.begin(), ending.end());   // the last d 
     }
-    vectFirst.push_back(first);
-    vectSecond.push_back(second);
+    vectFirst[i] = first;
+    vectSecond[i] = second;
   }  
 
   return std::make_pair(vectFirst, vectSecond);

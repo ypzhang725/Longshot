@@ -39,7 +39,6 @@ std::vector<int> readInputs(string fileName){
   return vect;
 }
 
-// todo: remove push_back
 int main(int argc, char** argv) {
   int port, party;
   parse_party_and_port(argv, &party, &port);
@@ -53,7 +52,7 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = false; 
+  bool constantDP = true; 
   // print 
   bool debugPrint = false;
   // privacy budget
@@ -101,9 +100,9 @@ int main(int argc, char** argv) {
 
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
-  std::vector<std::vector<int> > originalData;  // encoded real + dummy 
-  std::vector<std::vector<int> > originalDataEncodedNot;  // not encoded real + dummy
-  std::vector<std::vector<int> > originalDummyMarkers;  // dummy markers for real + dummy
+  std::vector<std::vector<int> > originalData(t);  // encoded real + dummy 
+  std::vector<std::vector<int> > originalDataEncodedNot(t);  // not encoded real + dummy
+  std::vector<std::vector<int> > originalDummyMarkers(t);  // dummy markers for real + dummy
   for (int i = 0; i < t; i++) { 
     std::vector<int> v_originalData(vect.begin() + (i*num_real), vect.begin() + ((i+1)*num_real)); // original real data
     std::vector<int> v_originalDataEncoded;  // encoded 
@@ -132,23 +131,23 @@ int main(int argc, char** argv) {
     // only categorical; for numerical, need to specify range and bin size
     v_originalDataEncoded = encodeData(party, size, randomVect, v_originalData, v_originalDummyMarkers);
 
-    originalData.push_back(v_originalDataEncoded);
-    originalDataEncodedNot.push_back(v_originalData);
-    originalDummyMarkers.push_back(v_originalDummyMarkers);
+    originalData[i] = v_originalDataEncoded;
+    originalDataEncodedNot[i] = v_originalData;
+    originalDummyMarkers[i] = v_originalDummyMarkers;
   }
 
   // metric
-  std::vector<double> metricRunTimeDP;
-  std::vector<double> metricRunTimeDPSort;
-  std::vector<double> metricDPError;  // |DP count - true count|
-  std::vector<double> metricDPStoreError;  // |DP count - true record|
-  std::vector<double> metricTTStoreError;  // |true count - true record|
+  std::vector<double> metricRunTimeDP(t);
+  std::vector<double> metricRunTimeDPSort(t);
+  std::vector<double> metricDPError(t);  // |DP count - true count|
+  std::vector<double> metricDPStoreError(t);  // |DP count - true record|
+  std::vector<double> metricTTStoreError(t); // |true count - true record|
   
   // secure part 
   std::map<std::string, std::vector<int> > mainData;
   std::map<std::string, std::vector<int> > mainDataEncodedNot;
   std::map<std::string, std::vector<int> > mainDummyMarker;
-  std::vector<std::vector<int> > trueHists;
+  std::vector<std::vector<int> > trueHists(t);
   std::map<std::string, std::vector<int> > dpHists;
   std::map<std::string, std::vector<int> > inconsistDPHists;
   std::vector<int> leftCacheData;
@@ -162,7 +161,7 @@ int main(int argc, char** argv) {
     int size = originalData[i].size();   
     std::vector<int> randomVect = uniformGenVector(bins);
     std::vector<int> sh = trueHistGen(party, originalData[i], originalDummyMarkers[i], randomVect, size, bins); 
-    trueHists.push_back(sh);
+    trueHists[i] = sh;
 
     // DP noise 
     std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
@@ -433,15 +432,16 @@ int main(int argc, char** argv) {
       
       // retrieve the data and DP histograms of previous nodes in this subtree
       // for each bin, we need to put n-d records for each interval together.  
-      std::vector<std::vector<int> > dataMergedPrevious;
-      std::vector<std::vector<int> > dataEncodedNotMergedPrevious;
-      std::vector<std::vector<int> > dummyMarkerMergedPrevious;
-      std::vector<std::vector<int> > dpMergedPrevious;
-      for (int j = 0; j < int(intervalPrevious.size()) ; j++){
-        dataMergedPrevious.push_back(mainData[intervalPrevious[j]]);
-        dataEncodedNotMergedPrevious.push_back(mainDataEncodedNot[intervalPrevious[j]]);
-        dummyMarkerMergedPrevious.push_back(mainDummyMarker[intervalPrevious[j]]);
-        dpMergedPrevious.push_back(computePrefix(dpHists[intervalPrevious[j]]));
+      int intervalSize = int(intervalPrevious.size());
+      std::vector<std::vector<int> > dataMergedPrevious(intervalSize);
+      std::vector<std::vector<int> > dataEncodedNotMergedPrevious(intervalSize);
+      std::vector<std::vector<int> > dummyMarkerMergedPrevious(intervalSize);
+      std::vector<std::vector<int> > dpMergedPrevious(intervalSize);
+      for (int j = 0; j < intervalSize; j++){
+        dataMergedPrevious[j] = mainData[intervalPrevious[j]];
+        dataEncodedNotMergedPrevious[j] = mainDataEncodedNot[intervalPrevious[j]];
+        dummyMarkerMergedPrevious[j] = mainDummyMarker[intervalPrevious[j]];
+        dpMergedPrevious[j] = computePrefix(dpHists[intervalPrevious[j]]);
       }
       std::vector<std::vector<int> > encodedRecordsFirst, notEncordedRecordsFirst, dummyMarkerFirst;
       std::vector<std::vector<int> > encodedRecordsSecond, notEncordedRecordsSecond, dummyMarkerSecond;
@@ -541,8 +541,8 @@ int main(int argc, char** argv) {
     auto durationDP = duration_cast<microseconds>(afterDP - start);
     auto durationDPSort = duration_cast<microseconds>(afterDPSort - afterDP);
    // cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
-    metricRunTimeDP.push_back(durationDP.count() / 1000);
-    metricRunTimeDPSort.push_back(durationDPSort.count() / 1000000);
+    metricRunTimeDP[i] = durationDP.count() / 1000;
+    metricRunTimeDPSort[i] = durationDPSort.count() / 1000000;
 
     // metric 2: DP accuracy for query 0 -- i
     // step1: add DP histograms that cover 0 -- i 
@@ -561,9 +561,9 @@ int main(int argc, char** argv) {
       dpI = addTwoVectors(dpI, dpHists[intervalss[j]]);
     }
     // step2: compute true histograms that cover 0 -- i
-    std::vector<std::vector<int> > trueHistgrams;
+    std::vector<std::vector<int> > trueHistgrams(i+1);
     for (int j = 0; j <= i; j++) { 
-     trueHistgrams.push_back(trueHists[j]);
+     trueHistgrams[j] = trueHists[j];
     }
     std::vector<int> trueI = computeTrueNumber(trueHistgrams, bins);
     // step3: compute the error for DP count 
@@ -572,7 +572,7 @@ int main(int argc, char** argv) {
       DPCountError += abs(dpI[j] - trueI[j]);
     }
   //  cout << "DPCountError: " << DPCountError << endl;
-    metricDPError.push_back(DPCountError);  
+    metricDPError[i] = DPCountError;  
 
     // metric 3: sort errors = (dp count - true records)  
     // step1: compute the #true for each interval's data and then add them up 
@@ -587,14 +587,14 @@ int main(int argc, char** argv) {
       DPStoreError += abs(dpI[j] - trueR[j]);
     }
    // cout << "DPStoreError: " << DPStoreError << endl;
-    metricDPStoreError.push_back(DPStoreError);
+    metricDPStoreError[i] = DPStoreError;
 
     // metric errors = (true count - true records)  
     double TTStoreError = 0;
     for (int j = 0; j < bins; j++) { 
       TTStoreError += abs(trueI[j] - trueR[j]);
     }
-    metricTTStoreError.push_back(TTStoreError);
+    metricTTStoreError[i] = TTStoreError;
 
     //debug
     if (debugPrint) {

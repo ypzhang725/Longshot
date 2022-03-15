@@ -39,7 +39,6 @@ std::vector<int> readInputs(string fileName){
   return vect;
 }
 
-// todo: remove push_back
 int main(int argc, char** argv) {
   int port, party;
   parse_party_and_port(argv, &party, &port);
@@ -53,7 +52,7 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = false; 
+  bool constantDP = true; 
   // print 
   bool debugPrint = false;
   // privacy budget
@@ -89,9 +88,9 @@ int main(int argc, char** argv) {
 
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
-  std::vector<std::vector<int> > originalData;  // encoded real + dummy 
-  std::vector<std::vector<int> > originalDataEncodedNot;  // not encoded real + dummy
-  std::vector<std::vector<int> > originalDummyMarkers;  // dummy markers for real + dummy
+  std::vector<std::vector<int> > originalData(t);  // encoded real + dummy 
+  std::vector<std::vector<int> > originalDataEncodedNot(t);  // not encoded real + dummy
+  std::vector<std::vector<int> > originalDummyMarkers(t);  // dummy markers for real + dummy
   for (int i = 0; i < t; i++) { 
     std::vector<int> v_originalData(vect.begin() + (i*num_real), vect.begin() + ((i+1)*num_real)); // original real data
     std::vector<int> v_originalDataEncoded;  // encoded 
@@ -120,24 +119,24 @@ int main(int argc, char** argv) {
     // only categorical; for numerical, need to specify range and bin size
     v_originalDataEncoded = encodeData(party, size, randomVect, v_originalData, v_originalDummyMarkers);
 
-    originalData.push_back(v_originalDataEncoded);
-    originalDataEncodedNot.push_back(v_originalData);
-    originalDummyMarkers.push_back(v_originalDummyMarkers);
+    originalData[i] = v_originalDataEncoded;
+    originalDataEncodedNot[i] = v_originalData;
+    originalDummyMarkers[i] = v_originalDummyMarkers;
   }
   
   // metric
-  std::vector<double> metricRunTimeDP;
-  std::vector<double> metricRunTimeDPSort;
-  std::vector<double> metricDPError;  // |DP count - true count|
-  std::vector<double> metricDPStoreError;  // |DP count - true record|
-  std::vector<double> metricTTStoreError;  // |true count - true record|
+  std::vector<double> metricRunTimeDP(t);
+  std::vector<double> metricRunTimeDPSort(t);
+  std::vector<double> metricDPError(t);  // |DP count - true count|
+  std::vector<double> metricDPStoreError(t);  // |DP count - true record|
+  std::vector<double> metricTTStoreError(t);  // |true count - true record|
 
   // secure part 
-  std::vector<int> mainData;
-  std::vector<int> mainDataEncodedNot;
-  std::vector<int> mainDummyMarker;
-  std::vector<std::vector<int> > trueHists;
-  std::vector<std::vector<int> > dpHists;
+  std::vector<int> mainData(t);
+  std::vector<int> mainDataEncodedNot(t);
+  std::vector<int> mainDummyMarker(t);
+  std::vector<std::vector<int> > trueHists(t);
+  std::vector<std::vector<int> > dpHists(t);
   std::map<std::string, std::vector<int> > inconsistDPHists;
   std::vector<int> leftCacheData;
   std::vector<int> leftCacheDataEncodedNot;
@@ -151,7 +150,7 @@ int main(int argc, char** argv) {
     int size = originalData[i].size();   
     std::vector<int> randomVect = uniformGenVector(bins);
     std::vector<int> sh = trueHistGen(party, originalData[i], originalDummyMarkers[i], randomVect, size, bins); 
-    trueHists.push_back(sh);
+    trueHists[i] = sh;
 
     // step2: dpHistGen
     // option1: add noise to leaf node
@@ -164,10 +163,10 @@ int main(int argc, char** argv) {
       lapVect = lapGenVector(bins, 1 / eps); 
     }
     std::vector<int> dp;
-    std::vector<std::vector<int> > trueHistgrams;
-    trueHistgrams.push_back(trueHists[i]);
+    std::vector<std::vector<int> > trueHistgrams(1);
+    trueHistgrams[0] = trueHists[i];
     dp = dpHistGen(party, trueHistgrams, lapVect, bins);  
-    dpHists.push_back(nonNegative(dp));
+    dpHists[i] = nonNegative(dp);
 
     auto afterDP = high_resolution_clock::now();
 
@@ -252,8 +251,8 @@ int main(int argc, char** argv) {
     auto durationDP = duration_cast<microseconds>(afterDP - start);
     auto durationDPSort = duration_cast<microseconds>(afterDPSort - afterDP);
    // cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
-    metricRunTimeDP.push_back(durationDP.count() / 1000);
-    metricRunTimeDPSort.push_back(durationDPSort.count() / 1000000);
+    metricRunTimeDP[i] = durationDP.count() / 1000;
+    metricRunTimeDPSort[i] = durationDPSort.count() / 1000000;
 
     // metric 2: DP accuracy for query 0 -- i
     // step1: add DP histograms that cover 0 -- i 
@@ -263,9 +262,9 @@ int main(int argc, char** argv) {
       dpI = addTwoVectors(dpI, dpHists[j]);
     }
     // step2: compute true histograms that cover 0 -- i
-    std::vector<std::vector<int> > trueHistgramsT;
+    std::vector<std::vector<int> > trueHistgramsT(i+1);
     for (int j = 0; j <= i; j++) { 
-     trueHistgramsT.push_back(trueHists[j]);
+     trueHistgramsT[j] = trueHists[j];
     }
     std::vector<int> trueI = computeTrueNumber(trueHistgramsT, bins);
     // step3: compute the error for DP count 
@@ -274,7 +273,7 @@ int main(int argc, char** argv) {
       DPCountError += abs(dpI[j] - trueI[j]);
     }
    // cout << "DPCountError: " << DPCountError << endl;
-    metricDPError.push_back(DPCountError);  
+    metricDPError[i] = DPCountError;  
 
     // metric 3: sort errors = (dp count - true records)  
     // step1: compute the #true for each interval's data and then add them up 
@@ -286,14 +285,14 @@ int main(int argc, char** argv) {
       DPStoreError += abs(dpI[j] - trueR[j]);
     }
    // cout << "DPStoreError: " << DPStoreError << endl;
-    metricDPStoreError.push_back(DPStoreError);
+    metricDPStoreError[i] = DPStoreError;
 
     // metric errors = (true count - true records)  
     double TTStoreError = 0;
     for (int j = 0; j < bins; j++) { 
       TTStoreError += abs(trueI[j] - trueR[j]);
     }
-    metricTTStoreError.push_back(TTStoreError);
+    metricTTStoreError[i] = TTStoreError;
 
     //debug
     if (debugPrint) {

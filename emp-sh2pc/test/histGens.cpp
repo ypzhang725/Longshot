@@ -185,9 +185,9 @@ std::vector<int> dpHistGen(int party, std::vector<std::vector<int> > number, std
   cout << "after adding noise" << ' ';
   printArray(res, bins);*/
   
-  std::vector<int> dpHist;
+  std::vector<int> dpHist(bins);
   for (int i = 0; i < bins; i++) {
-    dpHist.push_back(res[i].reveal<int32_t>());
+    dpHist[i] = res[i].reveal<int32_t>();
   }
   return dpHist;
 }
