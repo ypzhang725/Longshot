@@ -10,3 +10,9 @@ metricRunTimeDPSort: 40, 94, 40, 213, 41, 94, 42, 476, 40, 95
 metricDPError: 0, 3, 3, 2, 2, 2, 2, 0, 1, 1
 metricDPStoreError: 0, 4, 4, 0, 0, 0, 0, 0, 2, 0
 metricTTStoreError: 0, 3, 3, 2, 2, 2, 2, 0, 1, 1
+********************************************************************* 
+metricRunTimeDP: 1297, 1365, 1187, 1402, 1383, 1264, 1293, 1203, 1202, 1095
+metricRunTimeDPSort: 41, 94, 41, 212, 41, 94, 41, 474, 40, 93
+metricDPError: 1, 1, 1, 2, 2, 3, 3, 1, 2, 2
+metricDPStoreError: 4, 0, 0, 0, 0, 3, 3, 0, 3, 0
+metricTTStoreError: 3, 1, 1, 2, 2, 4, 4, 1, 3, 2
