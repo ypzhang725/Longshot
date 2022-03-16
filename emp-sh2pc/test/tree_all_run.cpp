@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
     num_real = std::stod(N_string);
     //num_dummy = 10;
     double b = 1 / eps;
-    double t = log((1/0.1));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
+    double t = log((1/0.01));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
     num_dummy = bins * int(b * t);
   } else {
     bins = 5; // bin number
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
   int sortOption = std::stod(sortOption_string);
   // option2: d --> depends on epsilon???
   double b = 1 / eps;
-  double t_ = log((1/0.1));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
+  double t_ = log((1/0.01));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
   int d = int(b * t_);
   int gapAgainThreshold = 1;
 
