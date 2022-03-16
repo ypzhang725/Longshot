@@ -1,0 +1,6 @@
+********************************************************************* 
+metricRunTimeDP: 3, 3, 3, 4, 3, 4, 4, 6
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0

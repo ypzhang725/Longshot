@@ -534,6 +534,12 @@ int main(int argc, char** argv) {
     
       // debug
       }
+      for (string& interval: intervalPrevious){
+        mainData.erase (interval);
+        mainDataEncodedNot.erase (interval);
+        mainDummyMarker.erase (interval);
+      }
+
     }
 
     // metric 1: run time
