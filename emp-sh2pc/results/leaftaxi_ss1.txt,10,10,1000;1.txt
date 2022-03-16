@@ -16,3 +16,33 @@ metricRunTimeDPSort: 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
 metricDPError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 169, 134, 130, 135, 133, 149, 172, 147, 108, 145
+metricRunTimeDPSort: 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 173, 150, 150, 113, 130, 156, 135, 117, 129, 140
+metricRunTimeDPSort: 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 153, 135, 119, 138, 133, 113, 135, 100, 109, 135
+metricRunTimeDPSort: 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 134, 151, 115, 155, 144, 144, 143, 112, 119, 126
+metricRunTimeDPSort: 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+metricDPError: 0, 0, 0, 0, 1, 1, 1, 1, 1, 1
+metricDPStoreError: 0, 0, 0, 0, 1, 1, 1, 1, 1, 1
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 150, 159, 132, 154, 158, 156, 164, 130, 156, 118
+metricRunTimeDPSort: 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
