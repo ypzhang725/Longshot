@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = true; 
+  bool constantDP = false; 
   // print 
   bool debugPrint = false;
   // privacy budget
@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
   int gapAgainThreshold = 1;
 
   string fileNameOutIndex = argv[8]; // out
-  string fileNameOut = "./results/tree"+fileName_real+","+t_string+","+eps_string+","+N_string+","+sortOption_string+";"+fileNameOutIndex+".txt";
+  string fileNameOut = "./results2/tree"+fileName_real+","+t_string+","+eps_string+","+N_string+","+sortOption_string+";"+fileNameOutIndex+".txt";
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << "  sortOption: " << sortOption_string << " out:" << fileNameOutIndex << endl;
 
   // prepare input data: original data contains real and dummy records
@@ -138,6 +138,7 @@ int main(int argc, char** argv) {
 
   // metric
   std::vector<double> metricRunTimeDP(t);
+  std::vector<double> metricRunTimeDPMerge(t);
   std::vector<double> metricRunTimeDPSort(t);
   std::vector<double> metricDPError(t);  // |DP count - true count|
   std::vector<double> metricDPStoreError(t);  // |DP count - true record|
@@ -534,6 +535,7 @@ int main(int argc, char** argv) {
     
       // debug
       }
+      // delete previous sorted arrays 
       for (string& interval: intervalPrevious){
         mainData.erase (interval);
         mainDataEncodedNot.erase (interval);
@@ -582,11 +584,22 @@ int main(int argc, char** argv) {
 
     // metric 3: sort errors = (dp count - true records)  
     // step1: compute the #true for each interval's data and then add them up 
-    std::vector<int> trueR(bins, 0);
-    for (int j = 0; j < int(intervalss.size()); j++) { 
-      std::vector<int> trueRecords = computeTrueRecords(dpHists[intervalss[j]], mainData[intervalss[j]]); 
-      trueR = addTwoVectors(trueR, trueRecords);
+    auto DPMergeBefore = high_resolution_clock::now();
+    std::vector<int> mergedMain = mainData[intervalss[0]]; 
+    std::vector<int> mergedDataEncodedNot = mainDataEncodedNot[intervalss[0]];
+    std::vector<int> mergedDummyMarker = mainDummyMarker[intervalss[0]];
+    std::vector<int> dpItmp = dpHists[intervalss[0]];
+    for (int j = 1; j < int(intervalss.size()); j++) { 
+      mergedMain = merge2SortedArr(dpItmp, dpHists[intervalss[j]], mergedMain, mainData[intervalss[j]], bins);
+      mergedDataEncodedNot = merge2SortedArr(dpItmp, dpHists[intervalss[j]], mergedDataEncodedNot, mainDataEncodedNot[intervalss[j]], bins);
+      mergedDummyMarker = merge2SortedArr(dpItmp, dpHists[intervalss[j]], mergedDummyMarker, mainDummyMarker[intervalss[j]], bins);
+      dpItmp = addTwoVectors(dpItmp, dpHists[intervalss[j]]);
     }
+    auto DPMergeAfter = high_resolution_clock::now();
+    auto durationDPMerge = duration_cast<microseconds>(DPMergeAfter - DPMergeBefore);
+    metricRunTimeDPMerge[i] = durationDPMerge.count();
+    std::vector<int> trueR = computeTrueRecords(dpItmp, mergedMain); 
+    
     // step2: compute the error for DP store 
     double DPStoreError = 0;
     for (int j = 0; j < bins; j++) { 
@@ -595,7 +608,7 @@ int main(int argc, char** argv) {
    // cout << "DPStoreError: " << DPStoreError << endl;
     metricDPStoreError[i] = DPStoreError;
 
-    // metric errors = (true count - true records)  
+    // metric 4: errors = (true count - true records)  
     double TTStoreError = 0;
     for (int j = 0; j < bins; j++) { 
       TTStoreError += abs(trueI[j] - trueR[j]);
@@ -645,6 +658,18 @@ int main(int argc, char** argv) {
   for (int i = 0; i < t; i++) {
     cout << metricRunTimeDPSort[i]; 
     outFile << metricRunTimeDPSort[i]; 
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  cout << "metricRunTimeDPMerge: ";
+  outFile << "metricRunTimeDPMerge: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRunTimeDPMerge[i];
+    outFile << metricRunTimeDPMerge[i];
     if (i != t-1){
      cout << ", ";
      outFile << ", ";

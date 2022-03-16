@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = true; 
+  bool constantDP = false; 
   // print 
   bool debugPrint = false;
   // privacy budget
@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
   }
   
   string fileNameOutIndex = argv[7]; // out
-  string fileNameOut = "./results/leaf"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
+  string fileNameOut = "./results2/leaf"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << " out:" << fileNameOutIndex << endl;
 
   // prepare input data: original data contains real and dummy records
@@ -126,6 +126,7 @@ int main(int argc, char** argv) {
   
   // metric
   std::vector<double> metricRunTimeDP(t);
+  std::vector<double> metricRunTimeDPMerge(t);
   std::vector<double> metricRunTimeDPSort(t);
   std::vector<double> metricDPError(t);  // |DP count - true count|
   std::vector<double> metricDPStoreError(t);  // |DP count - true record|
@@ -230,6 +231,7 @@ int main(int argc, char** argv) {
 
       // step4: dpMerge
       // DP histogram for main data store
+      auto DPMergeBefore = high_resolution_clock::now();
       std::vector<int> dp_main(bins, 0);
       for (int j = 0; j < i; j++) { 
         dp_main = addTwoVectors(dp_main, dpHists[j]);
@@ -238,6 +240,10 @@ int main(int argc, char** argv) {
       mainData = merge2SortedArr(dp_main, dpHists[i], mainData, sortedRecord, bins);
       mainDummyMarker = merge2SortedArr(dp_main, dpHists[i], mainDummyMarker, sortedDummy, bins);
       mainDataEncodedNot = merge2SortedArr(dp_main, dpHists[i], mainDataEncodedNot, sortedRecordEncodedNot, bins);
+      auto DPMergeAfter = high_resolution_clock::now();
+      auto durationDPMerge = duration_cast<microseconds>(DPMergeAfter - DPMergeBefore);
+      metricRunTimeDPMerge[i] = durationDPMerge.count();
+
       //debug
       if (debugPrint) {
         Integer *mainmain = reconstructArray(mainData);
@@ -337,6 +343,18 @@ int main(int argc, char** argv) {
   for (int i = 0; i < t; i++) {
     cout << metricRunTimeDPSort[i]; 
     outFile << metricRunTimeDPSort[i]; 
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  cout << "metricRunTimeDPMerge: ";
+  outFile << "metricRunTimeDPMerge: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRunTimeDPMerge[i];
+    outFile << metricRunTimeDPMerge[i];
     if (i != t-1){
      cout << ", ";
      outFile << ", ";
