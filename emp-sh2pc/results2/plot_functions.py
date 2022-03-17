@@ -57,35 +57,69 @@ def plotSort(T, arrayLeaf, arrayTree_sortSubroot, arrayTree_sortD, xlable, ylabl
 def readFileReturnMean(fileName):
     with open(fileName) as f:
         lines = f.readlines()
-    runs = 3#int(len(lines) / 6)
+    runs = int(len(lines) / 7)
    # print(runs)
-    #for i in range(18):
-    #    print(lines[i])
+   # for i in lines:
+   #     print(i)
 
+    metricRunTimeDP = [None]*runs
     metricRunTimeDPSort = [None]*runs
+    metricRunTimeDPMerge = [None]*runs
     metricDPError = [None]*runs
     metricDPStoreError = [None]*runs
+    metricTTStoreError = [None]*runs
+    
     for i in range(runs):
+        metricRunTimeDP_string = lines[(i*6) + 1]
+        metricRunTimeDP_string_result = re.search('metricRunTimeDP: (.*)\n', metricRunTimeDP_string).group(1)
+        metricRunTimeDP[i] = [int(e) for e in metricRunTimeDP_string_result.split(",")]
+        
         metricRunTimeDPSort_string = lines[(i*6) + 2]
         metricRunTimeDPSort_string_result = re.search('metricRunTimeDPSort: (.*)\n', metricRunTimeDPSort_string).group(1)
         metricRunTimeDPSort[i] = [int(e) for e in metricRunTimeDPSort_string_result.split(",")]
-        metricDPError_string = lines[(i*6) + 3]
+        
+        metricRunTimeDPMerge_string = lines[(i*6) + 3]
+        metricRunTimeDPMerge_string_result = re.search('metricRunTimeDPMerge: (.*)\n', metricRunTimeDPMerge_string).group(1)
+        metricRunTimeDPMerge[i] = [int(e) for e in metricRunTimeDPMerge_string_result.split(",")]
+        
+        metricDPError_string = lines[(i*6) + 4]
         metricDPError_string_result = re.search('metricDPError: (.*)\n', metricDPError_string).group(1)
         metricDPError[i] = [int(e) for e in metricDPError_string_result.split(",")]
-        metricDPStoreError_string = lines[(i*6) + 4]
+        
+        metricDPStoreError_string = lines[(i*6) + 5]
         metricDPStoreError_string_result = re.search('metricDPStoreError: (.*)\n', metricDPStoreError_string).group(1)
         metricDPStoreError[i] = [int(e) for e in metricDPStoreError_string_result.split(",")]
-
+        
+        metricTTStoreError_string = lines[(i*6) + 6]
+        metricTTStoreError_string_result = re.search('metricTTStoreError: (.*)\n', metricTTStoreError_string).group(1)
+        metricTTStoreError[i] = [int(e) for e in metricTTStoreError_string_result.split(",")]
+        
+    metricRunTimeDP_mean = np.mean(np.array(metricRunTimeDP), axis = 0)
     metricRunTimeDPSort_mean = np.mean(np.array(metricRunTimeDPSort), axis = 0)
+    metricRunTimeDPMerge_mean = np.mean(np.array(metricRunTimeDPMerge), axis = 0)
     metricDPError_mean = np.mean(np.array(metricDPError), axis = 0)
     metricDPStoreError_mean = np.mean(np.array(metricDPStoreError), axis = 0)
+    metricTTStoreError_mean = np.mean(np.array(metricTTStoreError), axis = 0)
     
     d = dict(); 
+    d['metricRunTimeDP_mean'] = metricRunTimeDP_mean
     d['metricRunTimeDPSort_mean'] = metricRunTimeDPSort_mean
+    d['metricRunTimeDPMerge_mean'] = metricRunTimeDPMerge_mean
     d['metricDPError_mean'] = metricDPError_mean
     d['metricDPStoreError_mean'] = metricDPStoreError_mean
+    d['metricTTStoreError_mean'] = metricTTStoreError_mean
 
     return d
+
+    '''
+    print(metricRunTimeDPSort)
+    print(metricDPError)
+    print(metricDPStoreError)
+    print(metricRunTimeDPSort_mean)
+    print(metricDPError_mean)
+    print(metricDPStoreError_mean)
+    return metricRunTimeDPSort_mean, metricDPError_mean, metricDPStoreError_mean
+    '''
 
 
 def plots(T, eps, N):
