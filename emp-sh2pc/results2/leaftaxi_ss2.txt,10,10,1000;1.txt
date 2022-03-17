@@ -5,3 +5,38 @@ metricRunTimeDPMerge: 12, 27, 41, 43, 34, 48, 58, 70, 78, 90
 metricDPError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 175, 128, 141, 129, 113, 128, 165, 98, 102, 158
+metricRunTimeDPSort: 3, 2, 2, 2, 2, 2, 2, 2, 2, 2
+metricRunTimeDPMerge: 12, 28, 40, 42, 41, 48, 56, 70, 80, 92
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 181, 133, 169, 149, 165, 150, 115, 98, 183, 159
+metricRunTimeDPSort: 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+metricRunTimeDPMerge: 11, 26, 41, 41, 32, 48, 58, 69, 78, 90
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 170, 118, 144, 147, 150, 144, 116, 169, 149, 147
+metricRunTimeDPSort: 2, 2, 2, 2, 2, 2, 2, 2, 2, 3
+metricRunTimeDPMerge: 12, 30, 44, 41, 37, 47, 59, 70, 81, 90
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 131, 135, 131, 102, 140, 130, 159, 172, 130, 149
+metricRunTimeDPSort: 2, 2, 2, 3, 2, 2, 3, 2, 2, 2
+metricRunTimeDPMerge: 13, 26, 41, 44, 34, 48, 57, 70, 78, 90
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 139, 98, 135, 148, 142, 160, 147, 151, 173, 147
+metricRunTimeDPSort: 2, 3, 2, 2, 2, 2, 2, 2, 2, 3
+metricRunTimeDPMerge: 11, 26, 41, 43, 34, 47, 60, 70, 80, 93
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0

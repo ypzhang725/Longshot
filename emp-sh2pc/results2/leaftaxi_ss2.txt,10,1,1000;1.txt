@@ -5,3 +5,31 @@ metricRunTimeDPMerge: 9, 21, 30, 40, 37, 49, 56, 66, 81, 89
 metricDPError: 4, 9, 10, 8, 11, 14, 13, 13, 11, 10
 metricDPStoreError: 4, 7, 7, 7, 7, 7, 7, 9, 9, 9
 metricTTStoreError: 0, 2, 5, 5, 10, 13, 12, 8, 12, 13
+********************************************************************* 
+metricRunTimeDP: 119, 144, 138, 158, 131, 147, 131, 150, 181, 176
+metricRunTimeDPSort: 2, 2, 2, 2, 3, 3, 3, 3, 3, 3
+metricRunTimeDPMerge: 9, 20, 32, 39, 35, 52, 55, 66, 81, 90
+metricDPError: 2, 10, 14, 11, 12, 11, 9, 9, 8, 11
+metricDPStoreError: 0, 1, 5, 5, 5, 5, 5, 5, 5, 5
+metricTTStoreError: 2, 9, 9, 16, 17, 16, 14, 14, 13, 16
+********************************************************************* 
+metricRunTimeDP: 173, 100, 151, 127, 159, 125, 139, 156, 130, 113
+metricRunTimeDPSort: 2, 3, 2, 3, 3, 2, 2, 3, 3, 3
+metricRunTimeDPMerge: 9, 21, 33, 44, 34, 46, 57, 63, 83, 88
+metricDPError: 1, 2, 3, 12, 12, 17, 14, 13, 18, 19
+metricDPStoreError: 0, 0, 0, 10, 10, 13, 13, 14, 18, 19
+metricTTStoreError: 1, 2, 3, 2, 4, 4, 3, 5, 10, 10
+********************************************************************* 
+metricRunTimeDP: 141, 102, 154, 145, 126, 142, 156, 176, 132, 129
+metricRunTimeDPSort: 2, 3, 3, 2, 3, 3, 3, 3, 3, 3
+metricRunTimeDPMerge: 9, 20, 35, 43, 35, 50, 56, 68, 81, 89
+metricDPError: 6, 6, 8, 7, 8, 7, 10, 10, 12, 13
+metricDPStoreError: 2, 2, 2, 2, 2, 2, 5, 5, 7, 8
+metricTTStoreError: 4, 4, 10, 9, 8, 9, 5, 5, 5, 5
+********************************************************************* 
+metricRunTimeDP: 169, 129, 158, 118, 148, 100, 128, 116, 146, 170
+metricRunTimeDPSort: 2, 3, 2, 3, 3, 2, 3, 3, 3, 3
+metricRunTimeDPMerge: 9, 19, 29, 44, 37, 52, 56, 69, 81, 91
+metricDPError: 4, 5, 11, 14, 14, 16, 19, 15, 23, 23
+metricDPStoreError: 4, 5, 11, 15, 16, 19, 20, 20, 25, 25
+metricTTStoreError: 0, 0, 0, 1, 2, 5, 5, 5, 2, 2
