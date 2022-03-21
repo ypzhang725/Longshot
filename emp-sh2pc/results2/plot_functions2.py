@@ -287,35 +287,35 @@ def plotNorEps(p1, p2, p3, NorEps): #eps: T, N, epsList or N: T, eps, NList
     xList = [str(x) for x in p3]
     # run time 
     plotStackBarCharRunTime("Leaf", xList, NorEps, LeafRunTimeDP_list, LeafRunTimeDPMerge_list, LeafRunTimeDPSort_list)
-    print("LeafUpdateDPTimeTree_list(millisec)", LeafRunTimeDP_list)
-    print("LeafDPMerge_list(microsec)", LeafRunTimeDPMerge_list)
-    print("LeafSortCacheDP_list(sec)", LeafRunTimeDPSort_list)
+    print("LeafUpdateDPTimeTree_list(millisec)", [format(e, ".1f") for e in LeafRunTimeDP_list])
+    print("LeafDPMerge_list(microsec)", [format(e, ".1f") for e in LeafRunTimeDPMerge_list])
+    print("LeafSortCacheDP_list(sec)", [format(e, ".1f") for e in LeafRunTimeDPSort_list])
     
     plotStackBarCharRunTime("TreeSortSubroot", xList, NorEps, SortRootRunTimeDP_list, SortRootRunTimeDPMerge_list, SortRootRunTimeDPSort_list)
-    print("TreeSortSubrootUpdateDPTimeTree_list(millisec)", SortRootRunTimeDP_list)
-    print("TreeSortSubrootDPMerge_list(microsec)", SortRootRunTimeDPMerge_list)
-    print("TreeSortSubrootSortCacheDP_list(sec)", SortRootRunTimeDPSort_list)
+    print("TreeSortSubrootUpdateDPTimeTree_list(millisec)", [format(e, ".1f") for e in SortRootRunTimeDP_list])
+    print("TreeSortSubrootDPMerge_list(microsec)", [format(e, ".1f") for e in SortRootRunTimeDPMerge_list])
+    print("TreeSortSubrootSortCacheDP_list(sec)", [format(e, ".1f") for e in SortRootRunTimeDPSort_list])
     
     plotStackBarCharRunTime("TreeSortD", xList, NorEps, SortDRunTimeDP_list, SortDRunTimeDPMerge_list, SortDRunTimeDPSort_list)
-    print("TreeSortDUpdateDPTimeTree_list(millisec)", SortDRunTimeDP_list)
-    print("TreeSortDDPMerge_list(microsec)", SortDRunTimeDPMerge_list)
-    print("TreeSortDSortCacheDP_list(sec)", SortDRunTimeDPSort_list)
+    print("TreeSortDUpdateDPTimeTree_list(millisec)", [format(e, ".1f") for e in SortDRunTimeDP_list])
+    print("TreeSortDDPMerge_list(microsec)", [format(e, ".1f") for e in SortDRunTimeDPMerge_list])
+    print("TreeSortDSortCacheDP_list(sec)", [format(e, ".1f") for e in SortDRunTimeDPSort_list])
     
     # accuracy 
     plotStackBarCharAccuracy("Leaf", xList, NorEps, LeafDPError_list, LeafDPStoreError_list, LeafTTStoreError_list)
-    print("LeafDPError_list", LeafDPError_list)
-    print("LeafDPStoreError_list", LeafDPStoreError_list)
-    print("LeafTTStoreError_list", LeafTTStoreError_list)
+    print("LeafDPError_list", [format(e, ".1f") for e in LeafDPError_list])
+    print("LeafDPStoreError_list", [format(e, ".1f") for e in LeafDPStoreError_list])
+    print("LeafTTStoreError_list", [format(e, ".1f") for e in LeafTTStoreError_list])
     
     plotStackBarCharAccuracy("TreeSortSubroot", xList, NorEps, SortRootDPError_list, SortRootDPStoreError_list, SortRootTTStoreError_list)
-    print("SortRootDPError_list", SortRootDPError_list)
-    print("SortRootDPStoreError_list", SortRootDPStoreError_list)
-    print("SortRootTTStoreError_list", SortRootTTStoreError_list)
+    print("SortRootDPError_list", [format(e, ".1f") for e in SortRootDPError_list])
+    print("SortRootDPStoreError_list", [format(e, ".1f") for e in SortRootDPStoreError_list])
+    print("SortRootTTStoreError_list", [format(e, ".1f") for e in SortRootTTStoreError_list])
     
     plotStackBarCharAccuracy("TreeSortD", xList, NorEps, SortDDPError_list, SortDDPStoreError_list, SortDTTStoreError_list)
-    print("SortDDPError_list", SortDDPError_list)
-    print("SortDDPStoreError_list", SortDDPStoreError_list)
-    print("SortDTTStoreError_list", SortDTTStoreError_list)
+    print("SortDDPError_list", [format(e, ".1f") for e in SortDDPError_list])
+    print("SortDDPStoreError_list", [format(e, ".1f") for e in SortDDPStoreError_list])
+    print("SortDTTStoreError_list", [format(e, ".1f") for e in SortDTTStoreError_list])
     
     
 
