@@ -95,7 +95,7 @@ std::pair<std::vector<std::vector<int> >, std::vector<std::vector<int> > > seper
   std::vector<std::vector<int> > dpHistPrefixIntrevals(intervals); 
   for (int i = 0; i < intervals; i++){  // for each interval
     int sizeInterval = dataMergedPrevious[i].size();
-    dpMergedPrevious[i][bins] = sizeInterval;
+    dpMergedPrevious[i][bins-1] = sizeInterval;
     std::vector<int> dpHistPrefix(bins+1, 0); 
     for (int j = 0; j < bins; j++) {
       dpHistPrefix[j+1] = dpMergedPrevious[i][j];
