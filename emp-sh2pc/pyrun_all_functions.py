@@ -9,7 +9,8 @@ def readData(fileName):
     df = pd.read_csv(fileName)   # [1271413 rows x 1 columns]
     df = df.to_numpy().flatten()
     df = df.tolist()
-    df.extend(df)
+    for i in range(3):
+        df.extend(df)
     return df
     
 def nonNegative(value):
