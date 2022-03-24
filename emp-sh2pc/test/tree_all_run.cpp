@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
   // constant dp noise
   bool constantDP = false; 
   // print 
-  bool debugPrint = false;
+  bool debugPrint = true;
   // privacy budget
   string eps_string = argv[5]; // eps
   double epsALL = std::stod(eps_string);
@@ -223,7 +223,7 @@ int main(int argc, char** argv) {
       if (debugPrint) {
         cout << "Consistent root: ";
         for (int j = 0; j < bins; j++) {
-        cout << dp[j] << ' ';
+        cout << dpHists[intervalDP][j] << ' ';
         }
         cout << endl;
       }
@@ -518,7 +518,7 @@ int main(int argc, char** argv) {
         cout << "leftRecord for " << intervalRootDP << ": ";
         printArray(leftRecordleftRecord, leftCacheData.size());
 
-       /* Integer *sortedDummysortedDummy = reconstructArray(mainDummyMarker[intervalRootDP]);
+        Integer *sortedDummysortedDummy = reconstructArray(mainDummyMarker[intervalRootDP]);
         Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
         cout << "sortedDummy for " << intervalRootDP << ": ";
         printArray(sortedDummysortedDummy, mainDummyMarker[intervalRootDP].size());
@@ -531,7 +531,7 @@ int main(int argc, char** argv) {
         printArray(sortedRecordsortedRecordEncodedNot, mainDataEncodedNot[intervalRootDP].size());
         cout << "leftRecordEncodedNot for " << intervalRootDP << ": ";
         printArray(leftRecordleftRecordEncodedNot, leftCacheDataEncodedNot.size());
-        cout << "sortedRecord.size(): " << mainData[intervalRootDP].size() << endl;*/
+        cout << "sortedRecord.size(): " << mainData[intervalRootDP].size() << endl;
     
       // debug
       }

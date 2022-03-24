@@ -519,9 +519,9 @@ def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
 
 
 #inputs: 
-T_list = [10000]
-epsAll_list = [1]
-numReal_list = [100]
+T_list = [1000]
+epsAll_list = [10, 1]
+numReal_list = [1000]
 runNum = 3
 
 start_time = time.time()
@@ -535,6 +535,7 @@ for T in T_list:
             list_runTimeDPSort_leaf = [None]*runNum
             list_dummyRecordNumCache_leaf = [None]*runNum
             for i in range(runNum):
+                print("T: "+T+"; epsAll: "+epsAll+"; N: "+numReal+"; run: "+i)
                 metricDPError_leaf, metricDPStoreError_leaf, metricTTStoreError_leaf, runTimeDPSort_leaf, dummyRecordNumCache_leaf = metrics("leaf", T, epsAll, numReal, None)
                 leaf_end_time = time.time()
                 list_metricDPError_leaf[i] = metricDPError_leaf
@@ -597,7 +598,7 @@ for T in T_list:
             mean_dummyRecordNumCache_treeA = np.round(np.mean(list_dummyRecordNumCache_treeA, axis = 0))
 
 
-            fileName = "resultsPY/T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)
+            fileName = "resultsPY/T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
 
             with open(fileName, 'w') as f:
                 entry = {}
