@@ -535,7 +535,7 @@ for T in T_list:
             list_runTimeDPSort_leaf = [None]*runNum
             list_dummyRecordNumCache_leaf = [None]*runNum
             for i in range(runNum):
-                print("T: "+str(T)+"; epsAll: "+str(epsAll)+"; N: "+str(numReal)+"; run: "+str(i))
+                print("leaf -- T: "+str(T)+"; epsAll: "+str(epsAll)+"; N: "+str(numReal)+"; run: "+str(i))
                 metricDPError_leaf, metricDPStoreError_leaf, metricTTStoreError_leaf, runTimeDPSort_leaf, dummyRecordNumCache_leaf = metrics("leaf", T, epsAll, numReal, None)
                 leaf_end_time = time.time()
                 list_metricDPError_leaf[i] = metricDPError_leaf
@@ -560,6 +560,7 @@ for T in T_list:
             list_runTimeDPSort_treeD = [None]*runNum
             list_dummyRecordNumCache_treeD = [None]*runNum
             for i in range(runNum):
+                print("treeD -- T: "+str(T)+"; epsAll: "+str(epsAll)+"; N: "+str(numReal)+"; run: "+str(i))
                 metricDPError_treeD, metricDPStoreError_treeD, metricTTStoreError_treeD, runTimeDPSort_treeD, dummyRecordNumCache_treeD = metrics("tree", T, epsAll, numReal, 2)
                 treeD_end_time = time.time()
                 list_metricDPError_treeD[i] = metricDPError_treeD
@@ -582,6 +583,7 @@ for T in T_list:
             list_runTimeDPSort_treeA = [None]*runNum
             list_dummyRecordNumCache_treeA = [None]*runNum
             for i in range(runNum):
+                print("treeA -- T: "+str(T)+"; epsAll: "+str(epsAll)+"; N: "+str(numReal)+"; run: "+str(i))
                 metricDPError_treeA, metricDPStoreError_treeA, metricTTStoreError_treeA, runTimeDPSort_treeA, dummyRecordNumCache_treeA = metrics("tree", T, epsAll, numReal, 0)
                 treeA_end_time = time.time()
                 list_metricDPError_treeA[i] = metricDPError_treeA
