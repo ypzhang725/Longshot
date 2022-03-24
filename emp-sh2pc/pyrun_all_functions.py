@@ -522,11 +522,10 @@ def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
 
 
 def run_all(T_list, epsAll_list, numReal_list, runNum):
-    start_time = time.time()
-
     for T in T_list:
         for epsAll in epsAll_list:
             for numReal in numReal_list:
+                start_time = time.time()
                 list_metricDPError_leaf = [None]*runNum
                 list_metricDPStoreError_leaf = [None]*runNum
                 list_metricTTStoreError_leaf = [None]*runNum
@@ -622,18 +621,25 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
                     json.dump(entry, f, ensure_ascii=False)
 
 
-#inputs: 
-T_list = [1000]
-epsAll_list = [10, 1]
-numReal_list = [10000]
-runNum = 3
-
-run_all(T_list, epsAll_list, numReal_list, runNum)
-
-#inputs: 
-T_list = [1000]
-epsAll_list = [0.1]
+T_list = [10]
+epsAll_list = [10, 1, 0.1]
 numReal_list = [1000, 10000]
 runNum = 3
 
 run_all(T_list, epsAll_list, numReal_list, runNum)
+
+#inputs: 
+T_list = [10000]
+epsAll_list = [10, 1]
+numReal_list = [1000, 10000]
+runNum = 3
+
+run_all(T_list, epsAll_list, numReal_list, runNum)
+
+#inputs: 
+#T_list = [1000]
+#epsAll_list = [0.1]
+#numReal_list = [1000, 10000]
+#runNum = 3
+
+#run_all(T_list, epsAll_list, numReal_list, runNum)
