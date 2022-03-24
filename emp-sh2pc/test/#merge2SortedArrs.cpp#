@@ -103,8 +103,7 @@ std::pair<std::vector<std::vector<int> >, std::vector<std::vector<int> > > seper
     dpHistPrefixIntrevals[i] = dpHistPrefix;
   }
 
-  for (int i = 0; i < bins; i++){  // for each bin 
-    std::vector<int> first;
+  for (int i = 0; i < bins; i++){  // for each bin     std::vector<int> first;
     std::vector<int> second;
     for (int j = 0; j < intervals; j++){  // for each interval
       std::vector<int> begining = slicing(dataMergedPrevious[j], dpHistPrefixIntrevals[j][i], dpHistPrefixIntrevals[j][i+1] - d - 1);

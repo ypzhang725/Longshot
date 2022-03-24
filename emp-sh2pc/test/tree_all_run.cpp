@@ -189,7 +189,7 @@ int main(int argc, char** argv) {
         // step2.2: DP hists of nodes on the path
         std::vector<int> dpNode = dpHistGen(party, trueHistgrams, lapVect, bins);
         string intervalDP = std::to_string(rootLeft) + ',' + std::to_string(i);
-        inconsistDPHists[intervalDP] = nonNegative(dpNode);
+        inconsistDPHists[intervalDP] = dpNode;
 
         rootLeft += (gap / 2);
         gap /= 2;
