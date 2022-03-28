@@ -47,3 +47,10 @@ metricRunTimeDPMerge: 0, 4, 11, 2, 14, 15, 22, 6, 18, 21
 metricDPError: 22, 18, 22, 6, 16, 16, 25, 17, 25, 14
 metricDPStoreError: 21, 17, 27, 20, 26, 23, 33, 18, 19, 25
 metricTTStoreError: 1, 5, 11, 14, 10, 9, 10, 21, 6, 11
+********************************************************************* 
+metricRunTimeDP: 21, 23, 25, 30, 32, 33, 33, 40, 39, 42
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 1, 0, 2, 1, 2
+metricRunTimeDPMerge: 3, 3, 21, 6, 26, 41, 51, 10, 74, 54
+metricDPError: 21, 23, 34, 27, 35, 28, 38, 18, 36, 20
+metricDPStoreError: 21, 20, 38, 27, 32, 27, 33, 18, 34, 35
+metricTTStoreError: 0, 3, 20, 20, 19, 21, 29, 20, 16, 15

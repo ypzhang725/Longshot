@@ -62,21 +62,21 @@ Integer * assignBin(Integer *res, Integer *res_d, int size, int bins, std::vecto
   // initialize bin mark                                                                                        
   Integer *res_b = new Integer[size];
   for(int i = 0; i < size; ++i){
-    res_b[i] = Integer(32, bins, ALICE); 
+    res_b[i] = Integer(32, bins*2+1, ALICE); 
   }
   
-  Integer one(32, 1, PUBLIC);
   Integer zero(32, 0, PUBLIC);
+  Integer one(32, 1, PUBLIC);
   // first round: real records                                                                       
   for(int i = 0; i < size; ++i){
     Bit eq_real = res_d[i] == one;   
-    res_b[i] = If(eq_real, res_b[i] + one, res_b[i]);  
+    res_b[i] = If(eq_real, res_b[i]-one, res_b[i]);  
     Integer bin_num = res[i] - one;                         
     for(int j = 0; j < bins; ++j){  
       Bit eq_bin = bin_num == Integer(32, j, PUBLIC);    // ALICE OR PUBLIC?
       Bit eq_count = res_counter[j] > zero;     
       Bit eq_bin_count_real = eq_real & eq_bin & eq_count;
-      res_b[i] = If(eq_bin_count_real, bin_num, res_b[i]);  
+      res_b[i] = If(eq_bin_count_real, bin_num*two, res_b[i]);  
       res_counter[j] = If(eq_bin_count_real, res_counter[j] - one, res_counter[j]);    
     }
   }    
@@ -87,10 +87,10 @@ Integer * assignBin(Integer *res, Integer *res_d, int size, int bins, std::vecto
   for(int i = 0; i < size; ++i){   
     Bit eq_dummy = res_d[i] == zero;
     for(int j = 0; j < bins; ++j){  
-      Bit eq_bin = res_b[i] == Integer(32, bins, PUBLIC);    // ALICE OR PUBLIC?
+      Bit eq_bin_last = res_b[i] == Integer(32, bins*2+1, PUBLIC);    // ALICE OR PUBLIC?
       Bit eq_count = res_counter[j] > zero;  
-      Bit eq_bin_count_dummy = eq_dummy & eq_bin & eq_count;   
-      res_b[i] = If(eq_bin_count_dummy, Integer(32, j, ALICE), res_b[i]);  
+      Bit eq_bin_count_dummy = eq_dummy & eq_bin_last & eq_count;   
+      res_b[i] = If(eq_bin_count_dummy, Integer(32, j, ALICE)*two+one, res_b[i]);  
       res_counter[j] = If(eq_bin_count_dummy, res_counter[j] - one, res_counter[j]);                         
     }
   }

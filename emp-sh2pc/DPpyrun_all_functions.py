@@ -597,7 +597,7 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
               #  mean_dummyRecordNumCache_treeA = np.round(np.mean(list_dummyRecordNumCache_treeA, axis = 0))
 
 
-                fileName = "resultsPY/DP-T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
+                fileName = "newResultsPY/DP-T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
 
                 with open(fileName, 'w') as f:
                     entry = {}
