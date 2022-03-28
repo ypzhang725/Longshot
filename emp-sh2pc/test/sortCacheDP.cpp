@@ -114,19 +114,20 @@ Integer * assignBin(Integer *res, Integer *res_d, int size, int bins, std::vecto
     
 }*/
 
-std::pair<std::vector<int>, std::vector<int> > copy2two(std::vector<int> num, int index){
-  int size = num.size();
+std::pair<std::vector<int>, std::vector<int> > copy2two(std::vector<int> num, int index, int dropDummy){
+  int sizeOriginal = num.size();
+  int sizeDroppedDummy = sizeOriginal - dropDummy;
   // warning: to remove bugs, the DP count is not larger than the total number of records.
   // actually we need to padd more records!
-  if (index > size) {     
-    index = size;
+  if (index > sizeDroppedDummy) {     
+    index = sizeDroppedDummy;
   }
   std::vector<int> vect1;
   std::vector<int> vect2;
   for(int i = 0; i < index; ++i){
     vect1.push_back(num[i]);
   }
-  for(int i = index; i < size; ++i){
+  for(int i = index; i < sizeDroppedDummy; ++i){
     vect2.push_back(num[i]);
   }
   return std::make_pair(vect1, vect2);

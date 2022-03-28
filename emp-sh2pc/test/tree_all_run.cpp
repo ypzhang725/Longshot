@@ -103,7 +103,11 @@ int main(int argc, char** argv) {
   std::vector<std::vector<int> > originalData(t);  // encoded real + dummy 
   std::vector<std::vector<int> > originalDataEncodedNot(t);  // not encoded real + dummy
   std::vector<std::vector<int> > originalDummyMarkers(t);  // dummy markers for real + dummy
-  for (int i = 0; i < t; i++) { 
+  for (int i = 0; i < t; i++) {    
+    if ((i % 2) == 1){  // 0, 1, 2, 3   only padd dummy with 2, 3
+      num_dummy = 0;
+    }
+
     std::vector<int> v_originalData(vect.begin() + (i*num_real), vect.begin() + ((i+1)*num_real)); // original real data
     std::vector<int> v_originalDataEncoded;  // encoded 
     std::vector<int> v_originalDummyMarkers;
@@ -247,7 +251,11 @@ int main(int argc, char** argv) {
       rootLeft += (gap / 2);
       gap /= 2;
     }
-  
+
+    int numDrop = (intervalPrevious.size() > 0) ? (intervalPrevious.size() - 1): 0;
+    int dropDummy = num_dummy * numDrop;
+    cout << "dropDummy " << dropDummy << endl;
+
     // step4.3: get the sorted array of the root node
     // option0: if sortOption == 0 or gapAgain <= x
     // option1: else if sortOption == 1 
@@ -286,9 +294,9 @@ int main(int argc, char** argv) {
       std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, dataToSort, dummyMarkerToSort, dataEncodedNotToSort, dpRoot, sizeSort, bins);
       // total DP count = #records we want to retrieve --> sorted root + left cache 
       int totalRecords = accumulate(dpRoot.begin(), dpRoot.end(), 0);
-      std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords);
-      std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords);
-      std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords);
+      std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords, dropDummy);
+      std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords, dropDummy);
+      std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords, dropDummy);
       // sorted root + left cache
       mainData[intervalRootDP] = seperatedRecord.first;
       leftCacheData = seperatedRecord.second;
@@ -377,9 +385,9 @@ int main(int argc, char** argv) {
         std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
         int sizeSort = toSortMergedPrevious.size();
         std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortBinDP(party, toSortMergedPrevious, toSortMarkerMergedPrevious, toSortEncodedNotMergedPrevious, dpRoot[j], sizeSort, j);
-        std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, dpRoot[j]);
-        std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, dpRoot[j]);
-        std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, dpRoot[j]);
+        std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, dpRoot[j], dropDummy);
+        std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, dpRoot[j], dropDummy);
+        std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, dpRoot[j], dropDummy);
         // sorted root for this bin + left cache
         mainData[intervalRootDP].insert(mainData[intervalRootDP].end(), seperatedRecord.first.begin(), seperatedRecord.first.end());
         dataCache = seperatedRecord.second;
@@ -489,9 +497,9 @@ int main(int argc, char** argv) {
         sortDPd = (sortDPd < 0) ? 0: sortDPd;   // todo: increase d if sortDPd<0
         // sort 
         std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortBinDP(party, toSortMergedPrevious, toSortMarkerMergedPrevious, toSortEncodedNotMergedPrevious, sortDPd, sizeSort, j);
-        std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, sortDPd);
-        std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, sortDPd);
-        std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, sortDPd);
+        std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, sortDPd, dropDummy);
+        std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, sortDPd, dropDummy);
+        std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, sortDPd, dropDummy);
         // n-d
         mainData[intervalRootDP].insert(mainData[intervalRootDP].end(), encodedRecordsFirst[j].begin(), encodedRecordsFirst[j].end());
         mainDummyMarker[intervalRootDP].insert(mainDummyMarker[intervalRootDP].end(), notEncordedRecordsFirst[j].begin(), notEncordedRecordsFirst[j].end());

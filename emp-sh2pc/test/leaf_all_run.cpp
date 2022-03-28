@@ -193,9 +193,9 @@ int main(int argc, char** argv) {
 
       // total DP count = #records we want to retrieve --> sorted cache + left cache 
       int totalRecords = accumulate(dpHists[i].begin(), dpHists[i].end(), 0);
-      std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords);
-      std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords);
-      std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords);
+      std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords, 0);
+      std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords, 0);
+      std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords, 0);
 
       std::vector<int> sortedRecord = seperatedRecord.first;
       leftCacheData = seperatedRecord.second;
