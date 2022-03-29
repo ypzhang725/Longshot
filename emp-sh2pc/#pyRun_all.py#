@@ -1,0 +1,37 @@
+import sys; sys.path.insert(0, '.')
+import funcPy
+
+, eps, numBins)
+        trueRecordNum, runTimeDPSort, dummyRecordNumCache = sortLeaf(T, numBins, dpHistsLeaf, originalData, originalDummyMarkers)
+
+            DPCount = [None]*T
+                trueCount = [None]*T
+                    for i in range(T):
+                                if (treeorLeaf=="tree"):
+                                                intervalss = intervalRangeQ(i)
+                                                            DPI = np.array([0]*numBins)
+                                                                        for interval in intervalss:
+                                                                                            DPI += dpHists[interval]
+                                                                                                        DPCount[i] = DPI
+                                                                        else:
+                                                                                        DPI = np.array([0]*numBins)
+                                                                                                    for j in range(i+1):
+                                                                                                                        DPI += dpHistsLeaf[str(j)+','+str(j)]
+                                                                                                                                    DPCount[i] = DPI
+
+                                                                                                                                            trueI = np.array([0]*numBins)
+                                                                                                                                                    for j in range(i+1):
+                                                                                                                                                                    trueI += trueHists[j]
+                                                                                                                                                                            trueCount[i] = trueI
+
+                                                                                                                                                                               # print("DPCount: ", DPCount)
+                                                                                                                                                                                #   print("trueCount: ", trueCount)
+                                                                                                                                                                                 #   print("trueRecordNum: ", trueRecordNum)
+
+                                                                                                                                                                                     metricDPError = np.sum(np.abs(np.array(DPCount) - np.array(trueCount)), axis =1)
+                                                                                                                                                                                         metricDPStoreError = np.sum(np.abs(np.array(DPCount) - np.array(trueRecordNum)), axis =1)
+                                                                                                                                                                                             metricTTStoreError = np.sum(np.abs(np.array(trueCount) - np.array(trueRecordNum)), axis =1)
+
+                                                                                                                                                                                                 return metricDPError, metricDPStoreError, metricTTStoreError, runTimeDPSort, dummyRecordNumCache
+
+                                                                                                                                                                                             ~

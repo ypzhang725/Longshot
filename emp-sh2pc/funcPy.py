@@ -4,7 +4,6 @@ import math
 import time
 import json
 
-
 def readData(fileName):
     df = pd.read_csv(fileName)   # [1271413 rows x 1 columns]
     df = df.to_numpy().flatten()
@@ -14,7 +13,7 @@ def readData(fileName):
     return df
     
 def nonNegative(value):
-    return [round(v) if v>0 else 0 for v in value]
+    return [int(round(v)) if v>0 else 0 for v in value]
 
 def DPTreeH(DPAllNodes, gap):
     height = int(math.log(gap, 2)) + 1 #the height of the tree
@@ -115,7 +114,7 @@ def computePrefix(test_list):
     
 def seperateD(dpMergedPrevious, dataMergedPrevious, d, numBin):
     vectFirst = [None] * numBin
-    vectSecond = [None] * numBin
+    vectSecond = []
     intervals = len(dpMergedPrevious)
     # preprocess preefix --> cut last bin if no enough records 
     # preprocess prefixsum
@@ -129,24 +128,40 @@ def seperateD(dpMergedPrevious, dataMergedPrevious, d, numBin):
         dpHistPrefixIntrevals[i] = dpHistPrefix
     for i in range(numBin): # for each bin 
         first = []
-        second = []
         for j in range(intervals):  # for each interval
             left = dpHistPrefixIntrevals[j][i+1] - d if (dpHistPrefixIntrevals[j][i] < dpHistPrefixIntrevals[j][i+1] - d) else dpHistPrefixIntrevals[j][i]
             begining = dataMergedPrevious[j][dpHistPrefixIntrevals[j][i]: left].copy()
             ending = dataMergedPrevious[j][left: dpHistPrefixIntrevals[j][i+1]].copy()
             first.extend(begining)  # the first n-d
-            second.extend(ending)   # the last d 
+            vectSecond.extend(ending)   # the last d 
         vectFirst[i] = first.copy()
-        vectSecond[i] = second.copy()
 
     return (vectFirst, vectSecond)  
 
+def seperateBin(sorted_data, sortDPdHist):
+    numBin = len(sortDPdHist)
+    seperatedData = [None]*numBin
+    dpHistPrefix_tmp = computePrefix(sortDPdHist)
+    dpHistPrefix_tmp[numBin-1] = len(sorted_data)  
+    dpHistPrefix = [0]*(numBin+1)
+    for j in range(numBin):
+        dpHistPrefix[j+1] = dpHistPrefix_tmp[j]
+    for j in range(numBin):
+        seperatedData[j] = sorted_data[dpHistPrefix[j]: dpHistPrefix[j+1]].copy()
+
+    return seperatedData 
+
+
 # for each time unit, insert real and dummy records, and compute true histogram
-def originalDataMarkerHists(T, numReal, numDummy, numBins, df):
+def originalDataMarkerHists(treeorLeaf, T, numReal, num_Dummy, numBins, df):
     originalData = {}
     originalDummyMarkers = {}
     trueHists = [None] * T
     for i in range(T):
+        numDummy = num_Dummy
+        if (treeorLeaf == "tree"):
+            if (i%2 == 1):
+                numDummy = 0
         # for originalData
         records = [None] * (numReal+numDummy)
         records[0: numReal] = df[i*numReal: (i+1)*numReal].copy()
@@ -160,10 +175,11 @@ def originalDataMarkerHists(T, numReal, numDummy, numBins, df):
         # compute trueHists
         counts, bins = np.histogram(records, bins=np.arange(1,numBins+2)) #[1,2,3,4,5] -> 4bins
         trueHists[i] = counts 
+ #   print(originalData)
+ #   print(originalDummyMarkers)
+ #   print(trueHists)
     return originalData, originalDummyMarkers, trueHists
-    #print(originalData)
-    #print(originalDummyMarkers)
-    #print(trueHists)
+    
     
 def computeTrueRecords(dpHist, dpStore):
     binNum = len(dpHist)
@@ -201,8 +217,6 @@ def intervalRangeQ(i):
         rightI = rootLeftI - 1
     return intervalss
 
-    
-
 # step2: dpHistGen for the root of the subtree
 def DPTimeTree(T, trueHists, eps, numBins):
     dpHists = {}
@@ -224,6 +238,8 @@ def DPTimeTree(T, trueHists, eps, numBins):
             # step2.2: DP hists of nodes on the path  
            # dpNode = trueHistgrams + 2#np.random.laplace(0, 1 / epsTree, 1)[0]
             dpNode = trueHistgrams + np.random.laplace(0, (1/eps), numBins)
+            dpNode = np.array([float(round(e)) for e in dpNode])
+           # print(dpNode)
             intervalDP = str(rootLeft) + ',' + str(i)
           #  print("intervalDP", intervalDP)
             inconsistDPHists[intervalDP] = dpNode
@@ -253,8 +269,7 @@ def DPTimeTree(T, trueHists, eps, numBins):
     #print(dpHists)
     #print(inconsistDPHists) 
 
-    
-def sortTree(sortOption, gapAgainThreshold, T, numBins, dpHists, originalData, originalDummyMarkers, eps):
+def sortTree(num_dummy, sortOption, gapAgainThreshold, T, numBins, dpHists, originalData, originalDummyMarkers, eps):
     t = math.log((1/0.005), math.e)
     d = math.ceil((1/eps) * t)
     leftCacheData = []
@@ -280,13 +295,19 @@ def sortTree(sortOption, gapAgainThreshold, T, numBins, dpHists, originalData, o
             if (rootLeftSort < int(rootLeftSort + (gapSort / 2))):
                 interval = str(rootLeftSort) + ',' + str(int(rootLeftSort + (gapSort / 2)) - 1)
                 intervalPrevious.append(interval)
-            rootLeftSort += int(gapSort / 2);
-            gapSort /= 2;
+            rootLeftSort += int(gapSort / 2)
+            gapSort /= 2
         #print(intervalPrevious)
         # step4.3: get the sorted array of the root node
         # option0: if sortOption == 0 or gapAgain <= x
         # option1: else if sortOption == 1 
         # option2: else sortOption == 2 
+        
+        
+        numDrop = (len(intervalPrevious) - 1) if len(intervalPrevious) > 0 else 0
+        dropDummy = num_dummy * numDrop
+       # print("dropDummy: ", dropDummy)
+    
         if (sortOption == 0 or gapAgainAgain <= gapAgainThreshold):
             dataToSort = leftCacheData.copy()
             dummyMarkerToSort = leftCacheDummyMarker.copy();
@@ -297,27 +318,28 @@ def sortTree(sortOption, gapAgainThreshold, T, numBins, dpHists, originalData, o
             dummyMarkerToSort.extend(originalDummyMarkers[i])
 
 
-          #  print(dpRoot)
+         #   print(dpRoot)
             bins = computeBin(dataToSort,dummyMarkerToSort,dpRoot)
             sorted_data = [k for _,k in sorted(zip(bins,dataToSort))]
             sorted_marker = [k for _,k in sorted(zip(bins,dummyMarkerToSort))]
             totalRecords = sum(dpRoot)
             dataToSortSize = len(dataToSort)
+            sizeDroppedDummy = dataToSortSize - dropDummy
             mainData[intervalRootDP] = sorted_data[0:totalRecords].copy()
-            leftCacheData = sorted_data[totalRecords:dataToSortSize].copy()
+            leftCacheData = sorted_data[totalRecords:sizeDroppedDummy].copy()
             mainDummyMarker[intervalRootDP] = sorted_marker[0:totalRecords].copy()
-            leftCacheDummyMarker = sorted_marker[totalRecords:dataToSortSize].copy()
+            leftCacheDummyMarker = sorted_marker[totalRecords:sizeDroppedDummy].copy()
             
             #runtime
             # 2m(n*#leafs) + O(n*#leafs  * (log(n*#leafs)  ^ 2))
             runtimeSortSize = 2*numBins*dataToSortSize + dataToSortSize*math.log(dataToSortSize, math.e)*math.log(dataToSortSize, math.e)
             runTimeDPSort[i] = round(runtimeSortSize)
-       #     print(mainData)
-       #     print(leftCacheData)
-       #     print(mainDummyMarker)
-       #     print(leftCacheDummyMarker)
+           # print(mainData)
+           # print(leftCacheData)
+          #  print(mainDummyMarker)
+          #  print(leftCacheDummyMarker)
         else:  # (sortOption == 2)
-        #    print(dpRoot)
+           # print(dpRoot)
             dataCache = leftCacheData.copy()
             dummyMarkerCache = leftCacheDummyMarker.copy()
             dataCache.extend(originalData[i])
@@ -338,22 +360,17 @@ def sortTree(sortOption, gapAgainThreshold, T, numBins, dpHists, originalData, o
             encodedRecordsFirst, encodedRecordsSecond = seperateD(dpMergedPrevious, dataMergedPrevious, d, numBins);
             dummyMarkerFirst, dummyMarkerSecond = seperateD(dpMergedPrevious, dummyMarkerMergedPrevious, d, numBins);
 
-            mainData[intervalRootDP] = []
-            mainDummyMarker[intervalRootDP] = []
-            runtimeSortSize = 0
+            encodedRecordsSecond.extend(dataCache)
+            dummyMarkerSecond.extend(dummyMarkerCache)
+            
+            sortDPdHist = [None]*numBins
             for j in range(numBins):
-                toSortMergedPrevious = encodedRecordsSecond[j].copy()
-                toSortMarkerMergedPrevious = dummyMarkerSecond[j].copy()
-                toSortMergedPrevious.extend(dataCache)
-                toSortMarkerMergedPrevious.extend(dummyMarkerCache)
-
                 # sort previous node for each bin and cache--> sorted for this bin + leftCache
               #  sizeSort = toSortMergedPrevious.size();
                 # compute the number of records we need to retrieve;  
                 # ??? what if the sum of n-d for all intervals is larger than dpRoot[j]? 
                 # d should be not too small!
                 sortDPd = dpRoot[j]
-                dataToSortSize = len(toSortMergedPrevious)
                 for k in range(int(len(intervalPrevious))):
                     leftAfterCutD = 0 if ((dpHists[intervalPrevious[k]][j] - d) < 0) else (dpHists[intervalPrevious[k]][j] - d);
                     sortDPd = sortDPd - leftAfterCutD
@@ -361,30 +378,42 @@ def sortTree(sortOption, gapAgainThreshold, T, numBins, dpHists, originalData, o
          #       print("sortDPd", sortDPd)
          #       print("toSortMergedPrevious", sorted(toSortMergedPrevious))
                 # sort 
-                bins = computeBinJ(toSortMergedPrevious, toSortMarkerMergedPrevious, sortDPd, j)
-                sorted_data = [k for _,k in sorted(zip(bins,toSortMergedPrevious))]
-                sorted_marker = [k for _,k in sorted(zip(bins,toSortMarkerMergedPrevious))]
+                sortDPdHist[j] = sortDPd
+           
+            bins = computeBin(encodedRecordsSecond, dummyMarkerSecond, sortDPdHist)
+            sorted_data = [k for _,k in sorted(zip(bins,encodedRecordsSecond))]
+            sorted_marker = [k for _,k in sorted(zip(bins,dummyMarkerSecond))]
+            
+            mainData[intervalRootDP] = []
+            mainDummyMarker[intervalRootDP] = []
+            
+            totalRecords = sum(sortDPdHist)
+            dataToSortSize = len(encodedRecordsSecond)
+            sizeDroppedDummy = dataToSortSize - dropDummy
+            
+            for j in range(numBins):
                 # n-d
                 mainData[intervalRootDP].extend(encodedRecordsFirst[j].copy())
                 mainDummyMarker[intervalRootDP].extend(dummyMarkerFirst[j].copy())
                 # sorted root d for this bin + left cache
-                mainData[intervalRootDP].extend(sorted_data[0:sortDPd].copy())
-                dataCache = sorted_data[sortDPd:dataToSortSize].copy()
-                mainDummyMarker[intervalRootDP].extend(sorted_marker[0:sortDPd].copy())
-                dummyMarkerCache = sorted_marker[sortDPd:dataToSortSize].copy()
+                seperatedBinsRecord = seperateBin(sorted_data[0:totalRecords], sortDPdHist)
+                seperatedBinsDummyMarker = seperateBin(sorted_marker[0:totalRecords], sortDPdHist)
                 
-                runtimeSortSize += 2*1*dataToSortSize + dataToSortSize*math.log(dataToSortSize, math.e)*math.log(dataToSortSize, math.e)
-
-          #      print("dataCache", dataCache)
-
-            leftCacheData = dataCache.copy()
-            leftCacheDummyMarker = dummyMarkerCache.copy()
+                mainData[intervalRootDP].extend(seperatedBinsRecord[j].copy())
+                mainDummyMarker[intervalRootDP].extend(seperatedBinsDummyMarker[j].copy())
             
+            leftCacheData = sorted_data[totalRecords:sizeDroppedDummy].copy()
+            leftCacheDummyMarker = sorted_marker[totalRecords:sizeDroppedDummy].copy()
+            #runtime
+            # 2m(n*#leafs) + O(n*#leafs  * (log(n*#leafs)  ^ 2))
+            runtimeSortSize = 2*numBins*dataToSortSize + dataToSortSize*math.log(dataToSortSize, math.e)*math.log(dataToSortSize, math.e)
             runTimeDPSort[i] = round(runtimeSortSize)
-       #     print(mainData)
-       #     print(leftCacheData)
-       #     print(mainDummyMarker)
-       #     print(leftCacheDummyMarker)
+            
+          #      print("dataCache", dataCache)
+         #   print(mainData)
+         #   print(leftCacheData)
+         #   print(mainDummyMarker)
+         #   print(leftCacheDummyMarker)
 
         for interval in intervalPrevious:
             mainData.pop(interval, None)
@@ -400,8 +429,6 @@ def sortTree(sortOption, gapAgainThreshold, T, numBins, dpHists, originalData, o
         
     return trueRecordNum, runTimeDPSort, dummyRecordNumCache
         
-
-
 # step2: dpHistGen for the root of the subtree
 def DPTimeLeaf(T, trueHists, eps, numBins):
     dpHists = {}
@@ -415,7 +442,6 @@ def DPTimeLeaf(T, trueHists, eps, numBins):
     #print(trueHists)
     #print(dpHists)
     #print(inconsistDPHists) 
-
 
 def sortLeaf(T, numBins, dpHists, originalData, originalDummyMarkers):
     leftCacheData = []
@@ -462,168 +488,3 @@ def sortLeaf(T, numBins, dpHists, originalData, originalDummyMarkers):
 
     return trueRecordNum, runTimeDPSort, dummyRecordNumCache
 
-
-
-def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
-    df = readData('nycTaxiData_payment_type.csv')
-    numBins = 4
-    p = 0.05
-    t = math.log((1/p), math.e)
-    if treeorLeaf == "tree":
-        #tree 
-        level = math.log(T, 2)
-        eps = epsAll/level  
-        numDummy = math.ceil((1/eps) * t) * numBins
-        originalData, originalDummyMarkers, trueHists = originalDataMarkerHists(T, numReal, numDummy, numBins, df)
-        dpHists = DPTimeTree(T, trueHists, eps, numBins)
-        gapAgainThreshold = 1 
-#        trueRecordNum, runTimeDPSort, dummyRecordNumCache = sortTree(sortOption, gapAgainThreshold, T, numBins, dpHists, originalData, originalDummyMarkers, eps) # original?
-        #print(trueRecordNum)
-
-    else:
-        #leaf
-        eps = epsAll
-        numDummy = math.ceil((1/eps) * t) * numBins
-        originalData, originalDummyMarkers, trueHists = originalDataMarkerHists(T, numReal, numDummy, numBins, df)
-
-        dpHistsLeaf = DPTimeLeaf(T, trueHists, eps, numBins)
- #       trueRecordNum, runTimeDPSort, dummyRecordNumCache = sortLeaf(T, numBins, dpHistsLeaf, originalData, originalDummyMarkers)
-
-    DPCount = [None]*T
-    trueCount = [None]*T
-    for i in range(T):
-        if (treeorLeaf=="tree"):
-            intervalss = intervalRangeQ(i) 
-            DPI = np.array([0]*numBins)
-            for interval in intervalss:
-                DPI += dpHists[interval]
-            DPCount[i] = DPI
-        else:
-            DPI = np.array([0]*numBins)
-            for j in range(i+1):
-                DPI += dpHistsLeaf[str(j)+','+str(j)]
-            DPCount[i] = DPI
-
-        trueI = np.array([0]*numBins)
-        for j in range(i+1):
-            trueI += trueHists[j]
-        trueCount[i] = trueI
-    
-   # print("DPCount: ", DPCount)
- #   print("trueCount: ", trueCount)
- #   print("trueRecordNum: ", trueRecordNum)
-    
-    metricDPError = np.sum(np.abs(np.array(DPCount) - np.array(trueCount)), axis =1)
-  #  metricDPStoreError = np.sum(np.abs(np.array(DPCount) - np.array(trueRecordNum)), axis =1)
-  #  metricTTStoreError = np.sum(np.abs(np.array(trueCount) - np.array(trueRecordNum)), axis =1)
-    
-    return metricDPError#, metricDPStoreError, metricTTStoreError, runTimeDPSort, dummyRecordNumCache
-
-
-
-def run_all(T_list, epsAll_list, numReal_list, runNum):
-    for T in T_list:
-        for epsAll in epsAll_list:
-            for numReal in numReal_list:
-                start_time = time.time()
-                list_metricDPError_leaf = [None]*runNum
-              #  list_metricDPStoreError_leaf = [None]*runNum
-             #   list_metricTTStoreError_leaf = [None]*runNum
-             #   list_runTimeDPSort_leaf = [None]*runNum
-              #  list_dummyRecordNumCache_leaf = [None]*runNum
-                for i in range(runNum):
-                    print("leaf -- T: "+str(T)+"; epsAll: "+str(epsAll)+"; N: "+str(numReal)+"; run: "+str(i))
-                    metricDPError_leaf = metrics("leaf", T, epsAll, numReal, None)
-                    leaf_end_time = time.time()
-                    list_metricDPError_leaf[i] = metricDPError_leaf
-                  #  list_metricDPStoreError_leaf[i] = metricDPStoreError_leaf
-                  #  list_metricTTStoreError_leaf[i] = metricTTStoreError_leaf
-                  #  list_runTimeDPSort_leaf[i] = runTimeDPSort_leaf
-                  #  list_dummyRecordNumCache_leaf[i] = dummyRecordNumCache_leaf
-                print("leaf***************")
-                print("--- %s seconds ---" % (leaf_end_time - start_time))
-
-                mean_metricDPError_leaf = np.round(np.mean(list_metricDPError_leaf, axis = 0))
-              #  mean_metricDPStoreError_leaf = np.round(np.mean(list_metricDPStoreError_leaf, axis = 0))
-              #  mean_metricTTStoreError_leaf = np.round(np.mean(list_metricTTStoreError_leaf, axis = 0))
-              #  mean_runTimeDPSort_leaf = np.round(np.mean(list_runTimeDPSort_leaf, axis = 0))
-              #  mean_dummyRecordNumCache_leaf = np.round(np.mean(list_dummyRecordNumCache_leaf, axis = 0))
-
-
-
-                list_metricDPError_treeD = [None]*runNum
-             #   list_metricDPStoreError_treeD = [None]*runNum
-             #   list_metricTTStoreError_treeD = [None]*runNum
-             #   list_runTimeDPSort_treeD = [None]*runNum
-             #   list_dummyRecordNumCache_treeD = [None]*runNum
-                for i in range(runNum):
-                    print("treeD -- T: "+str(T)+"; epsAll: "+str(epsAll)+"; N: "+str(numReal)+"; run: "+str(i))
-                    metricDPError_treeD = metrics("tree", T, epsAll, numReal, 2)
-                    treeD_end_time = time.time()
-                    list_metricDPError_treeD[i] = metricDPError_treeD
-                 #   list_metricDPStoreError_treeD[i] = metricDPStoreError_treeD
-                 #   list_metricTTStoreError_treeD[i] = metricTTStoreError_treeD
-                 #   list_runTimeDPSort_treeD[i] = runTimeDPSort_treeD
-                 #   list_dummyRecordNumCache_treeD[i] = dummyRecordNumCache_treeD
-                print("treeD***************")
-                print("--- %s seconds ---" % (treeD_end_time - start_time))
-                mean_metricDPError_treeD = np.round(np.mean(list_metricDPError_treeD, axis = 0))
-             #   mean_metricDPStoreError_treeD = np.round(np.mean(list_metricDPStoreError_treeD, axis = 0))
-             #   mean_metricTTStoreError_treeD = np.round(np.mean(list_metricTTStoreError_treeD, axis = 0))
-             #   mean_runTimeDPSort_treeD = np.round(np.mean(list_runTimeDPSort_treeD, axis = 0))
-             #   mean_dummyRecordNumCache_treeD = np.round(np.mean(list_dummyRecordNumCache_treeD, axis = 0))
-
-
-                list_metricDPError_treeA = [None]*runNum
-              #  list_metricDPStoreError_treeA = [None]*runNum
-              #  list_metricTTStoreError_treeA = [None]*runNum
-              #  list_runTimeDPSort_treeA = [None]*runNum
-              #  list_dummyRecordNumCache_treeA = [None]*runNum
-                for i in range(runNum):
-                    print("treeA -- T: "+str(T)+"; epsAll: "+str(epsAll)+"; N: "+str(numReal)+"; run: "+str(i))
-                    metricDPError_treeA = metrics("tree", T, epsAll, numReal, 0)
-                    treeA_end_time = time.time()
-                    list_metricDPError_treeA[i] = metricDPError_treeA
-                #    list_metricDPStoreError_treeA[i] = metricDPStoreError_treeA
-                #    list_metricTTStoreError_treeA[i] = metricTTStoreError_treeA
-                #    list_runTimeDPSort_treeA[i] = runTimeDPSort_treeA
-                #    list_dummyRecordNumCache_treeA[i] = dummyRecordNumCache_treeA
-                print("treeA***************")
-                print("--- %s seconds ---" % (treeA_end_time - start_time))
-                mean_metricDPError_treeA = np.round(np.mean(list_metricDPError_treeA, axis = 0))
-              #  mean_metricDPStoreError_treeA = np.round(np.mean(list_metricDPStoreError_treeA, axis = 0))
-              #  mean_metricTTStoreError_treeA = np.round(np.mean(list_metricTTStoreError_treeA, axis = 0))
-              #  mean_runTimeDPSort_treeA = np.round(np.mean(list_runTimeDPSort_treeA, axis = 0))
-              #  mean_dummyRecordNumCache_treeA = np.round(np.mean(list_dummyRecordNumCache_treeA, axis = 0))
-
-
-                fileName = "newResultsPY/DP-T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
-
-                with open(fileName, 'w') as f:
-                    entry = {}
-                    entry['list_metricDPError_leaf'] = mean_metricDPError_leaf.tolist()
-               #     entry['list_metricDPStoreError_leaf'] = mean_metricDPStoreError_leaf.tolist()
-               #     entry['list_metricTTStoreError_leaf'] = mean_metricTTStoreError_leaf.tolist()
-               #     entry['list_runTimeDPSort_leaf'] = mean_runTimeDPSort_leaf.tolist()
-               #     entry['list_dummyRecordNumCache_leaf'] = mean_dummyRecordNumCache_leaf.tolist()
-
-                    entry['list_metricDPError_treeA'] = mean_metricDPError_treeA.tolist()
-               #     entry['list_metricDPStoreError_treeA'] = mean_metricDPStoreError_treeA.tolist()
-               #     entry['list_metricTTStoreError_treeA'] = mean_metricTTStoreError_treeA.tolist()
-               #     entry['list_runTimeDPSort_treeA'] = mean_runTimeDPSort_treeA.tolist()
-               #     entry['list_dummyRecordNumCache_treeA'] = mean_dummyRecordNumCache_treeA.tolist()
-
-                    entry['list_metricDPError_treeD'] = mean_metricDPError_treeD.tolist()
-               #     entry['list_metricDPStoreError_treeD'] = mean_metricDPStoreError_treeD.tolist()
-               #     entry['list_metricTTStoreError_treeD'] = mean_metricTTStoreError_treeD.tolist()
-               #     entry['list_runTimeDPSort_treeD'] = mean_runTimeDPSort_treeD.tolist()
-               #     entry['list_dummyRecordNumCache_treeD'] = mean_dummyRecordNumCache_treeD.tolist()
-                    json.dump(entry, f, ensure_ascii=False)
-
-
-T_list = [10000]
-epsAll_list = [10, 1, 0.1]
-numReal_list = [100, 1000, 10000]
-runNum = 3
-
-run_all(T_list, epsAll_list, numReal_list, runNum)

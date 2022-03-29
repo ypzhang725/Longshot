@@ -25,7 +25,7 @@ double uniformGen(){
 std::vector<int> lapGenVector(int binNum, double beta){
     std::vector<int> res(binNum, 0);
     for(int i = 0; i < binNum; ++i) {
-        res[i] = int(lapGen(beta));
+        res[i] = round(lapGen(beta));
     }
     return res;
 }

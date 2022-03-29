@@ -85,9 +85,9 @@ std::vector<int> computeTrueRecords(std::vector<int> dpHist, std::vector<int> dp
   return trueR;
 }
 
-std::pair<std::vector<std::vector<int> >, std::vector<std::vector<int> > > seperateD(std::vector<std::vector<int> > dpMergedPrevious, std::vector<std::vector<int> > dataMergedPrevious, int d, int bins){
+std::pair<std::vector<std::vector<int> >, std::vector<int> > seperateD(std::vector<std::vector<int> > dpMergedPrevious, std::vector<std::vector<int> > dataMergedPrevious, int d, int bins){
   std::vector<std::vector<int> > vectFirst(bins);
-  std::vector<std::vector<int> > vectSecond(bins); 
+  std::vector<int> vectSecond; 
   int intervals = dpMergedPrevious.size();
 
   // preprocess preefix --> cut last bin if no enough records 
@@ -105,17 +105,30 @@ std::pair<std::vector<std::vector<int> >, std::vector<std::vector<int> > > seper
 
   for (int i = 0; i < bins; i++){  // for each bin 
     std::vector<int> first;
-    std::vector<int> second;
     for (int j = 0; j < intervals; j++){  // for each interval
       std::vector<int> begining = slicing(dataMergedPrevious[j], dpHistPrefixIntrevals[j][i], dpHistPrefixIntrevals[j][i+1] - d - 1);
       int left = (dpHistPrefixIntrevals[j][i] < dpHistPrefixIntrevals[j][i+1] - d) ? dpHistPrefixIntrevals[j][i+1] - d: dpHistPrefixIntrevals[j][i];
       std::vector<int> ending = slicing(dataMergedPrevious[j], left, dpHistPrefixIntrevals[j][i+1] - 1);
       first.insert(first.end(), begining.begin(), begining.end());  // the first n-d
-      second.insert(second.end(), ending.begin(), ending.end());   // the last d 
+      vectSecond.insert(vectSecond.end(), ending.begin(), ending.end());   // the last d 
     }
     vectFirst[i] = first;
-    vectSecond[i] = second;
   }  
 
   return std::make_pair(vectFirst, vectSecond);
+}
+
+std::vector<std::vector<int> > seperateBin(std::vector<int> seperatedRecord, std::vector<int> sortDPdHist){
+  int numBin = sortDPdHist.size();
+  std::vector<int> sortDPdPrefix_tmp = computePrefix(sortDPdHist);
+  std::vector<int> sortDPdPrefix(numBin+1, 0); 
+  for (int j = 0; j < numBin; j++) {
+    sortDPdPrefix[j+1] = sortDPdPrefix_tmp[j];
+  }
+  std::vector<std::vector<int> > seperatedBin(numBin);
+  for (int j = 0; j < numBin; j++) {
+    std::vector<int> toSortMergedPrevious = slicing(seperatedRecord, sortDPdPrefix[j], sortDPdPrefix[j+1] - 1);
+    seperatedBin[j] = toSortMergedPrevious;
+  }
+  return seperatedBin;
 }

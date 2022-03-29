@@ -142,7 +142,7 @@ std::vector<int> enforceConsistencyH(std::vector<std::vector<int> > dpNodes, int
       succ = consist;
     }
     
-    int dpConsistent = int(consist[0]);  //here double to int 124 -> 123
+    int dpConsistent = round(consist[0]);  //here double to int 124 -> 123
    // cout << "dpConsistent int: " << dpConsistent <<"," << endl;
    // cout << "dpConsistent double: " << consist[0] <<"," << endl;;
     dp[i] = dpConsistent;
