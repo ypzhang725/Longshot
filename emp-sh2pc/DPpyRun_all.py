@@ -50,7 +50,9 @@ def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
  #   print("trueCount: ", trueCount)
  #   print("trueRecordNum: ", trueRecordNum)
     
-    metricDPError = np.sum(np.abs(np.array(DPCount) - np.array(trueCount)), axis =1)
+   # metricDPError = np.sum(np.abs(np.array(DPCount) - np.array(trueCount)), axis =1)
+    metricDPError = np.sum(pow(np.array(DPCount) - np.array(trueCount), 2), axis =1)
+
   #  metricDPStoreError = np.sum(np.abs(np.array(DPCount) - np.array(trueRecordNum)), axis =1)
   #  metricTTStoreError = np.sum(np.abs(np.array(trueCount) - np.array(trueRecordNum)), axis =1)
     
@@ -164,9 +166,9 @@ epsAll_list = [10, 1, 0.1]
 numReal_list = [100, 1000, 10000]
 runNum = 3
 '''
-T_list = [10]
+T_list = [1000]
 epsAll_list = [1]
-numReal_list = [10000]
-runNum = 3
+numReal_list = [100]
+runNum = 20
 
 run_all(T_list, epsAll_list, numReal_list, runNum)
