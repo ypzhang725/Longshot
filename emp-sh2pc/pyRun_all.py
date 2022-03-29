@@ -161,15 +161,15 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
                     entry['list_dummyRecordNumCache_treeD'] = mean_dummyRecordNumCache_treeD.tolist()
                     json.dump(entry, f, ensure_ascii=False)
 
-'''
-T_list = [10000]
+
+T_list = [1000, 10000]
 epsAll_list = [10, 1, 0.1]
 numReal_list = [100, 1000, 10000]
-runNum = 3
+runNum = 10
 '''
 T_list = [1000]
 epsAll_list = [1]
 numReal_list = [1000]
 runNum = 10
-
+'''
 run_all(T_list, epsAll_list, numReal_list, runNum)

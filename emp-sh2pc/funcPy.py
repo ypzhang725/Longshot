@@ -8,7 +8,7 @@ def readData(fileName):
     df = pd.read_csv(fileName)   # [1271413 rows x 1 columns]
     df = df.to_numpy().flatten()
     df = df.tolist()
-    for i in range(3):
+    for i in range(4):
         df.extend(df)
     return df
     
