@@ -11,17 +11,16 @@ def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
         level = math.log(T, 2)
         eps = epsAll/level  
         numDummy = math.ceil((1/eps) * t) * numBins
-        originalData, originalDummyMarkers, trueHists = originalDataMarkerHists(treeorLeaf, T, numReal, numDummy, numBins, df)
+        originalData, originalDummyMarkers, trueHists = originalDataMarkerHistsTree(T, numReal, numDummy, numBins, df)
         dpHists = DPTimeTree(T, trueHists, eps, numBins)
         gapAgainThreshold = 1 
-        trueRecordNum, runTimeDPSort, dummyRecordNumCache = sortTree(numDummy, sortOption, gapAgainThreshold, T, numBins, dpHists, originalData, originalDummyMarkers, eps) # original
+        trueRecordNum, runTimeDPSort, dummyRecordNumCache = sortTree(numDummy, sortOption, gapAgainThreshold, T, numBins, dpHists, originalData, originalDummyMarkers, eps) # original?
         #print(trueRecordNum)
 
     else:
         #leaf
         eps = epsAll
-        numDummy = math.ceil((1/eps) * t) * numBins
-        originalData, originalDummyMarkers, trueHists = originalDataMarkerHists(treeorLeaf, T, numReal, numDummy, numBins, df)
+        originalData, originalDummyMarkers, trueHists = originalDataMarkerHistsLeaf(p, eps, T, numReal, numBins, df)
         dpHistsLeaf = DPTimeLeaf(T, trueHists, eps, numBins)
         trueRecordNum, runTimeDPSort, dummyRecordNumCache = sortLeaf(T, numBins, dpHistsLeaf, originalData, originalDummyMarkers)
 
@@ -138,7 +137,7 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
                 mean_dummyRecordNumCache_treeA = np.round(np.mean(list_dummyRecordNumCache_treeA, axis = 0))
 
 
-                fileName = "newResultsPY/T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
+                fileName = "newnewResultsPY/T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
 
                 with open(fileName, 'w') as f:
                     entry = {}
@@ -165,7 +164,7 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
 T_list = [1000, 10000]
 epsAll_list = [10, 1, 0.1]
 numReal_list = [100, 1000, 10000]
-runNum = 10
+runNum = 5
 '''
 T_list = [1000]
 epsAll_list = [1]

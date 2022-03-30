@@ -153,15 +153,14 @@ def seperateBin(sorted_data, sortDPdHist):
 
 
 # for each time unit, insert real and dummy records, and compute true histogram
-def originalDataMarkerHists(treeorLeaf, T, numReal, num_Dummy, numBins, df):
+def originalDataMarkerHistsTree(T, numReal, num_Dummy, numBins, df):
     originalData = {}
     originalDummyMarkers = {}
     trueHists = [None] * T
     for i in range(T):
         numDummy = num_Dummy
-        if (treeorLeaf == "tree"):
-            if (i%2 == 1):
-                numDummy = 0
+        if (i%2 == 1):
+            numDummy = 0
         # for originalData
         records = [None] * (numReal+numDummy)
         records[0: numReal] = df[i*numReal: (i+1)*numReal].copy()
@@ -179,7 +178,40 @@ def originalDataMarkerHists(treeorLeaf, T, numReal, num_Dummy, numBins, df):
  #   print(originalDummyMarkers)
  #   print(trueHists)
     return originalData, originalDummyMarkers, trueHists
-    
+
+def originalDataMarkerHistsLeaf(p, eps, T, numReal, numBins, df):
+    originalData = {}
+    originalDummyMarkers = {}
+    trueHists = [None] * T
+    dummy_leaf = 0
+    t_ = math.log((1/p), math.e)
+    b = 1/eps
+    for i in range(T):
+        a = 2*b*math.sqrt((i+1)*math.log((1/p), math.e))
+        if (a > i*b):
+            numDummy = math.ceil((1/eps) * t_) * numBins
+        else:
+            numDummy = round(a*numBins-dummy_leaf) if round(a*numBins-dummy_leaf) >= 0 else 0 
+        dummy_leaf += numDummy
+        
+        # for originalData
+        records = [None] * (numReal+numDummy)
+        records[0: numReal] = df[i*numReal: (i+1)*numReal].copy()
+        records[numReal: numReal+numDummy] = [10] * numDummy #todo change mpc code
+        originalData[i] = records
+        # for originalDummyMarker
+        DummyMarker = [None] * (numReal+numDummy)
+        DummyMarker[0: numReal] = [1] * numReal
+        DummyMarker[numReal: numReal+numDummy] = [2] * numDummy #todo change mpc code
+        originalDummyMarkers[i] = DummyMarker
+        # compute trueHists
+        counts, bins = np.histogram(records, bins=np.arange(1,numBins+2)) #[1,2,3,4,5] -> 4bins
+        trueHists[i] = counts 
+ #   print(originalData)
+ #   print(originalDummyMarkers)
+ #   print(trueHists)
+    return originalData, originalDummyMarkers, trueHists
+ 
     
 def computeTrueRecords(dpHist, dpStore):
     binNum = len(dpHist)
