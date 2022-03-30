@@ -85,16 +85,32 @@ int main(int argc, char** argv) {
   string fileNameOutIndex = argv[7]; // out
   string fileNameOut = "./results2/leaf"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << " out:" << fileNameOutIndex << endl;
-
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
   std::vector<std::vector<int> > originalData(t);  // encoded real + dummy 
   std::vector<std::vector<int> > originalDataEncodedNot(t);  // not encoded real + dummy
   std::vector<std::vector<int> > originalDummyMarkers(t);  // dummy markers for real + dummy
+  int dummy_leaf = 0;
+  double b = 1 / eps;
+  double p = 0.01;
+  double tt = log((1/p));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
   for (int i = 0; i < t; i++) { 
     std::vector<int> v_originalData(vect.begin() + (i*num_real), vect.begin() + ((i+1)*num_real)); // original real data
     std::vector<int> v_originalDataEncoded;  // encoded 
-    std::vector<int> v_originalDummyMarkers;
+    std::vector<int> v_originalDummyMarkers;    
+
+    int num_dummy = 0;      // redefine
+    int a = round(2 * b * sqrt((i + 1) * tt));
+    if (a > i * b){
+        num_dummy = bins * round(b * tt);
+    } else{
+      if (round(a * bins - dummy_leaf) >= 0){
+        num_dummy = round(a * bins - dummy_leaf);
+      } 
+    } 
+    dummy_leaf += num_dummy;
+  //  cout << "dummy_leaf: " << dummy_leaf << "  num_dummy: " << num_dummy<< endl;
+
     int size = num_real + num_dummy;  // real + dummy
     std::vector<int> randomVect = uniformGenVector(size);
 

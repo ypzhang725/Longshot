@@ -187,9 +187,9 @@ def originalDataMarkerHistsLeaf(p, eps, T, numReal, numBins, df):
     t_ = math.log((1/p), math.e)
     b = 1/eps
     for i in range(T):
-        a = 2*b*math.sqrt((i+1)*math.log((1/p), math.e))
+        a = round(2*b*math.sqrt((i+1)*math.log((1/p), math.e)))
         if (a > i*b):
-            numDummy = math.ceil((1/eps) * t_) * numBins
+            numDummy = round((1/eps) * t_) * numBins
         else:
             numDummy = round(a*numBins-dummy_leaf) if round(a*numBins-dummy_leaf) >= 0 else 0 
         dummy_leaf += numDummy
