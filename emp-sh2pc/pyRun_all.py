@@ -4,7 +4,7 @@ from funcPy import *
 def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
     df = readData('nycTaxiData_payment_type.csv')
     numBins = 4
-    p = 0.05
+    p = 0.01
     t = math.log((1/p), math.e)
     if treeorLeaf == "tree":
         #tree 
@@ -19,6 +19,7 @@ def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
 
     else:
         #leaf
+        p = 0.001
         eps = epsAll
         originalData, originalDummyMarkers, trueHists = originalDataMarkerHistsLeaf(p, eps, T, numReal, numBins, df)
         dpHistsLeaf = DPTimeLeaf(T, trueHists, eps, numBins)
