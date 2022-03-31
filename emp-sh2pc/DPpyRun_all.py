@@ -2,7 +2,8 @@ import sys; sys.path.insert(0, '.')
 from funcPy import *
 
 def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
-    df = readData('nycTaxiData_payment_type.csv')
+#    df = readData('nycTaxiData_payment_type.csv')
+    df = readData('bin4.csv')     
     numBins = 4
     p = 0.05
     t = math.log((1/p), math.e)
@@ -134,7 +135,7 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
               #  mean_dummyRecordNumCache_treeA = np.round(np.mean(list_dummyRecordNumCache_treeA, axis = 0))
 
 
-                fileName = "newnewResultsPY/DP-T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
+                fileName = "bin4newnewResultsPY/DP-T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
 
                 with open(fileName, 'w') as f:
                     entry = {}
@@ -164,9 +165,9 @@ epsAll_list = [10, 1, 0.1]
 numReal_list = [100, 1000, 10000]
 runNum = 10
 '''
-T_list = [1000]
+T_list = [10000]
 epsAll_list = [1]
-numReal_list = [100]
-runNum = 20
+numReal_list = [10000]
+runNum = 1
 '''
 run_all(T_list, epsAll_list, numReal_list, runNum)
