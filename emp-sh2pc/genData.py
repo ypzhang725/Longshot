@@ -9,4 +9,4 @@ dict = {'payment_type': scr}
 df = pd.DataFrame(dict) 
     
 # saving the dataframe 
-df.to_csv('bin4.csv') 
+df.to_csv('bin4.csv', index=False) 
