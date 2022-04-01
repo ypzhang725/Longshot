@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = false; 
+  bool constantDP = true; 
   // print 
   bool debugPrint = false;
   // privacy budget
@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
   std::vector<double> metricDPError(t);  // |DP count - true count|
   std::vector<double> metricDPStoreError(t);  // |DP count - true record|
   std::vector<double> metricTTStoreError(t);  // |true count - true record|
-
+  std::vector<double> metricss(t);
   // secure part 
   std::vector<int> mainData(t);
   std::vector<int> mainDataEncodedNot(t);
@@ -205,8 +205,12 @@ int main(int argc, char** argv) {
       leftCacheDummyMarker.insert(leftCacheDummyMarker.end(), originalDummyMarkers[i].begin(), originalDummyMarkers[i].end());
       int sizeCache = leftCacheData.size();
       std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
+      auto ssBefore = high_resolution_clock::now();
       std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins);
-
+      auto ssAfter = high_resolution_clock::now();
+      auto durationss = duration_cast<microseconds>(ssAfter - ssBefore);
+      metricss[i] = durationss.count();
+      cout << "ss" << durationss.count() << " num: "<< leftCacheData.size()<<endl;  
       // total DP count = #records we want to retrieve --> sorted cache + left cache 
       int totalRecords = accumulate(dpHists[i].begin(), dpHists[i].end(), 0);
       std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords, 0);

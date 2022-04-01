@@ -1,0 +1,7 @@
+********************************************************************* 
+metricRunTimeDP: 124, 156, 125, 109, 81, 125, 108, 105, 115, 108
+metricRunTimeDPSort: 3, 3, 3, 3, 4, 4, 4, 4, 4, 4
+metricRunTimeDPMerge: 9, 17, 26, 36, 30, 43, 52, 52, 63, 73
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
