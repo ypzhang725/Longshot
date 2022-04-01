@@ -19,7 +19,7 @@ def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
 
     else:
         #leaf
-        p = 0.001
+        p = 0.0001
         eps = epsAll
         originalData, originalDummyMarkers, trueHists = originalDataMarkerHistsLeaf(p, eps, T, numReal, numBins, df)
         dpHistsLeaf = DPTimeLeaf(T, trueHists, eps, numBins)
@@ -163,7 +163,7 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
 
 
 T_list = [1000, 10000]
-epsAll_list = [10, 1, 0.1]
+epsAll_list = [0.1]
 numReal_list = [100, 1000, 10000]
 runNum = 5
 '''
