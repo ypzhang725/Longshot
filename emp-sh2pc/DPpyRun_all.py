@@ -3,8 +3,8 @@ from funcPy import *
 
 def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
 #    df = readData('nycTaxiData_payment_type.csv')
-    df = readData('bin4.csv')     
-    numBins = 4
+    df = readData('bin1.csv')     
+    numBins = 1
     p = 0.05
     t = math.log((1/p), math.e)
     if treeorLeaf == "tree":
@@ -135,7 +135,7 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
               #  mean_dummyRecordNumCache_treeA = np.round(np.mean(list_dummyRecordNumCache_treeA, axis = 0))
 
 
-                fileName = "bin4newnewResultsPY/DP-T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
+                fileName = "bin1newnewResultsPY/DP-T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
 
                 with open(fileName, 'w') as f:
                     entry = {}
@@ -165,9 +165,9 @@ epsAll_list = [10, 1, 0.1]
 numReal_list = [100, 1000, 10000]
 runNum = 10
 '''
-T_list = [10000]
+T_list = [1000]
 epsAll_list = [1]
-numReal_list = [10000]
+numReal_list = [1000]
 runNum = 1
 '''
 run_all(T_list, epsAll_list, numReal_list, runNum)
