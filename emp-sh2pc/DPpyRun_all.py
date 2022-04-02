@@ -167,7 +167,7 @@ runNum = 10
 '''
 T_list = [1000]
 epsAll_list = [1, 0.1]
-numReal_list = [100, 1000]
+numReal_list = [10000]
 runNum = 100
 
 run_all(T_list, epsAll_list, numReal_list, runNum)
