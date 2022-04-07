@@ -3,7 +3,7 @@ from funcPy import *
 
 def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
     df = readData('bin4.csv')
-    numBins = 1
+    numBins = 4
     p = 0.01
     t = math.log((1/p), math.e)
     if treeorLeaf == "tree":
