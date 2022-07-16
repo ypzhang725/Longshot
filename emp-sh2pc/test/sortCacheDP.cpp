@@ -303,4 +303,59 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortBinDP(int 
   }
 }
 
+std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortOneBinDP(int party, std::vector<int> encodedData, std::vector<int> dummyMarker, std::vector<int> notEncodedData, std::vector<int> markers, int dpCount, int size) {
+ // cout<< "secret shares" << ' ';
+ // printArrayPlaintext(encodedData);
 
+  // reconstruct random     
+  std::vector<int> randomVect_res = uniformGenVector(size);                                                            
+  Integer *sh1_res = reconstructArray(randomVect_res);
+  std::vector<int> randomVect_res_d = uniformGenVector(size);                                                            
+  Integer *sh1_res_d = reconstructArray(randomVect_res_d);
+  std::vector<int> randomVect_res_NotEn = uniformGenVector(size);                                                            
+  Integer *sh1_res_NotEn = reconstructArray(randomVect_res_NotEn);
+
+  // reconstruct original data                                                                      
+  Integer *res = reconstructArray(encodedData);
+  // reconstruct dummy mark                                                                         
+  Integer *res_d = reconstructArray(dummyMarker);
+  // reconstruct original data not encoded     
+  Integer *res_NotEn = reconstructArray(notEncodedData);
+  // tag the records for this binNum as 0, otherwise as 1
+  Integer *res_b = reconstructArray(markers);
+
+  Integer * res_b_copy = copyArray(res_b, size);
+  Integer * res_b_copy2 = copyArray(res_b, size);
+  Integer * res_b_copy3 = copyArray(res_b, size);
+
+  sort(res_b_copy, size, res);
+  sort(res_b_copy2, size, res_d);
+  sort(res_b_copy3, size, res_NotEn);
+
+  /*cout << "after sort" << ' ';
+  cout << "original records" << ' ';
+  printArray(res, size);
+  cout << "dummy marker" << ' ';
+  printArray(res_d, size);
+  cout << "assigned bin" << ' ';
+  printArray(res_b_copy, size);*/
+
+  // generate secret shares      
+  Integer *sh2_res = generateSh2(sh1_res, res, size);
+  Integer *sh2_res_d = generateSh2(sh1_res_d, res_d, size);
+  Integer *sh2_res_NotEn = generateSh2(sh1_res_NotEn, res_NotEn, size);
+
+  std::vector<int> A_reveal = revealSh(sh1_res, size, ALICE);
+  std::vector<int> B_reveal = revealSh(sh2_res, size, BOB);
+  std::vector<int> D_A_reveal = revealSh(sh1_res_d, size, ALICE);
+  std::vector<int> D_B_reveal = revealSh(sh2_res_d, size, BOB);
+  std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
+  std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
+
+  if (party == ALICE) {
+    return std::make_tuple(A_reveal, D_A_reveal, A_reveal_notEn);
+  }
+  else {
+    return std::make_tuple(B_reveal, D_B_reveal, B_reveal_notEn);
+  }
+}

@@ -136,6 +136,46 @@ std::vector<int> trueHistGen(int party, std::vector<int> number, std::vector<int
   }
 }
 
+// number: original data; number2: dummy mark; number3: random number;
+std::pair<int, std::vector<int>>  computeDPCountMark(int party, std::vector<int> number, std::vector<int> number2, std::vector<int> number3, std::vector<int> bins, std::vector<int> noise){
+  // reconstruct original data
+  int size = number.size();
+  int binSize = bins.size();
+  Integer *res = reconstructArray(number);
+  // reconstruct dummy mark
+  Integer *res_d = reconstructArray(number2);
+  Integer count(32, 1, BOB);
+  Integer zero(32, 0, BOB);
+  Integer one(32, 1, BOB);
+
+  for(int i = 0; i < size; ++i){
+    Integer bin_num = res[i] - one;     // warning 
+    Bit eq_bin(false, BOB);                  
+    for(int j = 0; j < binSize; ++j){     // bins 
+      Bit eq = bin_num == Integer(32, bins[j], BOB);   // whether it is equal to the bin value 
+      eq_bin = eq_bin | eq;   
+    }                      
+    count = If(eq_bin, count + one, count);  
+    res_d[i] = If(eq_bin, zero, res_d[i]);  
+  }
+  // add noise
+  Integer *res_lap = addedNoise(noise);
+  count = count + res_lap;
+  int count_pub = count.reveal<int32_t>();
+  // return dummy records 
+  Integer *sh1 = reconstructArray(number3);  // reconstruct random number
+  Integer *sh2 = generateSh2(sh1, res_d, size);  // generate secret shares      
+  std::vector<int> realSh1 = revealSh(sh1, size, ALICE);
+  std::vector<int> realSh2 = revealSh(sh2, size, BOB);
+
+  if (party == ALICE) {
+    return std::make_pair(count_pub, realSh1); 
+  }
+  else {
+    return std::make_pair(count_pub, realSh2); 
+  }
+}
+
 // for debug
 std::vector<int> computeTrueNumber(std::vector<std::vector<int> > number, int bins){
   std::vector<int> res_num(bins, 0);
