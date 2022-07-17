@@ -1,0 +1,49 @@
+********************************************************************* 
+metricRunTimeDP: 4, 2, 2, 2, 2, 2, 2, 3
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 10, 12, 11, 13, 15, 12, 15, 15
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPError: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0

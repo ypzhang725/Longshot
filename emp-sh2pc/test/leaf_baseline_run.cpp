@@ -17,6 +17,47 @@ using namespace std::chrono;
 using namespace emp;
 using namespace std;
 
+
+std::tuple<std::vector<int>, std::vector<int>, std::vector<int>, int>  processQuery(std::vector<int> resultBins, bool debugPrint, double eps, bool constantDP, int party, std::vector<int> originalData, std::vector<int> originalDummyMarkers, std::vector<int> originalDataEncodedNot) {
+  // step1: compute DP count and mark records 
+  int size = originalData.size(); 
+  std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
+  if (constantDP) { 
+    std::vector<int> lapVect_(1, 0);
+    // std::vector<int> lapVect_(bins, 1);
+    lapVect = lapVect_;
+  } else {
+    lapVect = lapGenVector(1, 1 / eps); 
+  } 
+
+  std::vector<int> randomVect = uniformGenVector(size);
+  std::pair<int, std::vector<int> > results = computeDPCountMark(party, originalData, originalDummyMarkers, randomVect, resultBins, lapVect);
+  int DPCount = results.first;
+  std::vector<int> resultDummyMarkers = results.second;
+  
+  // step2: sort and retrive first DP count records 
+  std::vector<int> ansOriginalData_, ansOriginalDummyMarkers_, ansOriginalDataEncodedNot_;
+  tie(ansOriginalData_, ansOriginalDummyMarkers_, ansOriginalDataEncodedNot_) = sortOneBinDP(party, originalData, originalDummyMarkers, originalDataEncodedNot, resultDummyMarkers, DPCount, size);
+  int count = (DPCount < size) ? DPCount - 1: size - 1;  // - 1 for slicing
+  std::vector<int> ansOriginalData = slicing(ansOriginalData_, 0, count);
+  std::vector<int> ansOriginalDummyMarkers = slicing(ansOriginalDummyMarkers_, 0, count);
+  std::vector<int> ansOriginalDataEncodedNot = slicing(ansOriginalDataEncodedNot_, 0, count);
+
+  //debug
+  if (debugPrint) {
+      cout << "dpCount " << DPCount << endl;
+      Integer *ansOriginalData_ = reconstructArray(ansOriginalData);
+      cout << "ansOriginalData: " << ' ';
+      printArray(ansOriginalData_, ansOriginalData.size());
+
+      Integer *ansOriginalDummyMarkers_ = reconstructArray(ansOriginalDummyMarkers);
+      cout << "ansOriginalDummyMarkers: " << ' ';
+      printArray(ansOriginalDummyMarkers_, ansOriginalDummyMarkers.size());
+  }
+  //debug
+  return std::make_tuple(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCount);
+}
+
 std::vector<int> readInputs(string fileName){
   fstream sharesFile ;
   std::vector<int> vect;
@@ -54,7 +95,7 @@ int main(int argc, char** argv) {
   // constant dp noise
   bool constantDP = true; 
   // print 
-  bool debugPrint = false;
+  bool debugPrint = true;
   // privacy budget
   string eps_string = argv[5]; // eps
   double eps = std::stod(eps_string);
@@ -67,8 +108,6 @@ int main(int argc, char** argv) {
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
     num_real = std::stod(N_string);
-    double b = 1 / eps;
-    double t = log((1/0.01));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
   } else {
     bins = 5; // bin number
     num_real = 10;  
@@ -131,147 +170,26 @@ int main(int argc, char** argv) {
   std::vector<int> leftCacheData;
   std::vector<int> leftCacheDataEncodedNot;
   std::vector<int> leftCacheDummyMarker;
- // int mainSize = 0;
+  // int mainSize = 0;
   // for each update: 
   for (int i = 0; i < t; i++) {
     cout<< "index---------------------------------------------------------------------------: " << i << endl;
-    auto start = high_resolution_clock::now();
-
-    // step1: compute DP count and mark records 
-    int size = originalData[i].size(); 
-    std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
-    if (constantDP) { 
-      std::vector<int> lapVect_(1, 0);
-      // std::vector<int> lapVect_(bins, 1);
-      lapVect = lapVect_;
-    } else {
-      lapVect = lapGenVector(1, 1 / eps); 
-    } 
-
-    std::vector<int> randomVect = uniformGenVector(bins);
-    std::vector<int> resultBins = [1];   // given a query 
-    std::pair<int, std::vector<int> > results = computeDPCountMark(party, originalData[i], originalDummyMarkers[i], randomVect, resultBins, lapVect);
-    int DPCount = results.first;
-    std::vector<int> resultDummyMarkers = results.second;
-    
-    // step2: sort and retrive first DP count records 
-    std::tuple<std::vector<int>, std::vector<int>, std::vector<int> >  results_sort = sortOneBinDP(party, originalData[i], originalDummyMarkers[i], originalDataEncodedNot[i], resultDummyMarkers， DPCount, size);
-    int count = (dpCount < size) ? dpCount - 1: size - 1;  // - 1 for slicing
-    ansOriginalData = slicing(results_sort.first, 0, count);
-    ansOriginalDummyMarkers = slicing(results_sort.second, 0, count);
-    ansOriginalDataEncodedNot = slicing(results_sort.third, 0, count);
-
-
-
-    // step1: trueHistGen
-    int size = originalData[i].size();   
-    std::vector<int> randomVect = uniformGenVector(bins);
-    std::vector<int> sh = trueHistGen(party, originalData[i], originalDummyMarkers[i], randomVect, size, bins); 
-    trueHists[i] = sh;
-
-    // step2: dpHistGen
-    // option1: add noise to leaf node
-    std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
-    if (constantDP) { 
-      std::vector<int> lapVect_(bins, 0);
-     // std::vector<int> lapVect_(bins, 1);
-      lapVect = lapVect_;
-    } else {
-      lapVect = lapGenVector(bins, 1 / eps); 
+    auto startPointQ = high_resolution_clock::now();
+    for (int j = 0; j < bins; j++) {   // point queries 
+      std::vector<int> resultBins{j-1, j};   // given a query 
+      std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
+      int DPCounter;
+      tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, originalData[i], originalDummyMarkers[i], originalDataEncodedNot[i]);
     }
-    std::vector<int> dp;
-    std::vector<std::vector<int> > trueHistgrams(1);
-    trueHistgrams[0] = trueHists[i];
-    dp = dpHistGen(party, trueHistgrams, lapVect, bins);  
-    dpHists[i] = nonNegative(dp);
+    auto afterPointQ = high_resolution_clock::now();
 
-    auto afterDP = high_resolution_clock::now();
+    auto durationDPSort = duration_cast<microseconds>(afterPointQ - startPointQ);
+    // cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
+    metricRunTimeDP[i] = durationDPSort.count() / 1000;
+    // metric and runtime 
 
-    //debug
-    if (debugPrint) {
-        cout << "dpHists" << ' ';
-        for (int j = 0; j < bins; j++) {
-        cout << dpHists[i][j] << ' ';
-        }
-        cout <<  endl;
-    }
-    //debug
 
-    if (true) {
-      // step3: sortCacheUsingDP
-      // previously left records + new records in the cache --> sort using DP histogram
-      leftCacheData.insert(leftCacheData.end(), originalData[i].begin(), originalData[i].end());
-      leftCacheDataEncodedNot.insert(leftCacheDataEncodedNot.end(), originalDataEncodedNot[i].begin(), originalDataEncodedNot[i].end());
-      leftCacheDummyMarker.insert(leftCacheDummyMarker.end(), originalDummyMarkers[i].begin(), originalDummyMarkers[i].end());
-      int sizeCache = leftCacheData.size();
-      std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
-      auto ssBefore = high_resolution_clock::now();
-      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins);
-      auto ssAfter = high_resolution_clock::now();
-      auto durationss = duration_cast<microseconds>(ssAfter - ssBefore);
-      metricss[i] = durationss.count();
-      cout << "ss" << durationss.count() << " num: "<< leftCacheData.size()<<endl;  
-      // total DP count = #records we want to retrieve --> sorted cache + left cache 
-      int totalRecords = accumulate(dpHists[i].begin(), dpHists[i].end(), 0);
-      std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords, 0);
-      std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords, 0);
-      std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords, 0);
-
-      std::vector<int> sortedRecord = seperatedRecord.first;
-      leftCacheData = seperatedRecord.second;
-      std::vector<int> sortedDummy = seperatedDummyMarker.first;
-      leftCacheDummyMarker = seperatedDummyMarker.second;
-      std::vector<int> sortedRecordEncodedNot = seperatedRecordEncodedNot.first;
-      leftCacheDataEncodedNot = seperatedRecordEncodedNot.second;
-
-      //debug
-      if (debugPrint) {      
-          /*mainSize += totalRecords;
-        Integer *sortedRecordsortedRecord = reconstructArray(sortedRecord);
-        Integer *leftRecordleftRecord = reconstructArray(leftCacheData);
-        cout << "sortedRecordsortedRecord" << ' ';
-        printArray(sortedRecordsortedRecord, sortedRecord.size());
-        cout << "leftRecordleftRecord" << ' ';
-        printArray(leftRecordleftRecord, leftCacheData.size());
-         Integer *sortedDummysortedDummy = reconstructArray(sortedDummy);
-        Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
-        cout << "sortedDummysortedDummy" << ' ';
-        printArray(sortedDummysortedDummy, sortedDummy.size());
-        cout << "leftDummyleftDummy" << ' ';
-        printArray(leftDummyleftDummy, leftCacheDummyMarker.size());
-        Integer *sortedRecordsortedRecordEncodedNot = reconstructArray(sortedRecordEncodedNot);
-        Integer *leftRecordleftRecordEncodedNot = reconstructArray(leftCacheDataEncodedNot);
-        cout << "sortedRecordsortedRecordEncodedNot" << ' ';
-        printArray(sortedRecordsortedRecordEncodedNot, sortedRecordEncodedNot.size());
-        cout << "leftRecordleftRecordEncodedNot" << ' ';
-        printArray(leftRecordleftRecordEncodedNot, leftCacheDataEncodedNot.size());
-        cout << "sortedRecord.size(): " << sortedRecord.size() << endl;*/
-      }
-      //debug
-
-      // step4: dpMerge
-      // DP histogram for main data store
-      auto DPMergeBefore = high_resolution_clock::now();
-      std::vector<int> dp_main(bins, 0);
-      for (int j = 0; j < i; j++) { 
-        dp_main = addTwoVectors(dp_main, dpHists[j]);
-      }
-      // merge main and cache
-      mainData = merge2SortedArr(dp_main, dpHists[i], mainData, sortedRecord, bins);
-      mainDummyMarker = merge2SortedArr(dp_main, dpHists[i], mainDummyMarker, sortedDummy, bins);
-      mainDataEncodedNot = merge2SortedArr(dp_main, dpHists[i], mainDataEncodedNot, sortedRecordEncodedNot, bins);
-      auto DPMergeAfter = high_resolution_clock::now();
-      auto durationDPMerge = duration_cast<microseconds>(DPMergeAfter - DPMergeBefore);
-      metricRunTimeDPMerge[i] = durationDPMerge.count();
-
-      //debug
-      if (debugPrint) {
-        Integer *mainmain = reconstructArray(mainData);
-        cout << "mainmain: " << ' ';
-        printArray(mainmain, mainData.size());
-      }
-    }
-
+    /*
     // metric 1: run time
     auto afterDPSort = high_resolution_clock::now();
     auto durationDP = duration_cast<microseconds>(afterDP - start);
@@ -339,6 +257,7 @@ int main(int argc, char** argv) {
       cout << endl;
     }
     //debug
+    */
   }
 
   std::ofstream outFile;
