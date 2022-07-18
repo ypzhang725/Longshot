@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
   int bins = 0;
   // !warning: if there are not enough dummy records, then sortDP and copy2two are incorrect
   int num_real = 0;  
-  int num_dummy = 0; // make sure there are enough dummy records
+  int num_dummy_bin = 0; // make sure there are enough dummy records
   string N_string = argv[6]; // num of reals for each cache
    // nyc taxi dataset: 1271413 rows; 4 bins; payment_type
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
@@ -71,11 +71,11 @@ int main(int argc, char** argv) {
     //num_dummy = 10;
     double b = 1 / eps;
     double t = log((1/0.01));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
-    num_dummy = bins * int(b * t);
+    num_dummy_bin = int(b * t);
   } else {
     bins = 5; // bin number
     num_real = 10;  
-    num_dummy = 100; 
+    num_dummy_bin = 20; 
     std::vector<int> vect_ = vect;
     for (int i = 0; i < t; i++) { 
       vect.insert(vect.end(), vect_.begin(), vect_.end());
@@ -102,30 +102,33 @@ int main(int argc, char** argv) {
     int num_dummy = 0;      // redefine
     int a = round(2 * b * sqrt((i + 1) * tt));
     if (a > i * b){
-        num_dummy = bins * round(b * tt);
+        num_dummy_bin = round(b * tt);
     } else{
-      if (round(a * bins - dummy_leaf) >= 0){
-        num_dummy = round(a * bins - dummy_leaf);
+      if (round(a - dummy_leaf) >= 0){
+        num_dummy_bin = round(a - dummy_leaf);
       } 
     } 
-    dummy_leaf += num_dummy;
+    dummy_leaf += num_dummy_bin;
+    num_dummy = num_dummy_bin * bins;
   //  cout << "dummy_leaf: " << dummy_leaf << "  num_dummy: " << num_dummy<< endl;
 
     int size = num_real + num_dummy;  // real + dummy
     std::vector<int> randomVect = uniformGenVector(size);
 
     if (party == ALICE) {
-      std::vector<int> dummyRecord(num_dummy, 446);  // dummy(0s)
-      v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
-
+      for (int j = 0; j < bins; j++) {    
+        std::vector<int> dummyRecord(num_dummy_bin, 446);  // dummy(0s)
+        v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
+      }
       std::vector<int> realMarkers(num_real, 625);  // real(1s)
       std::vector<int> dummyMarker(num_dummy, 211);  // dummy(0s)
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), dummyMarker.begin(), dummyMarker.end()); //v_originalDummyMarkers: 1s+0s
     } else {
-      std::vector<int> dummyRecord(num_dummy, 446);  // dummy(0s)
-      v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
-
+      for (int j = 0; j < bins; j++) {    
+        std::vector<int> dummyRecord(num_dummy_bin, 446);  // dummy(0s)
+        v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
+      }
       std::vector<int> realMarkers(num_real, 624);  // real(1s)
       std::vector<int> dummyMarker(num_dummy, 211);  // dummy(0s)
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s

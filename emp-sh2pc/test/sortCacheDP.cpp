@@ -17,6 +17,14 @@ Integer memconcat(Integer int1, Integer int2){
   return res;
 }
 
+Integer memconcat(Integer int1, Integer int2, Integer int3){
+  Integer res(48, 0, ALICE);
+  memcpy(res.bits.data(), int1.bits.data(), 32* sizeof(block));
+  memcpy(res.bits.data()+32, int2.bits.data(), 8 * sizeof(block));
+  memcpy(res.bits.data()+32+8, int3.bits.data(), 8 * sizeof(block));
+  return res;
+}
+
 // for debug
   /*Integer *res_2 = new Integer[size];
   for(int i = 0; i < size; ++i){
@@ -199,6 +207,150 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDP(int par
 
 }
 
+std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDPNew(int party, std::vector<int> encodedData, std::vector<int> dummyMarker, std::vector<int> notEncodedData, std::vector<int> dpHist, int size, int bins, int num_dummy_bin) {
+ // cout<< "secret shares" << ' ';
+ // printArrayPlaintext(encodedData);
+
+  // reconstruct random     
+  std::vector<int> randomVect_res = uniformGenVector(size);                                                            
+  Integer *sh1_res = reconstructArray(randomVect_res);
+  std::vector<int> randomVect_res_d = uniformGenVector(size);                                                            
+  Integer *sh1_res_d = reconstructArray(randomVect_res_d);
+  std::vector<int> randomVect_res_NotEn = uniformGenVector(size);                                                            
+  Integer *sh1_res_NotEn = reconstructArray(randomVect_res_NotEn);
+
+  std::vector<int> counter = dpHist; 
+
+  // reconstruct original data                                                                      
+  Integer *res = reconstructArray(encodedData);
+  // reconstruct dummy mark                                                                         
+  Integer *res_d = reconstructArray(dummyMarker);
+  // reconstruct original data not encoded     
+  Integer *res_NotEn = reconstructArray(notEncodedData);
+
+  Integer zero(32, 0, PUBLIC);
+  Integer one(32, 1, PUBLIC);
+  Integer two(32, 2, PUBLIC);
+
+  // step0: reassign dummy data value 
+  Integer cnt_dummy_bin(32, num_dummy_bin, BOB);   // assume we have a fixed number of dummy for each bin
+  Integer num_bin(32, 0, BOB);   // from 0
+  for(int i = 0; i < size; ++i){
+    Bit eq_dummy = res_d[i] == zero;  
+    Bit cnt_dummy_zero = cnt_dummy_bin == zero;  
+    Bit bins_enough = num_bin >= Integer(32, bins, BOB);
+    num_bin = If(cnt_dummy_zero, num_bin + one, num_bin); 
+    Bit assign = eq_dummy & !bins_enough;
+    res[i] = If(assign, num_bin, res[i]); 
+    cnt_dummy_bin = If(assign, cnt_dummy_bin - one, cnt_dummy_bin); 
+  }
+
+  // step1: <dataValue, isDummy> --> <dataValue, isDummy, isCounter, counter>, append m values 
+  // isDummy: real: 1; dummy: 0
+  // isCounter: counter: 1; record: 0
+  int newSize = size+bins;
+  Integer *isCounter =new Integer[newSize];
+  Integer *counterValue = new Integer[newSize];
+  Integer *isDummy = new Integer[newSize];
+  Integer *dataValue = new Integer[newSize];
+  Integer *dataValueNotEn = new Integer[newSize];
+  Integer *binValue = new Integer[newSize];
+  
+  for(int i = 0; i < size; ++i){
+    isCounter[i] = Integer(8, 0, BOB);
+    counterValue[i] = Integer(32, 0, BOB);
+    dataValue[i] = res[i];
+    dataValueNotEn[i] = res_NotEn[i];
+    Bit eq_real = res_d[i] == one;   
+    binValue[i] = If(eq_real, Integer(32, bins*2, BOB), Integer(32, bins*2+1, BOB));  
+    isDummy[i] = If(eq_real, Integer(8, 1, BOB), Integer(8, 0, BOB));  
+  }
+
+  for(int i = size; i < newSize; ++i){
+    isCounter[i] = Integer(8, 1, BOB);
+    counterValue[i] = Integer(32, counter[i-size], BOB);
+    isDummy[i] = Integer(8, 0, BOB);
+    dataValue[i] = Integer(32, i-size, BOB);
+    dataValueNotEn[i] = Integer(32, i-size, BOB);
+    binValue[i] = Integer(32, bins*2+2, BOB);
+  }
+
+  // step2: sort by (dataValue, isCounter, isDummy)
+  Integer *sortKey = new Integer[newSize];
+  for(int i = 0; i < newSize; ++i){
+    sortKey[i] = memconcat(dataValue[i], isCounter[i], isDummy[i]);
+  }
+  Integer * sortKey_copy = copyArray(sortKey, newSize);
+  Integer * sortKey_copy2 = copyArray(sortKey, newSize);
+  Integer * sortKey_copy3 = copyArray(sortKey, newSize);
+  Integer * sortKey_copy4 = copyArray(sortKey, newSize);
+  Integer * sortKey_copy5 = copyArray(sortKey, newSize);
+  Integer * sortKey_copy6 = copyArray(sortKey, newSize);
+
+  sort(sortKey_copy, newSize, dataValue);
+  sort(sortKey_copy2, newSize, dataValueNotEn);
+  sort(sortKey_copy3, newSize, isDummy);
+  sort(sortKey_copy4, newSize, isCounter);
+  sort(sortKey_copy5, newSize, counterValue);
+  sort(sortKey_copy6, newSize, binValue);
+
+  // step3: linear scan to assign binValue
+  Integer cnt(32, 1, BOB);
+  for(int i = 0; i < newSize; ++i){
+    Bit eq_counter = isCounter[i] == Integer(32, 1, PUBLIC);  
+    cnt = If(eq_counter, counterValue[i], cnt - Integer(32, 1, PUBLIC)); 
+    Bit bigger_zero = cnt >= zero;  
+    Bit eq_real = isDummy[i] == one;  
+    Bit real_bin = bigger_zero & !eq_counter & eq_real;
+    Bit dummy_bin = bigger_zero & !eq_counter & !eq_real;
+    binValue[i] = If(real_bin, dataValue[i] * two, binValue[i]); 
+    binValue[i] = If(dummy_bin, dataValue[i] * two + one, binValue[i]); 
+  }
+
+  // step4: sort by binValue
+  Integer * res_b_copy = copyArray(binValue, newSize);
+  Integer * res_b_copy2 = copyArray(binValue, newSize);
+  Integer * res_b_copy3 = copyArray(binValue, newSize);
+
+  sort(res_b_copy, newSize, dataValue);
+  sort(res_b_copy2, newSize, dataValueNotEn);
+  sort(res_b_copy3, newSize, isDummy);
+
+  // step5: drop m counters 
+  for(int i = 0; i < size; ++i){
+    res[i] = dataValue[i];
+    res_d[i] = isDummy[i];
+    res_NotEn[i] = dataValueNotEn[i];
+  }
+
+  /*cout << "after sort" << ' ';
+  cout << "original records" << ' ';
+  printArray(res, size);
+  cout << "dummy marker" << ' ';
+  printArray(res_d, size);
+  cout << "assigned bin" << ' ';
+  printArray(res_b_copy, size);*/
+
+  // generate secret shares      
+  Integer *sh2_res = generateSh2(sh1_res, res, size);
+  Integer *sh2_res_d = generateSh2(sh1_res_d, res_d, size);
+  Integer *sh2_res_NotEn = generateSh2(sh1_res_NotEn, res_NotEn, size);
+
+  std::vector<int> A_reveal = revealSh(sh1_res, size, ALICE);
+  std::vector<int> B_reveal = revealSh(sh2_res, size, BOB);
+  std::vector<int> D_A_reveal = revealSh(sh1_res_d, size, ALICE);
+  std::vector<int> D_B_reveal = revealSh(sh2_res_d, size, BOB);
+  std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
+  std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
+
+  if (party == ALICE) {
+    return std::make_tuple(A_reveal, D_A_reveal, A_reveal_notEn);
+  }
+  else {
+    return std::make_tuple(B_reveal, D_B_reveal, B_reveal_notEn);
+  }
+
+}
 
 Integer * assignBinCompaction(Integer *res, Integer *res_d, int size, int binNumber, std::vector<int> counter){
   // initialize dp counter(only one element)

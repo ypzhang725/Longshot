@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
   int bins = 0;
   // !warning: if there are not enough dummy records, then sortDP and copy2two are incorrect
   int num_real = 0;  
-  int num_dummy = 0; // make sure there are enough dummy records
+  int num_dummy_bin = 0; // make sure there are enough dummy records
   string N_string = argv[6]; // num of reals for each cache
    // nyc taxi dataset: 1271413 rows; 4 bins; payment_type
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
@@ -73,11 +73,11 @@ int main(int argc, char** argv) {
     //num_dummy_ = 10;
     double b = 1 / eps;
     double t = log((1/0.01));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
-    num_dummy = bins * int(b * t);
+    num_dummy_bin = int(b * t);
   } else {
     bins = 5; // bin number
     num_real = 10;  
-    num_dummy = 10; 
+    num_dummy_bin = 2; 
     std::vector<int> vect_ = vect;
     for (int i = 0; i < t; i++) { 
       vect.insert(vect.end(), vect_.begin(), vect_.end());
@@ -105,33 +105,35 @@ int main(int argc, char** argv) {
   std::vector<std::vector<int> > originalDummyMarkers(t);  // dummy markers for real + dummy
   
   for (int i = 0; i < t; i++) {  
-    int num_dummy_ = 0;  
+    int num_dummy = 0;  
     if ((i % 2) == 1){  // 0, 1, 2, 3   only padd dummy with 2, 3
-      num_dummy_ = 0;
+      num_dummy = 0;
     } else {
-      num_dummy_ = num_dummy;
+      num_dummy = num_dummy_bin * bins;
     }
 
     std::vector<int> v_originalData(vect.begin() + (i*num_real), vect.begin() + ((i+1)*num_real)); // original real data
     std::vector<int> v_originalDataEncoded;  // encoded 
     std::vector<int> v_originalDummyMarkers;
-    int size = num_real + num_dummy_;  // real + dummy
+    int size = num_real + num_dummy;  // real + dummy
     std::vector<int> randomVect = uniformGenVector(size);
 
     if (party == ALICE) {
-      std::vector<int> dummyRecord(num_dummy_, 446);  // dummy(0s)
-      v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
-
+      for (int j = 0; j < bins; j++) {    
+        std::vector<int> dummyRecord(num_dummy_bin, 446);  // dummy(0s)
+        v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
+      }
       std::vector<int> realMarkers(num_real, 625);  // real(1s)
-      std::vector<int> dummyMarker(num_dummy_, 211);  // dummy(0s)
+      std::vector<int> dummyMarker(num_dummy_bin, 211);  // dummy(0s)
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), dummyMarker.begin(), dummyMarker.end()); //v_originalDummyMarkers: 1s+0s
     } else {
-      std::vector<int> dummyRecord(num_dummy_, 446);  // dummy(0s)
-      v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
-
+      for (int j = 0; j < bins; j++) {    
+        std::vector<int> dummyRecord(num_dummy_bin, 446 ^  j);  // dummy(0s)
+        v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
+      }
       std::vector<int> realMarkers(num_real, 624);  // real(1s)
-      std::vector<int> dummyMarker(num_dummy_, 211);  // dummy(0s)
+      std::vector<int> dummyMarker(num_dummy_bin, 211);  // dummy(0s)
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), dummyMarker.begin(), dummyMarker.end()); //v_originalDummyMarkers: 1s+0s
     }
@@ -257,7 +259,7 @@ int main(int argc, char** argv) {
     }
 
     int numDrop = (intervalPrevious.size() > 0) ? (intervalPrevious.size() - 1): 0;
-    int dropDummy = num_dummy * numDrop;
+    int dropDummy = num_dummy_bin * bins * numDrop;
 
     // step4.3: get the sorted array of the root node
     // option0: if sortOption == 0 or gapAgain <= x
