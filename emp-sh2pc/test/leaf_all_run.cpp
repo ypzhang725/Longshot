@@ -52,9 +52,9 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = true; 
+  bool constantDP = false; 
   // print 
-  bool debugPrint = false;
+  bool debugPrint = true;
   // privacy budget
   string eps_string = argv[5]; // eps
   double eps = std::stod(eps_string);
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
     } 
     dummy_leaf += num_dummy_bin;
     num_dummy = num_dummy_bin * bins;
-  //  cout << "dummy_leaf: " << dummy_leaf << "  num_dummy: " << num_dummy<< endl;
+    cout << "dummy_leaf: " << dummy_leaf << "  num_dummy: " << num_dummy<< endl;
 
     int size = num_real + num_dummy;  // real + dummy
     std::vector<int> randomVect = uniformGenVector(size);
@@ -120,17 +120,17 @@ int main(int argc, char** argv) {
         std::vector<int> dummyRecord(num_dummy_bin, 446);  // dummy(0s)
         v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
       }
-      std::vector<int> realMarkers(num_real, 625);  // real(1s)
-      std::vector<int> dummyMarker(num_dummy, 211);  // dummy(0s)
+      std::vector<int> realMarkers(num_real, 211);  // real(0s)
+      std::vector<int> dummyMarker(num_dummy, 625);  // dummy(1s)
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), dummyMarker.begin(), dummyMarker.end()); //v_originalDummyMarkers: 1s+0s
     } else {
       for (int j = 0; j < bins; j++) {    
-        std::vector<int> dummyRecord(num_dummy_bin, 446);  // dummy(0s)
+        std::vector<int> dummyRecord(num_dummy_bin, 446 ^ (j+1));  // dummy(1,2,3...)
         v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
       }
-      std::vector<int> realMarkers(num_real, 624);  // real(1s)
-      std::vector<int> dummyMarker(num_dummy, 211);  // dummy(0s)
+      std::vector<int> realMarkers(num_real, 211);  // real(0s)
+      std::vector<int> dummyMarker(num_dummy, 624);  // dummy(1s)
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), dummyMarker.begin(), dummyMarker.end()); //v_originalDummyMarkers: 1s+0s
     }
@@ -209,7 +209,8 @@ int main(int argc, char** argv) {
       int sizeCache = leftCacheData.size();
       std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
       auto ssBefore = high_resolution_clock::now();
-      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins);
+     // std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins);
+      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDPNew(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins, num_dummy_bin);
       auto ssAfter = high_resolution_clock::now();
       auto durationss = duration_cast<microseconds>(ssAfter - ssBefore);
       metricss[i] = durationss.count();
@@ -272,6 +273,9 @@ int main(int argc, char** argv) {
         Integer *mainmain = reconstructArray(mainData);
         cout << "mainmain: " << ' ';
         printArray(mainmain, mainData.size());
+        Integer *mainmaindummy = reconstructArray(mainDummyMarker);
+        cout << "mainmaindummy: " << ' ';
+        printArray(mainmaindummy, mainDummyMarker.size());
       }
     }
 
@@ -306,7 +310,7 @@ int main(int argc, char** argv) {
 
     // metric 3: sort errors = (dp count - true records)  
     // step1: compute the #true for each interval's data and then add them up 
-    std::vector<int> trueR = computeTrueRecords(dpI, mainData); 
+    std::vector<int> trueR = computeTrueRecords(dpI, mainData, mainDummyMarker); 
       
     // step2: compute the error for DP store 
     double DPStoreError = 0;

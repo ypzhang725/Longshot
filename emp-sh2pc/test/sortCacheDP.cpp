@@ -18,10 +18,10 @@ Integer memconcat(Integer int1, Integer int2){
 }
 
 Integer memconcat(Integer int1, Integer int2, Integer int3){
-  Integer res(48, 0, ALICE);
-  memcpy(res.bits.data(), int1.bits.data(), 32* sizeof(block));
-  memcpy(res.bits.data()+32, int2.bits.data(), 8 * sizeof(block));
-  memcpy(res.bits.data()+32+8, int3.bits.data(), 8 * sizeof(block));
+  Integer res(64, 0, ALICE);
+  memcpy(res.bits.data(), int3.bits.data(), 16 * sizeof(block));
+  memcpy(res.bits.data()+16, int2.bits.data(), 16 * sizeof(block));
+  memcpy(res.bits.data()+16+16, int1.bits.data(), 32 * sizeof(block));
   return res;
 }
 
@@ -77,7 +77,7 @@ Integer * assignBin(Integer *res, Integer *res_d, int size, int bins, std::vecto
   Integer one(32, 1, PUBLIC);
   // first round: real records                                                                       
   for(int i = 0; i < size; ++i){
-    Bit eq_real = res_d[i] == one;   
+    Bit eq_real = res_d[i] == zero;   
     res_b[i] = If(eq_real, res_b[i]-one, res_b[i]);  
     Integer bin_num = res[i] - one;                         
     for(int j = 0; j < bins; ++j){  
@@ -93,7 +93,7 @@ Integer * assignBin(Integer *res, Integer *res_d, int size, int bins, std::vecto
   // second round: dummy records   
   // warning: the dummy records should be enough, otherwise real records will be retrieved as dummy                                                                  
   for(int i = 0; i < size; ++i){   
-    Bit eq_dummy = res_d[i] == zero;
+    Bit eq_dummy = res_d[i] == one;
     for(int j = 0; j < bins; ++j){  
       Bit eq_bin_last = res_b[i] == Integer(32, bins*2+1, PUBLIC);    // ALICE OR PUBLIC?
       Bit eq_count = res_counter[j] > zero;  
@@ -232,22 +232,45 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDPNew(int 
   Integer one(32, 1, PUBLIC);
   Integer two(32, 2, PUBLIC);
 
+  /*std::vector<int> dpStorePublicO = revealSh(res, size, PUBLIC);
+  std::vector<int> dpStorePublicDummyO = revealSh(res_d, size, PUBLIC);
+  for (int j = 0; j < size; j++) {
+    cout << dpStorePublicO[j] << ' ';
+  }
+  cout << endl;
+  for (int j = 0; j < size; j++) {
+    cout << dpStorePublicDummyO[j] << ' ';
+  }
+  cout << endl;
+  cout << num_dummy_bin << endl;*/
   // step0: reassign dummy data value 
   Integer cnt_dummy_bin(32, num_dummy_bin, BOB);   // assume we have a fixed number of dummy for each bin
-  Integer num_bin(32, 0, BOB);   // from 0
+  Integer num_bin(32, 1, BOB);   // from 1
   for(int i = 0; i < size; ++i){
-    Bit eq_dummy = res_d[i] == zero;  
+    Bit eq_dummy = res_d[i] == one;  
     Bit cnt_dummy_zero = cnt_dummy_bin == zero;  
-    Bit bins_enough = num_bin >= Integer(32, bins, BOB);
+    cnt_dummy_bin = If(cnt_dummy_zero, Integer(32, num_dummy_bin, PUBLIC), cnt_dummy_bin); 
+    Bit bins_enough = num_bin <= Integer(32, bins, BOB);
     num_bin = If(cnt_dummy_zero, num_bin + one, num_bin); 
-    Bit assign = eq_dummy & !bins_enough;
+    Bit assign = eq_dummy & bins_enough;
     res[i] = If(assign, num_bin, res[i]); 
     cnt_dummy_bin = If(assign, cnt_dummy_bin - one, cnt_dummy_bin); 
   }
 
+  /*std::vector<int> dpStorePublic = revealSh(res, size, PUBLIC);
+  std::vector<int> dpStorePublicDummy = revealSh(res_d, size, PUBLIC);
+  for (int j = 0; j < size; j++) {
+    cout << dpStorePublic[j] << ' ';
+  }
+  cout << endl;
+  for (int j = 0; j < size; j++) {
+    cout << dpStorePublicDummy[j] << ' ';
+  }
+  cout << endl;*/
+
   // step1: <dataValue, isDummy> --> <dataValue, isDummy, isCounter, counter>, append m values 
-  // isDummy: real: 1; dummy: 0
-  // isCounter: counter: 1; record: 0
+  // isDummy: real: 0; dummy: 1   
+  // isCounter: counter: 0; record: 1
   int newSize = size+bins;
   Integer *isCounter =new Integer[newSize];
   Integer *counterValue = new Integer[newSize];
@@ -257,29 +280,56 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDPNew(int 
   Integer *binValue = new Integer[newSize];
   
   for(int i = 0; i < size; ++i){
-    isCounter[i] = Integer(8, 0, BOB);
+    isCounter[i] = Integer(16, 1, BOB);
     counterValue[i] = Integer(32, 0, BOB);
     dataValue[i] = res[i];
     dataValueNotEn[i] = res_NotEn[i];
-    Bit eq_real = res_d[i] == one;   
-    binValue[i] = If(eq_real, Integer(32, bins*2, BOB), Integer(32, bins*2+1, BOB));  
-    isDummy[i] = If(eq_real, Integer(8, 1, BOB), Integer(8, 0, BOB));  
+    Bit eq_real = res_d[i] == zero;   
+    binValue[i] = If(eq_real, Integer(32, (bins+1)*2-1, BOB), Integer(32, (bins+1)*2, BOB));  
+    isDummy[i] = If(eq_real, Integer(16, 0, BOB), Integer(16, 1, BOB));  
   }
 
   for(int i = size; i < newSize; ++i){
-    isCounter[i] = Integer(8, 1, BOB);
+    isCounter[i] = Integer(16, 0, BOB);
     counterValue[i] = Integer(32, counter[i-size], BOB);
-    isDummy[i] = Integer(8, 0, BOB);
-    dataValue[i] = Integer(32, i-size, BOB);
-    dataValueNotEn[i] = Integer(32, i-size, BOB);
-    binValue[i] = Integer(32, bins*2+2, BOB);
+    isDummy[i] = Integer(16, 1, BOB);
+    dataValue[i] = Integer(32, i-size+1, BOB);
+    dataValueNotEn[i] = Integer(32, i-size+1, BOB);
+    binValue[i] = Integer(32, (bins+1)*2+1, BOB);
   }
+
+  /*std::vector<int> dataValue_ = revealSh(dataValue, newSize, PUBLIC);
+  std::vector<int> isDummy_ = revealSh(isDummy, newSize, PUBLIC);
+  std::vector<int> counterValue_ = revealSh(counterValue, newSize, PUBLIC);
+  std::vector<int> isCounter_ = revealSh(isCounter, newSize, PUBLIC);
+  for (int j = 0; j < newSize; j++) {
+    cout << dataValue_[j] << ' ';
+  }
+  cout << endl;
+  for (int j = 0; j < newSize; j++) {
+    cout << isDummy_[j] << ' ';
+  }
+  cout << endl;
+  for (int j = 0; j < newSize; j++) {
+    cout << counterValue_[j] << ' ';
+  }
+  cout << endl;
+  for (int j = 0; j < newSize; j++) {
+    cout << isCounter_[j] << ' ';
+  }
+  cout << endl;*/
 
   // step2: sort by (dataValue, isCounter, isDummy)
   Integer *sortKey = new Integer[newSize];
   for(int i = 0; i < newSize; ++i){
     sortKey[i] = memconcat(dataValue[i], isCounter[i], isDummy[i]);
   }
+ /* std::vector<int> sortKey_ = revealSh64(sortKey, newSize, PUBLIC);
+  cout << "sortKey_" << endl;
+  for (int j = 0; j < newSize; j++) {
+    cout << sortKey_[j] << ' ';
+  }
+  cout << endl;*/
   Integer * sortKey_copy = copyArray(sortKey, newSize);
   Integer * sortKey_copy2 = copyArray(sortKey, newSize);
   Integer * sortKey_copy3 = copyArray(sortKey, newSize);
@@ -294,18 +344,51 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDPNew(int 
   sort(sortKey_copy5, newSize, counterValue);
   sort(sortKey_copy6, newSize, binValue);
 
+  /*dataValue_ = revealSh(dataValue, newSize, PUBLIC);
+  isDummy_ = revealSh(isDummy, newSize, PUBLIC);
+  counterValue_ = revealSh(counterValue, newSize, PUBLIC);
+  isCounter_ = revealSh(isCounter, newSize, PUBLIC);
+  cout << "after sort" << endl;
+  for (int j = 0; j < newSize; j++) {
+    cout << dataValue_[j] << ' ';
+  }
+  cout << endl;
+  for (int j = 0; j < newSize; j++) {
+    cout << isDummy_[j] << ' ';
+  }
+  cout << endl;
+  for (int j = 0; j < newSize; j++) {
+    cout << counterValue_[j] << ' ';
+  }
+  cout << endl;
+  for (int j = 0; j < newSize; j++) {
+    cout << isCounter_[j] << ' ';
+  }
+  cout << endl;
+  std::vector<int> binValue_ = revealSh(binValue, newSize, PUBLIC);
+  cout << "binValue" << endl;
+  for (int j = 0; j < newSize; j++) {
+    cout << binValue_[j] << ' ';
+  }*/
+
   // step3: linear scan to assign binValue
-  Integer cnt(32, 1, BOB);
+  Integer cnt = counterValue[0];
   for(int i = 0; i < newSize; ++i){
-    Bit eq_counter = isCounter[i] == Integer(32, 1, PUBLIC);  
-    cnt = If(eq_counter, counterValue[i], cnt - Integer(32, 1, PUBLIC)); 
+    Bit eq_counter_not = isCounter[i] == one;  
+    cnt = If(eq_counter_not, cnt - one, counterValue[i]); 
     Bit bigger_zero = cnt >= zero;  
-    Bit eq_real = isDummy[i] == one;  
-    Bit real_bin = bigger_zero & !eq_counter & eq_real;
-    Bit dummy_bin = bigger_zero & !eq_counter & !eq_real;
+    Bit eq_real = isDummy[i] == zero;  
+    Bit real_bin = bigger_zero & eq_counter_not & eq_real;
+    Bit dummy_bin = bigger_zero & eq_counter_not & !eq_real;
     binValue[i] = If(real_bin, dataValue[i] * two, binValue[i]); 
     binValue[i] = If(dummy_bin, dataValue[i] * two + one, binValue[i]); 
   }
+
+  /*binValue_ = revealSh(binValue, newSize, PUBLIC);
+  cout << "binValue" << endl;
+  for (int j = 0; j < newSize; j++) {
+    cout << binValue_[j] << ' ';
+  }*/
 
   // step4: sort by binValue
   Integer * res_b_copy = copyArray(binValue, newSize);
@@ -371,7 +454,7 @@ Integer * assignBinCompaction(Integer *res, Integer *res_d, int size, int binNum
   
   // first round: real records                                                                       
   for(int i = 0; i < size; ++i){
-    Bit eq_real = res_d[i] == one;   
+    Bit eq_real = res_d[i] == zero;   
     //res_b[i] = If(eq_real, res_b[i] + one, res_b[i]);  
     Integer bin_num = res[i] - one;    // from 0!!!!                     
     Bit eq_bin = bin_num == Integer(32, binNumber, PUBLIC);    // PUBLIC?
@@ -385,7 +468,7 @@ Integer * assignBinCompaction(Integer *res, Integer *res_d, int size, int binNum
   // second round: dummy records   
   // warning: the dummy records should be enough, otherwise real records will be retrieved as dummy                                                                  
   for(int i = 0; i < size; ++i){   
-    Bit eq_dummy = res_d[i] == zero;
+    Bit eq_dummy = res_d[i] == one;
     Bit eq_bin = res_b[i] == one;    // ALICE OR PUBLIC?
     Bit eq_count = res_counter[0] > zero;  
     Bit eq_bin_count_dummy = eq_dummy & eq_bin & eq_count;   

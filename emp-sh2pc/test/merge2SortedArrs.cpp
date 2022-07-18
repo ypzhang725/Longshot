@@ -57,12 +57,14 @@ std::vector<int> merge2SortedArr(std::vector<int> dp_main, std::vector<int> dp_c
   return merged;
 }
 
-std::vector<int> computeTrueRecords(std::vector<int> dpHist, std::vector<int> dpStore){
+std::vector<int> computeTrueRecords(std::vector<int> dpHist, std::vector<int> dpStore, std::vector<int> dpStoreDummy){
   int binNum = dpHist.size();
   int recordNum = dpStore.size();
   Integer * dpStoreI = reconstructArray(dpStore);
   std::vector<int> dpStorePublic = revealSh(dpStoreI, recordNum, PUBLIC);
-   
+  Integer * dpStoreIDummy = reconstructArray(dpStoreDummy);
+  std::vector<int> dpStorePublicDummy = revealSh(dpStoreIDummy, recordNum, PUBLIC);
+
   // prefix 
   std::vector<int> dpHistPrefix_tmp = computePrefix(dpHist);
   dpHistPrefix_tmp[binNum-1] = recordNum;  // cut DP hist to be consistent with the dpStore; assume that only last bin
@@ -76,7 +78,7 @@ std::vector<int> computeTrueRecords(std::vector<int> dpHist, std::vector<int> dp
   for (int i = 0; i < binNum; i++){
     int num = 0;
     for (int j = dpHistPrefix[i]; j < dpHistPrefix[i+1]; j++){
-       if ((dpStorePublic[j]-1) == i){ //dpStorePublic[j]: 1122334455
+       if (((dpStorePublic[j]-1) == i) && (dpStorePublicDummy[j] == 0)) { //dpStorePublic[j]: 1122334455
         num++;
       }
     }

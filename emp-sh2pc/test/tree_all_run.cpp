@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = false; 
+  bool constantDP = true; 
   // print 
   bool debugPrint = true;
   // privacy budget
@@ -120,20 +120,20 @@ int main(int argc, char** argv) {
 
     if (party == ALICE) {
       for (int j = 0; j < bins; j++) {    
-        std::vector<int> dummyRecord(num_dummy_bin, 446);  // dummy(0s)
+        std::vector<int> dummyRecord(num_dummy_bin, 446);  // dummy(1,2,3...)
         v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
       }
-      std::vector<int> realMarkers(num_real, 625);  // real(1s)
-      std::vector<int> dummyMarker(num_dummy_bin, 211);  // dummy(0s)
+      std::vector<int> realMarkers(num_real, 211);  // real(0s)
+      std::vector<int> dummyMarker(num_dummy_bin, 625);  // dummy(1s)
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), dummyMarker.begin(), dummyMarker.end()); //v_originalDummyMarkers: 1s+0s
     } else {
       for (int j = 0; j < bins; j++) {    
-        std::vector<int> dummyRecord(num_dummy_bin, 446 ^  j);  // dummy(0s)
+        std::vector<int> dummyRecord(num_dummy_bin, 446 ^ (j+1));  // dummy(1,2,3...)
         v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
       }
-      std::vector<int> realMarkers(num_real, 624);  // real(1s)
-      std::vector<int> dummyMarker(num_dummy_bin, 211);  // dummy(0s)
+      std::vector<int> realMarkers(num_real, 211);  // real(0s)
+      std::vector<int> dummyMarker(num_dummy_bin, 624);  // dummy(1s)
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), dummyMarker.begin(), dummyMarker.end()); //v_originalDummyMarkers: 1s+0s
     }
@@ -296,7 +296,8 @@ int main(int argc, char** argv) {
 
       // sort according to the DP hist of root 
       std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
-      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, dataToSort, dummyMarkerToSort, dataEncodedNotToSort, dpRoot, sizeSort, bins);
+      //std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, dataToSort, dummyMarkerToSort, dataEncodedNotToSort, dpRoot, sizeSort, bins);
+      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDPNew(party, dataToSort, dummyMarkerToSort, dataEncodedNotToSort, dpRoot, sizeSort, bins, num_dummy_bin);
       // total DP count = #records we want to retrieve --> sorted root + left cache 
       int totalRecords = accumulate(dpRoot.begin(), dpRoot.end(), 0);
       std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords, dropDummy);
@@ -503,7 +504,8 @@ int main(int argc, char** argv) {
         sortDPdHist[j] = sortDPd;
       }
       // sort 
-      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, encodedRecordsSecond, dummyMarkerSecond, notEncordedRecordsSecond, sortDPdHist, sizeSort, bins);
+      //std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, encodedRecordsSecond, dummyMarkerSecond, notEncordedRecordsSecond, sortDPdHist, sizeSort, bins);
+      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDPNew(party, encodedRecordsSecond, dummyMarkerSecond, notEncordedRecordsSecond, sortDPdHist, sizeSort, bins, num_dummy_bin);
       int totalRecords = accumulate(sortDPdHist.begin(), sortDPdHist.end(), 0);
       std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords, dropDummy);
       std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords, dropDummy);
@@ -617,7 +619,7 @@ int main(int argc, char** argv) {
     auto DPMergeAfter = high_resolution_clock::now();
     auto durationDPMerge = duration_cast<microseconds>(DPMergeAfter - DPMergeBefore);
     metricRunTimeDPMerge[i] = durationDPMerge.count();
-    std::vector<int> trueR = computeTrueRecords(dpItmp, mergedMain); 
+    std::vector<int> trueR = computeTrueRecords(dpItmp, mergedMain, mergedDummyMarker); 
     
     // step2: compute the error for DP store 
     double DPStoreError = 0;

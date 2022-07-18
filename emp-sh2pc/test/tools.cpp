@@ -56,6 +56,14 @@ std::vector<int> revealSh(Integer * sh, int bins, int party){ //todo: ALICE BOB
   return real;
 }
 
+std::vector<int> revealSh64(Integer * sh, int bins, int party){ //todo: ALICE BOB
+  std::vector<int> real(bins);
+  for (int i = 0; i < bins; ++i) {
+    real[i] = sh[i].reveal<int64_t>(party);
+  }
+  return real;
+}
+
 double lapGen(double beta){
     // https://www.johndcook.com/blog/2018/03/13/generating-laplace-random-variables/
     std::random_device rd;

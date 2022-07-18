@@ -135,12 +135,12 @@ int main(int argc, char** argv) {
     std::vector<int> randomVect = uniformGenVector(size);
 
     if (party == ALICE) {
-      std::vector<int> realMarkers(num_real, 625);  // real(1s)
-      // std::vector<int> dummyMarker(num_dummy, 211);  // dummy(0s)
+      std::vector<int> realMarkers(num_real, 211);  // real(0s)
+      // std::vector<int> dummyMarker(num_dummy, 625);  // dummy(1s)
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s
     } else {
-      std::vector<int> realMarkers(num_real, 624);  // real(1s)
-      // std::vector<int> dummyMarker(num_dummy, 211);  // dummy(0s)
+      std::vector<int> realMarkers(num_real, 211);  // real(0s)
+      // std::vector<int> dummyMarker(num_dummy, 624);  // dummy(1s)
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s
     }
 

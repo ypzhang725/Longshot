@@ -32,8 +32,9 @@ Integer * computeHist(Integer * res_d, Integer * res, int bins, int size){
     res_h[i] = Integer(32, 0, ALICE);
   }
   Integer one(32, 1, BOB);
+  Integer zero(32, 0, BOB);
   for(int i = 0; i < size; ++i){
-    Bit eq_real = res_d[i] == one;   
+    Bit eq_real = res_d[i] == zero;   
     Integer bin_num = res[i] - one;                                                    
       for(int j = 0; j < bins; ++j){ //each bin    
         Bit eq_bin = bin_num == Integer(32, j, PUBLIC);    // ALICE OR PUBLIC?                                                 
@@ -56,7 +57,7 @@ std::vector<int> encodeData(int party, int size, std::vector<int> randomVect, st
   // reconstruct original data
   Integer *res = reconstructArray(v_originalData);
   // reconstruct dummy mark
- // Integer *res_d = reconstructArray(v_originalDummyMarkers);  // not need to check, since assume dummy value is 0;
+ // Integer *res_d = reconstructArray(v_originalDummyMarkers);  // not need to check, since assume we encode dummy as well
   // reconstruct random number
   Integer *sh1 = reconstructArray(randomVect);
 
@@ -156,7 +157,7 @@ std::pair<int, std::vector<int> >  computeDPCountMark(int party, std::vector<int
       eq_bin = eq_bin | eq;   
     }                      
     count = If(eq_bin, count + one, count);  
-    res_d[i] = If(eq_bin, zero, res_d[i]);  
+    res_d[i] = If(eq_bin, zero, one);  // zero: ans, one: others
   }
   
   // add noise
