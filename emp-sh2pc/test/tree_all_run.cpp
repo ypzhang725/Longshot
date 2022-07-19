@@ -74,6 +74,13 @@ int main(int argc, char** argv) {
     double b = 1 / eps;
     double t = log((1/0.01));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
     num_dummy_bin = int(b * t);
+  } else if ((fileName_real == "bin40_ss1.txt") || (fileName_real == "bin40_ss2.txt")) {
+    bins = 40; // bin number
+    num_real = std::stod(N_string);
+    //num_dummy = 10;
+    double b = 1 / eps;
+    double t = log((1/0.01));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
+    num_dummy_bin = int(b * t);
   } else {
     bins = 5; // bin number
     num_real = 10;  
@@ -177,7 +184,7 @@ int main(int argc, char** argv) {
     // DP noise 
     std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
     if (constantDP) { 
-      std::vector<int> lapVect_(bins, 0);
+      std::vector<int> lapVect_(bins, 1);
      // std::vector<int> lapVect_(bins, 1);
       lapVect = lapVect_;
     } else {
