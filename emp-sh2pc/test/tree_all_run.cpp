@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
   } else {
     bins = 5; // bin number
     num_real = 10;  
-    num_dummy_bin = 2; 
+    num_dummy_bin = 5; 
     std::vector<int> vect_ = vect;
     for (int i = 0; i < t; i++) { 
       vect.insert(vect.end(), vect_.begin(), vect_.end());
@@ -117,23 +117,23 @@ int main(int argc, char** argv) {
     std::vector<int> v_originalDummyMarkers;
     int size = num_real + num_dummy;  // real + dummy
     std::vector<int> randomVect = uniformGenVector(size);
-
+    cout << "!!!" << i <<endl;
     if (party == ALICE) {
       for (int j = 0; j < bins; j++) {    
-        std::vector<int> dummyRecord(num_dummy_bin, 446);  // dummy(1,2,3...)
+        std::vector<int> dummyRecord(int(num_dummy / bins), 446);  // dummy(1,2,3...)
         v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
       }
       std::vector<int> realMarkers(num_real, 211);  // real(0s)
-      std::vector<int> dummyMarker(num_dummy_bin, 625);  // dummy(1s)
+      std::vector<int> dummyMarker(num_dummy, 625);  // dummy(1s)
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), dummyMarker.begin(), dummyMarker.end()); //v_originalDummyMarkers: 1s+0s
     } else {
       for (int j = 0; j < bins; j++) {    
-        std::vector<int> dummyRecord(num_dummy_bin, 446 ^ (j+1));  // dummy(1,2,3...)
+        std::vector<int> dummyRecord(int(num_dummy / bins), 446 ^ (j+1));  // dummy(1,2,3...)
         v_originalData.insert(v_originalData.end(), dummyRecord.begin(), dummyRecord.end()); // v_originalData: real+dummy
       }
       std::vector<int> realMarkers(num_real, 211);  // real(0s)
-      std::vector<int> dummyMarker(num_dummy_bin, 624);  // dummy(1s)
+      std::vector<int> dummyMarker(num_dummy, 624);  // dummy(1s)
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), realMarkers.begin(), realMarkers.end()); //v_originalDummyMarkers: 1s+0s
       v_originalDummyMarkers.insert(v_originalDummyMarkers.end(), dummyMarker.begin(), dummyMarker.end()); //v_originalDummyMarkers: 1s+0s
     }
@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
     std::vector<int> randomVect = uniformGenVector(bins);
     std::vector<int> sh = trueHistGen(party, originalData[i], originalDummyMarkers[i], randomVect, size, bins); 
     trueHists[i] = sh;
-
+    
     // DP noise 
     std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
     if (constantDP) { 
@@ -320,6 +320,12 @@ int main(int argc, char** argv) {
         cout << "leftRecord for " << intervalRootDP << ": ";
         printArray(leftRecordleftRecord, leftCacheData.size());
 
+        Integer *sortedDummysortedDummy = reconstructArray(mainDummyMarker[intervalRootDP]);
+        Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
+        cout << "sortedDummy for " << intervalRootDP << ": ";
+        printArray(sortedDummysortedDummy, mainDummyMarker[intervalRootDP].size());
+        cout << "leftDummy for " << intervalRootDP << ": ";
+        printArray(leftDummyleftDummy, leftCacheDummyMarker.size());
        /* Integer *sortedDummysortedDummy = reconstructArray(mainDummyMarker[intervalRootDP]);
         Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
         cout << "sortedDummy for " << intervalRootDP << ": ";
@@ -504,24 +510,39 @@ int main(int argc, char** argv) {
         sortDPdHist[j] = sortDPd;
       }
       // sort 
-      //std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, encodedRecordsSecond, dummyMarkerSecond, notEncordedRecordsSecond, sortDPdHist, sizeSort, bins);
-      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDPNew(party, encodedRecordsSecond, dummyMarkerSecond, notEncordedRecordsSecond, sortDPdHist, sizeSort, bins, num_dummy_bin);
+      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, encodedRecordsSecond, dummyMarkerSecond, notEncordedRecordsSecond, sortDPdHist, sizeSort, bins);
+      //std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDPNew(party, encodedRecordsSecond, dummyMarkerSecond, notEncordedRecordsSecond, sortDPdHist, sizeSort, bins, num_dummy_bin);
       int totalRecords = accumulate(sortDPdHist.begin(), sortDPdHist.end(), 0);
       std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords, dropDummy);
       std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords, dropDummy);
       std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords, dropDummy);
 
+      if (debugPrint) {
+        Integer *encodedRecords_ = reconstructArray(encodedRecords);
+        cout << "encodedRecords: " << ' ';
+        printArray(encodedRecords_, encodedRecords.size());
+        Integer *dummyMarker_ = reconstructArray(dummyMarker);
+        cout << "dummyMarker: " << ' ';
+        printArray(dummyMarker_, dummyMarker.size());
+        cout << "d: " << d << endl;
+        cout << "totalRecords: " << totalRecords << endl;
+        for (int j = 0; j < bins; j++) {
+        cout << "size: " << encodedRecordsFirst[j].size() << ";";
+        }
+         cout << endl;
+      }
+
+      std::vector<std::vector<int> > seperatedBinsRecord = seperateBin(seperatedRecord.first, sortDPdHist);
+      std::vector<std::vector<int> > seperatedBinsDummyMarker = seperateBin(seperatedDummyMarker.first, sortDPdHist);
+      std::vector<std::vector<int> > seperatedBinsRecordEncodedNot = seperateBin(seperatedRecordEncodedNot.first, sortDPdHist);
       for (int j = 0; j < bins; j++) {
         // n-d
         mainData[intervalRootDP].insert(mainData[intervalRootDP].end(), encodedRecordsFirst[j].begin(), encodedRecordsFirst[j].end());
-        mainDummyMarker[intervalRootDP].insert(mainDummyMarker[intervalRootDP].end(), notEncordedRecordsFirst[j].begin(), notEncordedRecordsFirst[j].end());
-        mainDataEncodedNot[intervalRootDP].insert(mainDataEncodedNot[intervalRootDP].end(), dummyMarkerFirst[j].begin(), dummyMarkerFirst[j].end());
+        mainDummyMarker[intervalRootDP].insert(mainDummyMarker[intervalRootDP].end(), dummyMarkerFirst[j].begin(), dummyMarkerFirst[j].end());
+        mainDataEncodedNot[intervalRootDP].insert(mainDataEncodedNot[intervalRootDP].end(), notEncordedRecordsFirst[j].begin(), notEncordedRecordsFirst[j].end());
         // sorted root d for this bin  
-        std::vector<std::vector<int> > seperatedBinsRecord = seperateBin(seperatedRecord.first, sortDPdHist);
         mainData[intervalRootDP].insert(mainData[intervalRootDP].end(), seperatedBinsRecord[j].begin(), seperatedBinsRecord[j].end());
-        std::vector<std::vector<int> > seperatedBinsDummyMarker = seperateBin(seperatedDummyMarker.first, sortDPdHist);
         mainDummyMarker[intervalRootDP].insert(mainDummyMarker[intervalRootDP].end(), seperatedBinsDummyMarker[j].begin(), seperatedBinsDummyMarker[j].end());
-        std::vector<std::vector<int> > seperatedBinsRecordEncodedNot = seperateBin(seperatedRecordEncodedNot.first, sortDPdHist);
         mainDataEncodedNot[intervalRootDP].insert(mainDataEncodedNot[intervalRootDP].end(), seperatedBinsRecordEncodedNot[j].begin(), seperatedBinsRecordEncodedNot[j].end());
       }
       // left cache
