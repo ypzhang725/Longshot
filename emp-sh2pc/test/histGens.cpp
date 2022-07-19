@@ -44,6 +44,86 @@ Integer * computeHist(Integer * res_d, Integer * res, int bins, int size){
   }
   return res_h;
 }
+Integer memconcat2(Integer int1, Integer int2){
+  Integer res(64, 0, ALICE);
+  memcpy(res.bits.data(), int2.bits.data(), 32* sizeof(block));
+  memcpy(res.bits.data()+32, int1.bits.data(), 32 * sizeof(block));
+  return res;
+}
+Integer* copyArray_(Integer* array, int size){
+  Integer * copy = new Integer[size];
+  for(int i = 0; i < size; ++i){
+    copy[i] = array[i];
+  }
+  return copy; 
+}
+
+Integer * computeHistNew(Integer * res_d, Integer * res, int bins, int size){
+  Integer zero(32, 0, PUBLIC);
+  Integer one(32, 1, PUBLIC);
+  Integer two(32, 2, PUBLIC);
+  int newSize = size+bins;
+  // step1: <dataValue, isDummy> --> <dataValue, isDummy, isCounter, counter>, append m values 
+  // isDummy: real: 0; dummy: 1   
+  // isCounter: counter: 1; record: 0
+  Integer *isCounter =new Integer[newSize];
+  Integer *isDummy = new Integer[newSize];
+  Integer *counterValue = new Integer[newSize];
+  Integer *dataValue = new Integer[newSize];
+     
+  for(int i = 0; i < size; ++i){
+    isCounter[i] = zero;
+    isDummy[i] = res_d[i];
+    counterValue[i] = zero;
+    dataValue[i] = res[i];
+  }
+
+  for(int i = size; i < newSize; ++i){
+    isCounter[i] = one;
+    isDummy[i] = one;
+    counterValue[i] = zero;
+    dataValue[i] = Integer(32, i-size+1, BOB);
+  }
+  
+  // step2: sort by (dataValue, isCounter)
+  Integer *sortKey = new Integer[newSize];
+  for(int i = 0; i < newSize; ++i){
+    sortKey[i] = memconcat2(dataValue[i], isCounter[i]);
+  }
+  
+  Integer * sortKey_copy = copyArray_(sortKey, newSize);
+  Integer * sortKey_copy2 = copyArray_(sortKey, newSize);
+  Integer * sortKey_copy3 = copyArray_(sortKey, newSize);
+  Integer * sortKey_copy4 = copyArray_(sortKey, newSize);
+
+  sort(sortKey_copy, newSize, dataValue);
+  sort(sortKey_copy2, newSize, isDummy);
+  sort(sortKey_copy3, newSize, isCounter);
+  sort(sortKey_copy4, newSize, counterValue);
+ 
+  // step3: linear scan to aggregate 
+  Integer agg = zero;
+  for(int i = 0; i < newSize; ++i){
+    Bit eq_counter = isCounter[i] == one;  
+    Bit eq_real = isDummy[i] == zero;  
+    Bit real_bin = eq_real & !eq_counter;
+    agg = If(real_bin, agg + one, agg); 
+    counterValue[i] = agg;
+    agg = If(eq_counter, zero, agg); 
+  }
+  
+  // step4: sort by isCounter --> counters at the end 
+  sort(isCounter, newSize, counterValue);
+  
+  // step5: pick the last m counters 
+  Integer *res_h = new Integer[bins];
+  for(int i = 0; i < bins; ++i){
+    res_h[i] = counterValue[i+size];
+  }
+  cout << "???" << endl;
+  return res_h;
+}
+
 
 Integer * generateSh2(Integer * sh1, Integer * res_h, int bins){
   Integer *sh2 = new Integer[bins];
@@ -94,7 +174,8 @@ std::vector<int> trueHistGen(int party, std::vector<int> number, std::vector<int
   Integer *sh1 = reconstructArray(number3);
 
   // compute histogram
-  Integer *res_h = computeHist(res_d, res, bins, size);
+  // Integer *res_h = computeHist(res_d, res, bins, size);
+  Integer *res_h = computeHistNew(res_d, res, bins, size);
     
   /*cout << "random number" << ' ';
   printArray(sh1, bins);
