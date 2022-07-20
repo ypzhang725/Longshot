@@ -320,3 +320,28 @@ metricRunTimeDPMerge: 8, 11, 29, 13, 18, 15, 34, 43
 metricDPError: 0, 0, 0, 0, 0, 0, 0, 0
 metricDPStoreError: 0, 0, 0, 0, 0, 0, 0, 0
 metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimePoint: 32, 28, 29, 27, 28, 29, 28, 28
+metricDPErrorPoint: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorPoint: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorPoint: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimePoint: 32, 29, 28, 30, 27, 29, 28, 28
+metricDPErrorPoint: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorPoint: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorPoint: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeRange: 88, 88, 87, 86, 88, 87, 88, 88
+metricDPErrorRange: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorRange: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorRange: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimePoint: 30, 31, 27, 30, 28, 27, 27, 27
+metricDPErrorPoint: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorPoint: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorPoint: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeRange: 93, 92, 87, 90, 86, 86, 86, 86
+metricDPErrorRange: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorRange: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorRange: 0, 0, 0, 0, 0, 0, 0, 0

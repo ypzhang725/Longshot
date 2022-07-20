@@ -18,7 +18,7 @@ using namespace emp;
 using namespace std;
 
 
-std::tuple<std::vector<int>, std::vector<int>, std::vector<int>, int>  processQuery(std::vector<int> resultBins, bool debugPrint, double eps, bool constantDP, int party, std::vector<int> originalData, std::vector<int> originalDummyMarkers, std::vector<int> originalDataEncodedNot) {
+std::tuple<std::vector<int>, std::vector<int>, std::vector<int>, int, int>  processQuery(std::vector<int> resultBins, bool debugPrint, double eps, bool constantDP, int party, std::vector<int> originalData, std::vector<int> originalDummyMarkers, std::vector<int> originalDataEncodedNot) {
   // step1: compute DP count and mark records 
   int size = originalData.size(); 
   std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
@@ -31,13 +31,13 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int>, int>  processQu
   } 
 
   std::vector<int> randomVect = uniformGenVector(size);
-  std::pair<int, std::vector<int> > results = computeDPCountMark(party, originalData, originalDummyMarkers, randomVect, resultBins, lapVect);
-  int DPCount = results.first;
-  std::vector<int> resultDummyMarkers = results.second;
-  
+  int DPCount, TrueCount;
+  std::vector<int> resultDummyMarkers;
+  // note that the returned trueCounter is only for test purpose
+  std::tie(DPCount, resultDummyMarkers, TrueCount) = computeDPCountMark(party, originalData, originalDummyMarkers, randomVect, resultBins, lapVect);
   // step2: sort and retrive first DP count records 
   std::vector<int> ansOriginalData_, ansOriginalDummyMarkers_, ansOriginalDataEncodedNot_;
-  tie(ansOriginalData_, ansOriginalDummyMarkers_, ansOriginalDataEncodedNot_) = sortOneBinDP(party, originalData, originalDummyMarkers, originalDataEncodedNot, resultDummyMarkers, DPCount, size);
+  std::tie(ansOriginalData_, ansOriginalDummyMarkers_, ansOriginalDataEncodedNot_) = sortOneBinDP(party, originalData, originalDummyMarkers, originalDataEncodedNot, resultDummyMarkers, DPCount, size);
   int count = (DPCount < size) ? DPCount - 1: size - 1;  // - 1 for slicing
   std::vector<int> ansOriginalData = slicing(ansOriginalData_, 0, count);
   std::vector<int> ansOriginalDummyMarkers = slicing(ansOriginalDummyMarkers_, 0, count);
@@ -55,7 +55,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int>, int>  processQu
       printArray(ansOriginalDummyMarkers_, ansOriginalDummyMarkers.size());
   }
   //debug
-  return std::make_tuple(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCount);
+  return std::make_tuple(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCount, TrueCount);
 }
 
 std::vector<int> readInputs(string fileName){
@@ -153,12 +153,14 @@ int main(int argc, char** argv) {
   }
   
   // metric
-  std::vector<double> metricRunTimeDP(t);
-  std::vector<double> metricRunTimeDPMerge(t);
-  std::vector<double> metricRunTimeDPSort(t);
-  std::vector<double> metricDPError(t);  // |DP count - true count|
-  std::vector<double> metricDPStoreError(t);  // |DP count - true record|
-  std::vector<double> metricTTStoreError(t);  // |true count - true record|
+  std::vector<double> metricRunTimePoint(t);
+  std::vector<double> metricDPErrorPoint(t);  // |DP count - true count|
+  std::vector<double> metricDPStoreErrorPoint(t);  // |DP count - true record|
+  std::vector<double> metricTTStoreErrorPoint(t);  // |true count - true record|
+  std::vector<double> metricRunTimeRange(t);
+  std::vector<double> metricDPErrorRange(t);  // |DP count - true count|
+  std::vector<double> metricDPStoreErrorRange(t);  // |DP count - true record|
+  std::vector<double> metricTTStoreErrorRange(t);  // |true count - true record|
   std::vector<double> metricss(t);
   // secure part 
   std::vector<int> mainData(t);
@@ -174,102 +176,102 @@ int main(int argc, char** argv) {
   // for each update: 
   for (int i = 0; i < t; i++) {
     cout<< "index---------------------------------------------------------------------------: " << i << endl;
+    // point queries -------------------------------------------------------------------------------------------
     auto startPointQ = high_resolution_clock::now();
-    for (int j = 0; j < bins; j++) {   // point queries 
-      std::vector<int> resultBins{j-1, j};   // given a query 
+    // step1: get DP count and DP records
+    std::vector<int> DPCountPoint(bins, 0);
+    std::vector<int> TrueCountPoint(bins, 0);
+    std::vector<int> TrueRecordPoint(bins, 0);
+  
+    for (int j = 0; j < bins; j++) {   
+      std::vector<int> resultBins{j, j};   // given a query 
       std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
-      int DPCounter;
-      tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, originalData[i], originalDummyMarkers[i], originalDataEncodedNot[i]);
+      int DPCounter, TrueCounter;
+      // note that the returned trueCounter is only for test purpose
+      std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, originalData[i], originalDummyMarkers[i], originalDataEncodedNot[i]);
+      DPCountPoint[j] = DPCounter;
+      TrueCountPoint[j] = TrueCounter;
+      // process returned records to filter out dummy -- this is only for trusted clients 
+      std::vector<int> resultTrueRecords = returnTrueRecords(party, ansOriginalData, ansOriginalDummyMarkers, TrueCounter);
+      TrueRecordPoint[j] = resultTrueRecords.size();
     }
     auto afterPointQ = high_resolution_clock::now();
-
-    auto durationDPSort = duration_cast<microseconds>(afterPointQ - startPointQ);
+    // metric 1: query process time for all point queries 
+    auto durationPointQ = duration_cast<microseconds>(afterPointQ - startPointQ);
     // cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
-    metricRunTimeDP[i] = durationDPSort.count() / 1000;
-    // metric and runtime 
-
-
-    /*
-    // metric 1: run time
-    auto afterDPSort = high_resolution_clock::now();
-    auto durationDP = duration_cast<microseconds>(afterDP - start);
-    auto durationDPSort = duration_cast<microseconds>(afterDPSort - afterDP);
-   // cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
-    metricRunTimeDP[i] = durationDP.count() / 1000;
-    metricRunTimeDPSort[i] = durationDPSort.count() / 1000000;
-
-    // metric 2: DP accuracy for query 0 -- i
-    // step1: add DP histograms that cover 0 -- i 
-    std::vector<string> intervalss;
-    std::vector<int> dpI(bins, 0);
-    for (int j = 0; j <= i; j++) { 
-      dpI = addTwoVectors(dpI, dpHists[j]);
-    }
-    // step2: compute true histograms that cover 0 -- i
-    std::vector<std::vector<int> > trueHistgramsT(i+1);
-    for (int j = 0; j <= i; j++) { 
-     trueHistgramsT[j] = trueHists[j];
-    }
-    std::vector<int> trueI = computeTrueNumber(trueHistgramsT, bins);
-    // step3: compute the error for DP count 
-    double DPCountError = 0;
+    // metric 2: accuracy time for all point queries 
+    double DPStoreErrorPoint = 0;
+    double DPErrorPoint = 0;
+    double TTStoreErrorPoint = 0;
     for (int j = 0; j < bins; j++) { 
-      DPCountError += abs(dpI[j] - trueI[j]);
+      DPStoreErrorPoint += abs(DPCountPoint[j] - TrueRecordPoint[j]);
+      DPErrorPoint += abs(DPCountPoint[j] - TrueCountPoint[j]);
+      TTStoreErrorPoint += abs(TrueCountPoint[j] - TrueRecordPoint[j]);
     }
-   // cout << "DPCountError: " << DPCountError << endl;
-    metricDPError[i] = DPCountError;  
-
-    // metric 3: sort errors = (dp count - true records)  
-    // step1: compute the #true for each interval's data and then add them up 
-    std::vector<int> trueR = computeTrueRecords(dpI, mainData); 
-      
-    // step2: compute the error for DP store 
-    double DPStoreError = 0;
-    for (int j = 0; j < bins; j++) { 
-      DPStoreError += abs(dpI[j] - trueR[j]);
-    }
-   // cout << "DPStoreError: " << DPStoreError << endl;
-    metricDPStoreError[i] = DPStoreError;
-
-    // metric errors = (true count - true records)  
-    double TTStoreError = 0;
-    for (int j = 0; j < bins; j++) { 
-      TTStoreError += abs(trueI[j] - trueR[j]);
-    }
-    metricTTStoreError[i] = TTStoreError;
-
-    //debug
-    if (debugPrint) {
-      cout << "dp count: ";
-      for (int j = 0; j < bins; j++) {
-        cout << dpI[j] << ' ';
+    // for all time point
+    metricRunTimePoint[i] = durationPointQ.count() / 1000;
+    metricDPErrorPoint[i] = DPErrorPoint;
+    metricDPStoreErrorPoint[i] = DPStoreErrorPoint;
+    metricTTStoreErrorPoint[i] = TTStoreErrorPoint;
+    
+    // range queries -------------------------------------------------------------------------------------------
+    auto startRangeQ = high_resolution_clock::now();
+    // step1: get DP count and DP records
+    std::vector<std::vector<int> > rangeQuery;
+    for (int j = 0; j < bins; j++) {   
+      for (int k = j; k < bins; k++) {   
+        vector<int> vect{j, k};
+        rangeQuery.push_back(vect);
       }
-      cout << endl;
-      cout << "true count: ";
-      for (int j = 0; j < bins; j++) {
-        cout << trueI[j] << ' ';
-      }
-      cout << endl;
-      cout << "true record: ";
-      for (int j = 0; j < bins; j++) {
-        cout << trueR[j] << ' ';
-      }
-      cout << endl;
     }
-    //debug
-    */
+    int querySize = rangeQuery.size();
+    std::vector<int> DPCountRange(querySize, 0);
+    std::vector<int> TrueCountRange(querySize, 0);
+    std::vector<int> TrueRecordRange(querySize, 0);
+   
+    for (int j = 0; j < querySize; j++) {   
+      std::vector<int> resultBins = rangeQuery[j];   // given a query 
+      std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
+      int DPCounter, TrueCounter;
+      // note that the returned trueCounter is only for test purpose
+      std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, originalData[i], originalDummyMarkers[i], originalDataEncodedNot[i]);
+      DPCountRange[j] = DPCounter;
+      TrueCountRange[j] = TrueCounter;
+      // process returned records to filter out dummy -- this is only for trusted clients 
+      std::vector<int> resultTrueRecords = returnTrueRecords(party, ansOriginalData, ansOriginalDummyMarkers, TrueCounter);
+      TrueRecordRange[j] = resultTrueRecords.size();
+     }
+    auto afterRangeQ = high_resolution_clock::now();
+    // metric 1: query process time for all point queries 
+    auto durationRangeQ  = duration_cast<microseconds>(afterRangeQ  - startRangeQ );
+    // cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
+    // metric 2: accuracy time for all point queries 
+    double DPStoreErrorRange = 0;
+    double DPErrorRange = 0;
+    double TTStoreErrorRange = 0;
+    for (int j = 0; j < querySize; j++) { 
+      DPStoreErrorRange += abs(DPCountRange[j] - TrueRecordRange[j]);
+      DPErrorRange += abs(DPCountRange[j] - TrueCountRange[j]);
+      TTStoreErrorRange += abs(TrueCountRange[j] - TrueRecordRange[j]);
+    }
+    // for all time point
+    metricRunTimeRange[i] = durationRangeQ.count() / 1000;
+    metricDPErrorRange[i] = DPErrorRange;
+    metricDPStoreErrorRange[i] = DPStoreErrorRange;
+    metricTTStoreErrorRange[i] = TTStoreErrorRange;
   }
+  
 
   std::ofstream outFile;
   outFile.open(fileNameOut, std::ios_base::app);//std::ios_base::app
  
   cout << "********************************************************************* " << endl;
   outFile << "********************************************************************* " << endl;
-  cout << "metricRunTimeDP: ";
-  outFile << "metricRunTimeDP: ";
+  cout << "metricRunTimePoint: ";
+  outFile << "metricRunTimePoint: ";
   for (int i = 0; i < t; i++) {
-    cout << metricRunTimeDP[i];
-    outFile << metricRunTimeDP[i];
+    cout << metricRunTimePoint[i];
+    outFile << metricRunTimePoint[i];
     if (i != t-1){
      cout << ", ";
      outFile << ", ";
@@ -277,11 +279,12 @@ int main(int argc, char** argv) {
   } 
   cout << endl;
   outFile << endl;
-  cout << "metricRunTimeDPSort: ";
-  outFile << "metricRunTimeDPSort: ";
+  
+  cout << "metricDPErrorPoint: ";
+  outFile << "metricDPErrorPoint: ";
   for (int i = 0; i < t; i++) {
-    cout << metricRunTimeDPSort[i]; 
-    outFile << metricRunTimeDPSort[i]; 
+    cout << metricDPErrorPoint[i];
+    outFile << metricDPErrorPoint[i];
     if (i != t-1){
      cout << ", ";
      outFile << ", ";
@@ -289,35 +292,11 @@ int main(int argc, char** argv) {
   } 
   cout << endl;
   outFile << endl;
-  cout << "metricRunTimeDPMerge: ";
-  outFile << "metricRunTimeDPMerge: ";
+  cout << "metricDPStoreErrorPoint: ";
+  outFile << "metricDPStoreErrorPoint: ";
   for (int i = 0; i < t; i++) {
-    cout << metricRunTimeDPMerge[i];
-    outFile << metricRunTimeDPMerge[i];
-    if (i != t-1){
-     cout << ", ";
-     outFile << ", ";
-    }
-  } 
-  cout << endl;
-  outFile << endl;
-  cout << "metricDPError: ";
-  outFile << "metricDPError: ";
-  for (int i = 0; i < t; i++) {
-    cout << metricDPError[i];
-    outFile << metricDPError[i];
-    if (i != t-1){
-     cout << ", ";
-     outFile << ", ";
-    }
-  } 
-  cout << endl;
-  outFile << endl;
-  cout << "metricDPStoreError: ";
-  outFile << "metricDPStoreError: ";
-  for (int i = 0; i < t; i++) {
-    cout << metricDPStoreError[i];
-    outFile << metricDPStoreError[i];
+    cout << metricDPStoreErrorPoint[i];
+    outFile << metricDPStoreErrorPoint[i];
     if (i != t-1){
      cout << ", ";
      outFile << ", ";
@@ -325,11 +304,64 @@ int main(int argc, char** argv) {
   } 
   cout << endl;
   outFile << endl; 
-  cout << "metricTTStoreError: ";
-  outFile << "metricTTStoreError: ";
+  cout << "metricTTStoreErrorPoint: ";
+  outFile << "metricTTStoreErrorPoint: ";
   for (int i = 0; i < t; i++) {
-    cout << metricTTStoreError[i];
-    outFile << metricTTStoreError[i];
+    cout << metricTTStoreErrorPoint[i];
+    outFile << metricTTStoreErrorPoint[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+
+
+  cout << "********************************************************************* " << endl;
+  outFile << "********************************************************************* " << endl;
+  cout << "metricRunTimeRange: ";
+  outFile << "metricRunTimeRange: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRunTimeRange[i];
+    outFile << metricRunTimeRange[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  
+  cout << "metricDPErrorRange: ";
+  outFile << "metricDPErrorRange: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricDPErrorRange[i];
+    outFile << metricDPErrorRange[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  cout << "metricDPStoreErrorRange: ";
+  outFile << "metricDPStoreErrorRange: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricDPStoreErrorRange[i];
+    outFile << metricDPStoreErrorRange[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl; 
+  cout << "metricTTStoreErrorRange: ";
+  outFile << "metricTTStoreErrorRange: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricTTStoreErrorRange[i];
+    outFile << metricTTStoreErrorRange[i];
     if (i != t-1){
      cout << ", ";
      outFile << ", ";

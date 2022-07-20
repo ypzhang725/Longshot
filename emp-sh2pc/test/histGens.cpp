@@ -219,7 +219,7 @@ std::vector<int> trueHistGen(int party, std::vector<int> number, std::vector<int
 }
 
 // number: original data; number2: dummy mark; number3: random number;
-std::pair<int, std::vector<int> >  computeDPCountMark(int party, std::vector<int> number, std::vector<int> number2, std::vector<int> number3, std::vector<int> bins, std::vector<int> noise){
+std::tuple<int, std::vector<int>, int>  computeDPCountMark(int party, std::vector<int> number, std::vector<int> number2, std::vector<int> number3, std::vector<int> bins, std::vector<int> noise){
   // reconstruct original data
   int size = number.size();
   int binSize = bins.size();
@@ -229,7 +229,6 @@ std::pair<int, std::vector<int> >  computeDPCountMark(int party, std::vector<int
   Integer count(32, 0, BOB);
   Integer zero(32, 0, BOB);
   Integer one(32, 1, BOB);
-
   for(int i = 0; i < size; ++i){
     Integer bin_num = res[i] - one;     // warning 
     Bit eq_bin(false, BOB);                  
@@ -240,27 +239,45 @@ std::pair<int, std::vector<int> >  computeDPCountMark(int party, std::vector<int
     count = If(eq_bin, count + one, count);  
     res_d[i] = If(eq_bin, zero, one);  // zero: ans, one: others
   }
-  
   // add noise
   Integer *res_lap = addedNoise(noise);
-  count = count + res_lap[0];
-  
-  int count_pub = count.reveal<int32_t>();
+  Integer DPCount = count + res_lap[0];
+  int DPCount_pub = DPCount.reveal<int32_t>();
+  int TrueCount_pub = count.reveal<int32_t>();
   
   // return dummy records 
   Integer *sh1 = reconstructArray(number3);  // reconstruct random number
   Integer *sh2 = generateSh2(sh1, res_d, size);  // generate secret shares   
-   
   std::vector<int> realSh1 = revealSh(sh1, size, ALICE);
   std::vector<int> realSh2 = revealSh(sh2, size, BOB);
-
   if (party == ALICE) {
-    return std::make_pair(count_pub, realSh1); 
+    return std::make_tuple(DPCount_pub, realSh1, TrueCount_pub); 
   }
   else {
-    return std::make_pair(count_pub, realSh2); 
+    return std::make_tuple(DPCount_pub, realSh2, TrueCount_pub); 
   }
 }
+
+std::vector<int> returnTrueRecords(int party, std::vector<int> number, std::vector<int> number2, int trueCount) {
+  // reconstruct original data
+  Integer *res = reconstructArray(number);
+ 
+  // reconstruct dummy mark
+  Integer *res_d = reconstructArray(number2);
+
+  // true records 
+  std::vector<int> trueRecords(trueCount, 0);
+  int size =  number2.size();
+  int cnt = 0;
+  for(int i = 0; i < size; ++i){
+    if (res_d[i].reveal<int32_t>() == 0){
+      trueRecords[cnt] = res[i].reveal<int32_t>();
+      cnt++;
+    }
+  }
+  return trueRecords;
+}
+
 
 // for debug
 std::vector<int> computeTrueNumber(std::vector<std::vector<int> > number, int bins){
