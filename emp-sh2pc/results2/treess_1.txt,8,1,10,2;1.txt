@@ -12,3 +12,75 @@ metricRunTimeDPMerge: 3, 1, 15, 2, 17, 15, 26, 1
 metricDPError: 10, 15, 25, 15, 25, 30, 40, 20
 metricDPStoreError: 10, 15, 25, 15, 25, 30, 40, 20
 metricTTStoreError: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 42, 15, 59, 24, 64, 23, 53, 30
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 2, 0, 28, 1, 16, 22, 37, 3
+metricRunTimePointQuery: 1135, 2574, 9828, 29291, 5269, 9626, 13922, 11659
+metricRunTimeRangeQuery: 1137, 2577, 9831, 29294, 5271, 9628, 13924, 11661
+metricDPErrorP: 10, 15, 25, 15, 25, 30, 40, 20
+metricDPStoreErrorP: 10, 15, 25, 15, 25, 30, 40, 20
+metricTTStoreErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPErrorR: 70, 105, 175, 105, 175, 210, 280, 140
+metricDPStoreErrorR: 70, 105, 175, 105, 175, 210, 280, 140
+metricTTStoreErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 37, 14, 35, 16, 36, 14, 38, 20
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 1, 0, 15, 0, 14, 16, 25, 0
+metricRunTimePointQuery: 569, 1298, 2298, 2182, 2699, 3143, 4480, 4133
+metricRunTimeRangeQuery: 571, 1300, 2300, 2184, 2701, 3145, 4483, 4135
+metricDPErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 41, 14, 37, 16, 35, 14, 38, 20
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 1, 1, 12, 0, 15, 13, 24, 0
+metricRunTimePointQuery: 594, 2113, 2176, 2084, 2687, 3562, 4688, 4166
+metricRunTimeRangeQuery: 596, 2116, 2178, 2086, 2689, 3564, 4691, 4168
+metricDPErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 38, 13, 37, 15, 36, 14, 36, 21
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 3, 0, 12, 0, 17, 14, 24, 1
+metricRunTimePointQuery: 577, 1121, 1681, 2269, 2763, 3245, 4137, 4817
+metricRunTimeRangeQuery: 551, 1102, 1741, 2252, 2589, 3942, 4223, 4549
+metricDPErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 36, 13, 36, 16, 37, 14, 36, 20
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 2, 2, 15, 1, 17, 18, 27, 2
+metricRunTimePointQuery: 580, 1168, 1894, 2197, 3536, 3874, 4202, 4750
+metricRunTimeRangeQuery: 566, 1173, 1640, 2218, 2729, 3845, 4042, 4626
+metricDPErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeDP: 34, 13, 35, 16, 34, 14, 37, 21
+metricRunTimeDPSort: 0, 0, 0, 0, 0, 0, 0, 0
+metricRunTimeDPMerge: 2, 2, 15, 1, 15, 14, 27, 2
+metricRunTimePointQuery: 610, 1307, 1670, 2275, 2759, 3337, 4151, 4760
+metricRunTimeRangeQuery: 628, 1114, 1629, 2236, 2635, 3767, 3850, 4576
+metricDPErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorP: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorR: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorR: 0, 0, 0, 0, 0, 0, 0, 0

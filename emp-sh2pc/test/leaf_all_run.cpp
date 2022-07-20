@@ -154,9 +154,16 @@ int main(int argc, char** argv) {
   std::vector<double> metricRunTimeDP(t);
   std::vector<double> metricRunTimeDPMerge(t);
   std::vector<double> metricRunTimeDPSort(t);
-  std::vector<double> metricDPError(t);  // |DP count - true count|
-  std::vector<double> metricDPStoreError(t);  // |DP count - true record|
-  std::vector<double> metricTTStoreError(t);  // |true count - true record|
+
+  std::vector<double> metricRunTimePointQuery(t);
+  std::vector<double> metricDPErrorP(t);  // |DP count - true count|
+  std::vector<double> metricDPStoreErrorP(t);  // |DP count - true record|
+  std::vector<double> metricTTStoreErrorP(t);  // |true count - true record|
+  std::vector<double> metricRunTimeRangeQuery(t);
+  std::vector<double> metricDPErrorR(t);  // |DP count - true count|
+  std::vector<double> metricDPStoreErrorR(t);  // |DP count - true record|
+  std::vector<double> metricTTStoreErrorR(t);  // |true count - true record|
+
   std::vector<double> metricss(t);
   // secure part 
   std::vector<int> mainData(t);
@@ -207,148 +214,213 @@ int main(int argc, char** argv) {
     }
     //debug
 
-    if (true) {
-      // step3: sortCacheUsingDP
-      // previously left records + new records in the cache --> sort using DP histogram
-      leftCacheData.insert(leftCacheData.end(), originalData[i].begin(), originalData[i].end());
-      leftCacheDataEncodedNot.insert(leftCacheDataEncodedNot.end(), originalDataEncodedNot[i].begin(), originalDataEncodedNot[i].end());
-      leftCacheDummyMarker.insert(leftCacheDummyMarker.end(), originalDummyMarkers[i].begin(), originalDummyMarkers[i].end());
-      int sizeCache = leftCacheData.size();
-      std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
-      auto ssBefore = high_resolution_clock::now();
-     // std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins);
-      std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDPNew(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins, num_dummy_bin);
-      auto ssAfter = high_resolution_clock::now();
-      auto durationss = duration_cast<microseconds>(ssAfter - ssBefore);
-      metricss[i] = durationss.count();
-      cout << "ss" << durationss.count() << " num: "<< leftCacheData.size()<<endl;  
-      // total DP count = #records we want to retrieve --> sorted cache + left cache 
-      int totalRecords = accumulate(dpHists[i].begin(), dpHists[i].end(), 0);
-      std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords, 0);
-      std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords, 0);
-      std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords, 0);
+     
+    // step3: sortCacheUsingDP
+    // previously left records + new records in the cache --> sort using DP histogram
+    leftCacheData.insert(leftCacheData.end(), originalData[i].begin(), originalData[i].end());
+    leftCacheDataEncodedNot.insert(leftCacheDataEncodedNot.end(), originalDataEncodedNot[i].begin(), originalDataEncodedNot[i].end());
+    leftCacheDummyMarker.insert(leftCacheDummyMarker.end(), originalDummyMarkers[i].begin(), originalDummyMarkers[i].end());
+    int sizeCache = leftCacheData.size();
+    std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
+    auto ssBefore = high_resolution_clock::now();
+    // std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins);
+    std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDPNew(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins, num_dummy_bin);
+    auto ssAfter = high_resolution_clock::now();
+    auto durationss = duration_cast<microseconds>(ssAfter - ssBefore);
+    metricss[i] = durationss.count();
+    cout << "ss" << durationss.count() << " num: "<< leftCacheData.size()<<endl;  
+    // total DP count = #records we want to retrieve --> sorted cache + left cache 
+    int totalRecords = accumulate(dpHists[i].begin(), dpHists[i].end(), 0);
+    std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords, 0);
+    std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords, 0);
+    std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords, 0);
 
-      std::vector<int> sortedRecord = seperatedRecord.first;
-      leftCacheData = seperatedRecord.second;
-      std::vector<int> sortedDummy = seperatedDummyMarker.first;
-      leftCacheDummyMarker = seperatedDummyMarker.second;
-      std::vector<int> sortedRecordEncodedNot = seperatedRecordEncodedNot.first;
-      leftCacheDataEncodedNot = seperatedRecordEncodedNot.second;
+    std::vector<int> sortedRecord = seperatedRecord.first;
+    leftCacheData = seperatedRecord.second;
+    std::vector<int> sortedDummy = seperatedDummyMarker.first;
+    leftCacheDummyMarker = seperatedDummyMarker.second;
+    std::vector<int> sortedRecordEncodedNot = seperatedRecordEncodedNot.first;
+    leftCacheDataEncodedNot = seperatedRecordEncodedNot.second;
 
-      //debug
-      if (debugPrint) {      
-          /*mainSize += totalRecords;
-        Integer *sortedRecordsortedRecord = reconstructArray(sortedRecord);
-        Integer *leftRecordleftRecord = reconstructArray(leftCacheData);
-        cout << "sortedRecordsortedRecord" << ' ';
-        printArray(sortedRecordsortedRecord, sortedRecord.size());
-        cout << "leftRecordleftRecord" << ' ';
-        printArray(leftRecordleftRecord, leftCacheData.size());
-         Integer *sortedDummysortedDummy = reconstructArray(sortedDummy);
-        Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
-        cout << "sortedDummysortedDummy" << ' ';
-        printArray(sortedDummysortedDummy, sortedDummy.size());
-        cout << "leftDummyleftDummy" << ' ';
-        printArray(leftDummyleftDummy, leftCacheDummyMarker.size());
-        Integer *sortedRecordsortedRecordEncodedNot = reconstructArray(sortedRecordEncodedNot);
-        Integer *leftRecordleftRecordEncodedNot = reconstructArray(leftCacheDataEncodedNot);
-        cout << "sortedRecordsortedRecordEncodedNot" << ' ';
-        printArray(sortedRecordsortedRecordEncodedNot, sortedRecordEncodedNot.size());
-        cout << "leftRecordleftRecordEncodedNot" << ' ';
-        printArray(leftRecordleftRecordEncodedNot, leftCacheDataEncodedNot.size());
-        cout << "sortedRecord.size(): " << sortedRecord.size() << endl;*/
-      }
-      //debug
-
-      // step4: dpMerge
-      // DP histogram for main data store
-      auto DPMergeBefore = high_resolution_clock::now();
-      std::vector<int> dp_main(bins, 0);
-      for (int j = 0; j < i; j++) { 
-        dp_main = addTwoVectors(dp_main, dpHists[j]);
-      }
-      // merge main and cache
-      mainData = merge2SortedArr(dp_main, dpHists[i], mainData, sortedRecord, bins);
-      mainDummyMarker = merge2SortedArr(dp_main, dpHists[i], mainDummyMarker, sortedDummy, bins);
-      mainDataEncodedNot = merge2SortedArr(dp_main, dpHists[i], mainDataEncodedNot, sortedRecordEncodedNot, bins);
-      auto DPMergeAfter = high_resolution_clock::now();
-      auto durationDPMerge = duration_cast<microseconds>(DPMergeAfter - DPMergeBefore);
-      metricRunTimeDPMerge[i] = durationDPMerge.count();
-
-      //debug
-      if (debugPrint) {
-        Integer *mainmain = reconstructArray(mainData);
-        cout << "mainmain: " << ' ';
-        printArray(mainmain, mainData.size());
-        Integer *mainmaindummy = reconstructArray(mainDummyMarker);
-        cout << "mainmaindummy: " << ' ';
-        printArray(mainmaindummy, mainDummyMarker.size());
-      }
+    //debug
+    if (debugPrint) {      
+        /*mainSize += totalRecords;
+      Integer *sortedRecordsortedRecord = reconstructArray(sortedRecord);
+      Integer *leftRecordleftRecord = reconstructArray(leftCacheData);
+      cout << "sortedRecordsortedRecord" << ' ';
+      printArray(sortedRecordsortedRecord, sortedRecord.size());
+      cout << "leftRecordleftRecord" << ' ';
+      printArray(leftRecordleftRecord, leftCacheData.size());
+        Integer *sortedDummysortedDummy = reconstructArray(sortedDummy);
+      Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
+      cout << "sortedDummysortedDummy" << ' ';
+      printArray(sortedDummysortedDummy, sortedDummy.size());
+      cout << "leftDummyleftDummy" << ' ';
+      printArray(leftDummyleftDummy, leftCacheDummyMarker.size());
+      Integer *sortedRecordsortedRecordEncodedNot = reconstructArray(sortedRecordEncodedNot);
+      Integer *leftRecordleftRecordEncodedNot = reconstructArray(leftCacheDataEncodedNot);
+      cout << "sortedRecordsortedRecordEncodedNot" << ' ';
+      printArray(sortedRecordsortedRecordEncodedNot, sortedRecordEncodedNot.size());
+      cout << "leftRecordleftRecordEncodedNot" << ' ';
+      printArray(leftRecordleftRecordEncodedNot, leftCacheDataEncodedNot.size());
+      cout << "sortedRecord.size(): " << sortedRecord.size() << endl;*/
     }
+    //debug
 
+    // step4: dpMerge
+    // DP histogram for main data store
+    auto DPMergeBefore = high_resolution_clock::now();
+    std::vector<int> dp_main(bins, 0);
+    for (int j = 0; j < i; j++) { 
+      dp_main = addTwoVectors(dp_main, dpHists[j]);
+    }
+    // merge main and cache
+    mainData = merge2SortedArr(dp_main, dpHists[i], mainData, sortedRecord, bins);
+    mainDummyMarker = merge2SortedArr(dp_main, dpHists[i], mainDummyMarker, sortedDummy, bins);
+    mainDataEncodedNot = merge2SortedArr(dp_main, dpHists[i], mainDataEncodedNot, sortedRecordEncodedNot, bins);
+    auto DPMergeAfter = high_resolution_clock::now();
+    auto durationDPMerge = duration_cast<microseconds>(DPMergeAfter - DPMergeBefore);
+    metricRunTimeDPMerge[i] = durationDPMerge.count();
+
+    //debug
+    if (debugPrint) {
+      Integer *mainmain = reconstructArray(mainData);
+      cout << "mainmain: " << ' ';
+      printArray(mainmain, mainData.size());
+      Integer *mainmaindummy = reconstructArray(mainDummyMarker);
+      cout << "mainmaindummy: " << ' ';
+      printArray(mainmaindummy, mainDummyMarker.size());
+    }
+    
     // metric 1: run time
-    auto afterDPSort = high_resolution_clock::now();
+    //auto afterDPSort = high_resolution_clock::now();
     auto durationDP = duration_cast<microseconds>(afterDP - start);
-    auto durationDPSort = duration_cast<microseconds>(afterDPSort - afterDP);
+    auto durationDPSort = duration_cast<microseconds>(DPMergeBefore - afterDP);  
    // cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
     metricRunTimeDP[i] = durationDP.count() / 1000;
     metricRunTimeDPSort[i] = durationDPSort.count() / 1000000;
 
-    // metric 2: DP accuracy for query 0 -- i
-    // step1: add DP histograms that cover 0 -- i 
+    // point query ======= 
+    // metric 2: DP accuracy for Point query 0 -- i
+    // add DP histograms that cover 0 -- i 
+    auto PointQueryBefore = high_resolution_clock::now();
     std::vector<string> intervalss;
-    std::vector<int> dpI(bins, 0);
+    std::vector<int> PdpI(bins, 0);
     for (int j = 0; j <= i; j++) { 
-      dpI = addTwoVectors(dpI, dpHists[j]);
+      PdpI = addTwoVectors(PdpI, dpHists[j]);
     }
-    // step2: compute true histograms that cover 0 -- i
+    // compute the #true for each interval's data and then add them up 
+    std::vector<int> PtrueR = computeTrueRecords(PdpI, mainData, mainDummyMarker); 
+    auto PointQueryAfter = high_resolution_clock::now();
+
+    // range query =======
+    auto RangeQueryBefore = high_resolution_clock::now();
+    std::vector<int> RdpI;
+    int idx = 0;
+    for (int j = 0; j < bins; j++) {   
+      for (int k = j; k < bins; k++) {   
+        RdpI.push_back(0);
+        for (int l = j; l <= k; l++){
+          RdpI[idx] = RdpI[idx] + PdpI[l];
+        }
+        idx++;
+      }
+    } 
+    std::vector<int> RtrueR = computeTrueRecordRange(PdpI, mainData, mainDummyMarker); 
+    auto RangeQueryAfter = high_resolution_clock::now();
+
+    auto durationPointQuery= duration_cast<microseconds>(PointQueryAfter - PointQueryBefore);
+    metricRunTimePointQuery[i] = durationPointQuery.count();
+    auto durationRangeQuery= duration_cast<microseconds>(RangeQueryAfter - RangeQueryBefore);
+    metricRunTimeRangeQuery[i] = durationRangeQuery.count();
+
+    // compute true histograms that cover 0 -- i
     std::vector<std::vector<int> > trueHistgramsT(i+1);
     for (int j = 0; j <= i; j++) { 
      trueHistgramsT[j] = trueHists[j];
     }
-    std::vector<int> trueI = computeTrueNumber(trueHistgramsT, bins);
-    // step3: compute the error for DP count 
-    double DPCountError = 0;
+    std::vector<int> PtrueI = computeTrueNumber(trueHistgramsT, bins);
+    std::vector<int> RtrueI;
+    int idx2 = 0;
+    for (int j = 0; j < bins; j++) {   
+      for (int k = j; k < bins; k++) {   
+        RtrueI.push_back(0);
+        for (int l = j; l <= k; l++){
+          RtrueI[idx2] = RtrueI[idx2] + PtrueI[l];
+        }
+        idx2++;
+      }
+    }
+    int rangeQuerySize = RtrueI.size();
+    // compute the error for DP count 
+    double DPCountErrorP = 0;
+    double DPCountErrorR = 0;
     for (int j = 0; j < bins; j++) { 
-      DPCountError += abs(dpI[j] - trueI[j]);
+      DPCountErrorP += abs(PdpI[j] - PtrueI[j]);
+    }
+    for (int j = 0; j < rangeQuerySize; j++) { 
+      DPCountErrorR += abs(RdpI[j] - RtrueI[j]);
     }
    // cout << "DPCountError: " << DPCountError << endl;
-    metricDPError[i] = DPCountError;  
+    metricDPErrorP[i] = DPCountErrorP;  
+    metricDPErrorR[i] = DPCountErrorR;  
 
-    // metric 3: sort errors = (dp count - true records)  
-    // step1: compute the #true for each interval's data and then add them up 
-    std::vector<int> trueR = computeTrueRecords(dpI, mainData, mainDummyMarker); 
-      
-    // step2: compute the error for DP store 
-    double DPStoreError = 0;
+    // metric sort errors = (dp count - true records)  
+    // compute the error for DP store 
+    double DPStoreErrorP = 0;
+    double DPStoreErrorR = 0;
     for (int j = 0; j < bins; j++) { 
-      DPStoreError += abs(dpI[j] - trueR[j]);
+      DPStoreErrorP += abs(PdpI[j] - PtrueR[j]);
+    }
+    for (int j = 0; j < rangeQuerySize; j++) { 
+      DPStoreErrorR += abs(RdpI[j] - RtrueR[j]);
     }
    // cout << "DPStoreError: " << DPStoreError << endl;
-    metricDPStoreError[i] = DPStoreError;
+    metricDPStoreErrorP[i] = DPStoreErrorP;
+    metricDPStoreErrorR[i] = DPStoreErrorR;
 
     // metric errors = (true count - true records)  
-    double TTStoreError = 0;
+    double TTStoreErrorP = 0;
+    double TTStoreErrorR = 0;
     for (int j = 0; j < bins; j++) { 
-      TTStoreError += abs(trueI[j] - trueR[j]);
+      TTStoreErrorP += abs(PtrueI[j] - PtrueR[j]);
     }
-    metricTTStoreError[i] = TTStoreError;
+    for (int j = 0; j < rangeQuerySize; j++) { 
+      TTStoreErrorR += abs(RtrueI[j] - RtrueR[j]);
+    }
+    metricTTStoreErrorP[i] = TTStoreErrorP;
+    metricTTStoreErrorR[i] = TTStoreErrorR;
 
     //debug
     if (debugPrint) {
-      cout << "dp count: ";
+      cout << "dp count P: ";
       for (int j = 0; j < bins; j++) {
-        cout << dpI[j] << ' ';
+        cout << PdpI[j] << ' ';
       }
       cout << endl;
-      cout << "true count: ";
+      cout << "true count P: ";
       for (int j = 0; j < bins; j++) {
-        cout << trueI[j] << ' ';
+        cout << PtrueI[j] << ' ';
       }
       cout << endl;
-      cout << "true record: ";
+      cout << "true record P: ";
       for (int j = 0; j < bins; j++) {
-        cout << trueR[j] << ' ';
+        cout << PtrueR[j] << ' ';
+      }
+      cout << endl;
+      cout << "dp count R: ";
+      for (int j = 0; j < rangeQuerySize; j++) {
+        cout << RdpI[j] << ' ';
+      }
+      cout << endl;
+      cout << "true count R: ";
+      for (int j = 0; j < rangeQuerySize; j++) {
+        cout << RtrueI[j] << ' ';
+      }
+      cout << endl;
+      cout << "true record R: ";
+      for (int j = 0; j < rangeQuerySize; j++) {
+        cout << RtrueR[j] << ' ';
       }
       cout << endl;
     }
@@ -396,11 +468,14 @@ int main(int argc, char** argv) {
   } 
   cout << endl;
   outFile << endl;
-  cout << "metricDPError: ";
-  outFile << "metricDPError: ";
+
+
+  // query processing runtime 
+  cout << "metricRunTimePointQuery: ";
+  outFile << "metricRunTimePointQuery: ";
   for (int i = 0; i < t; i++) {
-    cout << metricDPError[i];
-    outFile << metricDPError[i];
+    cout << metricRunTimePointQuery[i];
+    outFile << metricRunTimePointQuery[i];
     if (i != t-1){
      cout << ", ";
      outFile << ", ";
@@ -408,11 +483,36 @@ int main(int argc, char** argv) {
   } 
   cout << endl;
   outFile << endl;
-  cout << "metricDPStoreError: ";
-  outFile << "metricDPStoreError: ";
+  cout << "metricRunTimeRangeQuery: ";
+  outFile << "metricRunTimeRangeQuery: ";
   for (int i = 0; i < t; i++) {
-    cout << metricDPStoreError[i];
-    outFile << metricDPStoreError[i];
+    cout << metricRunTimeRangeQuery[i];
+    outFile << metricRunTimeRangeQuery[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  // query processing error  
+  cout << "metricDPErrorP: ";
+  outFile << "metricDPErrorP: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricDPErrorP[i];
+    outFile << metricDPErrorP[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  cout << "metricDPStoreErrorP: ";
+  outFile << "metricDPStoreErrorP: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricDPStoreErrorP[i];
+    outFile << metricDPStoreErrorP[i];
     if (i != t-1){
      cout << ", ";
      outFile << ", ";
@@ -420,11 +520,48 @@ int main(int argc, char** argv) {
   } 
   cout << endl;
   outFile << endl; 
-  cout << "metricTTStoreError: ";
-  outFile << "metricTTStoreError: ";
+  cout << "metricTTStoreErrorP: ";
+  outFile << "metricTTStoreErrorP: ";
   for (int i = 0; i < t; i++) {
-    cout << metricTTStoreError[i];
-    outFile << metricTTStoreError[i];
+    cout << metricTTStoreErrorP[i];
+    outFile << metricTTStoreErrorP[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+
+  cout << "metricDPErrorR: ";
+  outFile << "metricDPErrorR: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricDPErrorR[i];
+    outFile << metricDPErrorR[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  cout << "metricDPStoreErrorR: ";
+  outFile << "metricDPStoreErrorR: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricDPStoreErrorR[i];
+    outFile << metricDPStoreErrorR[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl; 
+  cout << "metricTTStoreErrorR: ";
+  outFile << "metricTTStoreErrorR: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricTTStoreErrorR[i];
+    outFile << metricTTStoreErrorR[i];
     if (i != t-1){
      cout << ", ";
      outFile << ", ";

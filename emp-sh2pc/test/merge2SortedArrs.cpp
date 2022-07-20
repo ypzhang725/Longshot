@@ -87,6 +87,41 @@ std::vector<int> computeTrueRecords(std::vector<int> dpHist, std::vector<int> dp
   return trueR;
 }
 
+std::vector<int> computeTrueRecordRange(std::vector<int> dpHist, std::vector<int> dpStore, std::vector<int> dpStoreDummy){
+  int binNum = dpHist.size();
+  int recordNum = dpStore.size();
+  Integer * dpStoreI = reconstructArray(dpStore);
+  std::vector<int> dpStorePublic = revealSh(dpStoreI, recordNum, PUBLIC);
+  Integer * dpStoreIDummy = reconstructArray(dpStoreDummy);
+  std::vector<int> dpStorePublicDummy = revealSh(dpStoreIDummy, recordNum, PUBLIC);
+
+  // prefix 
+  std::vector<int> dpHistPrefix_tmp = computePrefix(dpHist);
+  dpHistPrefix_tmp[binNum-1] = recordNum;  // cut DP hist to be consistent with the dpStore; assume that only last bin
+  std::vector<int> dpHistPrefix(binNum+1, 0); 
+  for (int j = 0; j < binNum; j++) {
+    dpHistPrefix[j+1] = dpHistPrefix_tmp[j];
+  }
+
+  // compute the number of true records 
+  std::vector<int> trueR;
+  int idx = 0;
+  for (int j = 0; j < binNum; j++) {   
+    for (int k = j; k < binNum; k++) {    // all range queries [j, k]
+      trueR.push_back(0);
+      for (int l = dpHistPrefix[j]; l < dpHistPrefix[k+1]; l++){   // for these records 
+        for (int m = j; m <= k; m++){
+          if (((dpStorePublic[l]-1) == m) && (dpStorePublicDummy[l] == 0)) { //dpStorePublic[j]: 1122334455
+          trueR[idx]++;
+          }
+        }
+      }
+      idx++;
+    }
+  }
+  return trueR; 
+}
+
 std::pair<std::vector<std::vector<int> >, std::vector<int> > seperateD(std::vector<std::vector<int> > dpMergedPrevious, std::vector<std::vector<int> > dataMergedPrevious, int d, int bins){
   std::vector<std::vector<int> > vectFirst(bins);
   std::vector<int> vectSecond; 
