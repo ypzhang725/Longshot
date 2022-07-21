@@ -164,7 +164,7 @@ def originalDataMarkerHistsTree(T, numReal, num_Dummy, numBins, df):
         # for originalData
         records = [None] * (numReal+numDummy)
         records[0: numReal] = df[i*numReal: (i+1)*numReal].copy()
-        records[numReal: numReal+numDummy] = [10] * numDummy #todo change mpc code
+        records[numReal: numReal+numDummy] = [1000] * numDummy #todo change mpc code
         originalData[i] = records
         # for originalDummyMarker
         DummyMarker = [None] * (numReal+numDummy)
@@ -197,7 +197,7 @@ def originalDataMarkerHistsLeaf(p, eps, T, numReal, numBins, df):
         # for originalData
         records = [None] * (numReal+numDummy)
         records[0: numReal] = df[i*numReal: (i+1)*numReal].copy()
-        records[numReal: numReal+numDummy] = [10] * numDummy #todo change mpc code
+        records[numReal: numReal+numDummy] = [1000] * numDummy #todo change mpc code
         originalData[i] = records
         # for originalDummyMarker
         DummyMarker = [None] * (numReal+numDummy)
@@ -230,6 +230,28 @@ def computeTrueRecords(dpHist, dpStore):
                 num = num+1
         trueR[i] = num
     return trueR 
+
+def computeTrueRecordsRange(dpHist, dpStore):
+    binNum = len(dpHist)
+    recordNum = len(dpStore) 
+            
+    dpHistPrefix_tmp = computePrefix(dpHist)
+    dpHistPrefix_tmp[binNum-1] = recordNum  
+    dpHistPrefix = [0]*(binNum+1)
+    for j in range(binNum):
+        dpHistPrefix[j+1] = dpHistPrefix_tmp[j]
+    trueR = []
+    idx = 0 
+    for j in range(binNum):
+        for k in range(j, binNum, 1): # all range queries [j, k]
+            trueR.append(0) 
+            for l in range(dpHistPrefix[j], dpHistPrefix[k+1], 1):
+                for m in range(j, (k+1), 1): 
+                    if ((dpStore[l]-1) == m):
+                        trueR[idx] = trueR[idx]+1
+
+            idx = idx+1
+
 
 def computeDummyRecordsCache(cache):
     num = 0
@@ -309,6 +331,7 @@ def sortTree(num_dummy, sortOption, gapAgainThreshold, T, numBins, dpHists, orig
     mainData = {}
     mainDummyMarker = {}
     trueRecordNum = [None] * T
+    trueRecordNumRange = [None] * T
     runTimeDPSort = [None] * T
     dummyRecordNumCache = [None] * T
     
@@ -423,13 +446,13 @@ def sortTree(num_dummy, sortOption, gapAgainThreshold, T, numBins, dpHists, orig
             dataToSortSize = len(encodedRecordsSecond)
             sizeDroppedDummy = dataToSortSize - dropDummy
             
+            # sorted root d for this bin + left cache
+            seperatedBinsRecord = seperateBin(sorted_data[0:totalRecords], sortDPdHist)
+            seperatedBinsDummyMarker = seperateBin(sorted_marker[0:totalRecords], sortDPdHist)
             for j in range(numBins):
                 # n-d
                 mainData[intervalRootDP].extend(encodedRecordsFirst[j].copy())
                 mainDummyMarker[intervalRootDP].extend(dummyMarkerFirst[j].copy())
-                # sorted root d for this bin + left cache
-                seperatedBinsRecord = seperateBin(sorted_data[0:totalRecords], sortDPdHist)
-                seperatedBinsDummyMarker = seperateBin(sorted_marker[0:totalRecords], sortDPdHist)
                 
                 mainData[intervalRootDP].extend(seperatedBinsRecord[j].copy())
                 mainDummyMarker[intervalRootDP].extend(seperatedBinsDummyMarker[j].copy())
@@ -453,13 +476,22 @@ def sortTree(num_dummy, sortOption, gapAgainThreshold, T, numBins, dpHists, orig
         
         dummyRecordNumCache[i] = computeDummyRecordsCache(leftCacheDummyMarker)
         intervalss = intervalRangeQ(i) 
+        rangeQuery= []
+        for j in range(bins):   
+            for k in range(j, bins, 1):
+                vect = [j, k]
+                rangeQuery.append(vect)
+        querySize = len(rangeQuery)
       #  print(intervalss)
         trueR = np.array([0]*numBins)
+        RangetrueR = np.array([0]*querySize)
         for interval in intervalss:
             trueR += computeTrueRecords(dpHists[interval], mainData[interval])
+            RangetrueR += computeTrueRecordsRange(dpHists[interval], mainData[interval])
         trueRecordNum[i] = trueR
-        
-    return trueRecordNum, runTimeDPSort, dummyRecordNumCache
+        trueRecordNumRange[i] = RangetrueR
+
+    return trueRecordNum, trueRecordNumRange, runTimeDPSort, dummyRecordNumCache
         
 # step2: dpHistGen for the root of the subtree
 def DPTimeLeaf(T, trueHists, eps, numBins):
@@ -481,6 +513,7 @@ def sortLeaf(T, numBins, dpHists, originalData, originalDummyMarkers):
     mainData = {}
     mainDummyMarker = {}
     trueRecordNum = [None] * T
+    trueRecordNumRange = [None] * T
     runTimeDPSort = [None] * T
     dummyRecordNumCache = [None] * T
     # step4: get the sorted array of the root node 
@@ -511,12 +544,19 @@ def sortLeaf(T, numBins, dpHists, originalData, originalDummyMarkers):
       #  print(leftCacheData)
       #  print(mainDummyMarker)
       #  print(leftCacheDummyMarker)
-        
+        rangeQuery= []
+        for j in range(bins):   
+            for k in range(j, bins, 1):
+                vect = [j, k]
+                rangeQuery.append(vect)
+        querySize = len(rangeQuery)
         trueR = np.array([0]*numBins)
+        RangetrueR = np.array([0]*querySize)
         for j in range(i+1):
             jStr = str(j) + ',' + str(j)
             trueR += computeTrueRecords(dpHists[jStr], mainData[jStr])
+            RangetrueR += computeTrueRecordsRange(dpHists[jStr], mainData[jStr])
         trueRecordNum[j] = trueR
-
-    return trueRecordNum, runTimeDPSort, dummyRecordNumCache
+        trueRecordNumRange[i] = RangetrueR
+    return trueRecordNum, trueRecordNumRange, runTimeDPSort, dummyRecordNumCache
 

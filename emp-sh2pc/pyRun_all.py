@@ -14,7 +14,7 @@ def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
         originalData, originalDummyMarkers, trueHists = originalDataMarkerHistsTree(T, numReal, numDummy, numBins, df)
         dpHists = DPTimeTree(T, trueHists, eps, numBins)
         gapAgainThreshold = 1 
-        trueRecordNum, runTimeDPSort, dummyRecordNumCache = sortTree(numDummy, sortOption, gapAgainThreshold, T, numBins, dpHists, originalData, originalDummyMarkers, eps) # original?
+        trueRecordNum, trueRecordNumRange, runTimeDPSort, dummyRecordNumCache = sortTree(numDummy, sortOption, gapAgainThreshold, T, numBins, dpHists, originalData, originalDummyMarkers, eps) # original?
         #print(trueRecordNum)
 
     else:
@@ -23,7 +23,7 @@ def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
         eps = epsAll
         originalData, originalDummyMarkers, trueHists = originalDataMarkerHistsLeaf(p, eps, T, numReal, numBins, df)
         dpHistsLeaf = DPTimeLeaf(T, trueHists, eps, numBins)
-        trueRecordNum, runTimeDPSort, dummyRecordNumCache = sortLeaf(T, numBins, dpHistsLeaf, originalData, originalDummyMarkers)
+        trueRecordNum, trueRecordNumRange, runTimeDPSort, dummyRecordNumCache = sortLeaf(T, numBins, dpHistsLeaf, originalData, originalDummyMarkers)
 
     DPCount = [None]*T
     trueCount = [None]*T
@@ -44,6 +44,17 @@ def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
         for j in range(i+1):
             trueI += trueHists[j]
         trueCount[i] = trueI
+
+    DPCountRange = []
+    trueCountRange = []
+    idx = 0 
+    for j in range(numBins):
+        for k in range(j, numBins, 1):
+            DPCountRange.append(0) 
+            for l in range(j, (k+1), 1):
+                DPCountRange[idx] = DPCountRange[idx] + DPCount[l]
+                trueCountRange[idx] = trueCountRange[idx] + trueCount[l]
+            idx = idx+1
     
    # print("DPCount: ", DPCount)
  #   print("trueCount: ", trueCount)
@@ -56,9 +67,13 @@ def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
     metricDPError = np.sum(pow(np.array(DPCount) - np.array(trueCount), 2), axis =1)
     metricDPStoreError = np.sum(pow(np.array(DPCount) - np.array(trueRecordNum), 2), axis =1)
     metricTTStoreError = np.sum(pow(np.array(trueCount) - np.array(trueRecordNum), 2), axis =1)
+
+    metricDPErrorRange = np.sum(pow(np.array(DPCountRange) - np.array(trueCountRange), 2), axis =1)
+    metricDPStoreErrorRange = np.sum(pow(np.array(DPCountRange) - np.array(trueRecordNumRange), 2), axis =1)
+    metricTTStoreErrorRange = np.sum(pow(np.array(trueCountRange) - np.array(trueRecordNumRange), 2), axis =1)
     
     
-    return metricDPError, metricDPStoreError, metricTTStoreError, runTimeDPSort, dummyRecordNumCache
+    return metricDPError, metricDPStoreError, metricTTStoreError, metricDPErrorRange, metricDPStoreErrorRange, metricTTStoreErrorRange, runTimeDPSort, dummyRecordNumCache
 
 
 

@@ -183,12 +183,20 @@ int main(int argc, char** argv) {
     std::vector<int> TrueCountPoint(bins, 0);
     std::vector<int> TrueRecordPoint(bins, 0);
   
+    // process data
+    std::vector<int> tempOriginalData;
+    std::vector<int> tempOriginalDummyMarkers;
+    for (int j = 0; j <= i; j++) { 
+      tempOriginalData.insert(tempOriginalData.end(), originalData[j].begin(), originalData[j].end());
+      tempOriginalDummyMarkers.insert(tempOriginalDummyMarkers.end(), originalDummyMarkers[j].begin(), originalDummyMarkers[j].end());
+    }
+
     for (int j = 0; j < bins; j++) {   
       std::vector<int> resultBins{j, j};   // given a query 
       std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
       int DPCounter, TrueCounter;
       // note that the returned trueCounter is only for test purpose
-      std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, originalData[i], originalDummyMarkers[i], originalDataEncodedNot[i]);
+      std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, originalDataEncodedNot[i]);
       DPCountPoint[j] = DPCounter;
       TrueCountPoint[j] = TrueCounter;
       // process returned records to filter out dummy -- this is only for trusted clients 
@@ -234,7 +242,7 @@ int main(int argc, char** argv) {
       std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
       int DPCounter, TrueCounter;
       // note that the returned trueCounter is only for test purpose
-      std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, originalData[i], originalDummyMarkers[i], originalDataEncodedNot[i]);
+      std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, originalDataEncodedNot[i]);
       DPCountRange[j] = DPCounter;
       TrueCountRange[j] = TrueCounter;
       // process returned records to filter out dummy -- this is only for trusted clients 
