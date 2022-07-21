@@ -52,9 +52,9 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = true; 
+  bool constantDP = false; 
   // print 
-  bool debugPrint = true;
+  bool debugPrint = false;
   // privacy budget
   string eps_string = argv[5]; // eps
   double epsALL = std::stod(eps_string);
@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
   int gapAgainThreshold = 1;
 
   string fileNameOutIndex = argv[8]; // out
-  string fileNameOut = "./results2/tree"+fileName_real+","+t_string+","+eps_string+","+N_string+","+sortOption_string+";"+fileNameOutIndex+".txt";
+  string fileNameOut = "./resultsJuly/tree"+fileName_real+","+t_string+","+eps_string+","+N_string+","+sortOption_string+";"+fileNameOutIndex+".txt";
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << "  sortOption: " << sortOption_string << " out:" << fileNameOutIndex << endl;
 
   // prepare input data: original data contains real and dummy records

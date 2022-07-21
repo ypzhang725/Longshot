@@ -93,9 +93,9 @@ int main(int argc, char** argv) {
   string t_string = argv[4]; // t 
   int t = atoi(t_string.c_str());  //  the number of updates
   // constant dp noise
-  bool constantDP = true; 
+  bool constantDP = false; 
   // print 
-  bool debugPrint = true;
+  bool debugPrint = false;
   // privacy budget
   string eps_string = argv[5]; // eps
   double eps = std::stod(eps_string);
@@ -107,6 +107,9 @@ int main(int argc, char** argv) {
    // nyc taxi dataset: 1271413 rows; 4 bins; payment_type
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
+    num_real = std::stod(N_string);
+  } else if ((fileName_real == "bin40_ss1.txt") || (fileName_real == "bin40_ss2.txt")) {
+    bins = 40; // bin number
     num_real = std::stod(N_string);
   } else {
     bins = 5; // bin number
@@ -186,17 +189,19 @@ int main(int argc, char** argv) {
     // process data
     std::vector<int> tempOriginalData;
     std::vector<int> tempOriginalDummyMarkers;
+    std::vector<int> tempOriginalDataEncodedNot;
     for (int j = 0; j <= i; j++) { 
       tempOriginalData.insert(tempOriginalData.end(), originalData[j].begin(), originalData[j].end());
       tempOriginalDummyMarkers.insert(tempOriginalDummyMarkers.end(), originalDummyMarkers[j].begin(), originalDummyMarkers[j].end());
+      tempOriginalDataEncodedNot.insert(tempOriginalDataEncodedNot.end(), originalDataEncodedNot[j].begin(), originalDataEncodedNot[j].end());
     }
-
+    cout << "fff"<<endl;
     for (int j = 0; j < bins; j++) {   
       std::vector<int> resultBins{j, j};   // given a query 
       std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
       int DPCounter, TrueCounter;
       // note that the returned trueCounter is only for test purpose
-      std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, originalDataEncodedNot[i]);
+      std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, tempOriginalDataEncodedNot);
       DPCountPoint[j] = DPCounter;
       TrueCountPoint[j] = TrueCounter;
       // process returned records to filter out dummy -- this is only for trusted clients 
@@ -242,7 +247,7 @@ int main(int argc, char** argv) {
       std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
       int DPCounter, TrueCounter;
       // note that the returned trueCounter is only for test purpose
-      std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, originalDataEncodedNot[i]);
+      std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, tempOriginalDataEncodedNot);
       DPCountRange[j] = DPCounter;
       TrueCountRange[j] = TrueCounter;
       // process returned records to filter out dummy -- this is only for trusted clients 

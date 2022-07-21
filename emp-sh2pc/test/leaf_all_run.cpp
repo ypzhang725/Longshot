@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
   // constant dp noise
   bool constantDP = false; 
   // print 
-  bool debugPrint = true;
+  bool debugPrint = false;
   // privacy budget
   string eps_string = argv[5]; // eps
   double eps = std::stod(eps_string);
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
   }
   
   string fileNameOutIndex = argv[7]; // out
-  string fileNameOut = "./results2/leaf"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
+  string fileNameOut = "./resultsJuly/leaf"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << " out:" << fileNameOutIndex << endl;
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
