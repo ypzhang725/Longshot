@@ -238,9 +238,10 @@ int main(int argc, char** argv) {
       DPCountRange[j] = DPCounter;
       TrueCountRange[j] = TrueCounter;
       // process returned records to filter out dummy -- this is only for trusted clients 
-      std::vector<int> resultTrueRecords = returnTrueRecords(party, ansOriginalData, ansOriginalDummyMarkers, TrueCounter);
-      TrueRecordRange[j] = resultTrueRecords.size();
-     }
+     // std::vector<int> resultTrueRecords = returnTrueRecords(party, ansOriginalData, ansOriginalDummyMarkers, TrueCounter);
+     // TrueRecordRange[j] = resultTrueRecords.size();
+       TrueRecordRange[j] = (DPCounter < TrueCounter) ? DPCounter : TrueCounter;
+      }
     auto afterRangeQ = high_resolution_clock::now();
     // metric 1: query process time for all point queries 
     auto durationRangeQ  = duration_cast<microseconds>(afterRangeQ  - startRangeQ );
