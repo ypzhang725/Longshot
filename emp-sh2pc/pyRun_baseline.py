@@ -97,9 +97,9 @@ def metricBaseline(bins, epsilon, T, numReal):
             DPErrorPoint += abs(DPCountPoint[j] - TrueCountPoint[j])
             TTStoreErrorPoint += abs(TrueCountPoint[j] - TrueRecordPoint[j])
 
-        metricDPErrorPoint[i] = DPErrorPoint;
-        metricDPStoreErrorPoint[i] = DPStoreErrorPoint;
-        metricTTStoreErrorPoint[i] = TTStoreErrorPoint;
+        metricDPErrorPoint[i] = DPErrorPoint / bins
+        metricDPStoreErrorPoint[i] = DPStoreErrorPoint / bins
+        metricTTStoreErrorPoint[i] = TTStoreErrorPoint / bins
 
 
         #range query 
@@ -127,9 +127,9 @@ def metricBaseline(bins, epsilon, T, numReal):
             DPErrorRange += abs(DPCountRange[j] - TrueCountRange[j])
             TTStoreErrorRange += abs(TrueCountRange[j] - TrueRecordRange[j])
 
-        metricDPErrorRange[i] = DPErrorRange
-        metricDPStoreErrorRange[i] = DPStoreErrorRange
-        metricTTStoreErrorRange[i] = TTStoreErrorRange
+        metricDPErrorRange[i] = DPErrorRange / querySize
+        metricDPStoreErrorRange[i] = DPStoreErrorRange / querySize
+        metricTTStoreErrorRange[i] = TTStoreErrorRange / querySize
     return metricDPErrorPoint, metricDPStoreErrorPoint, metricTTStoreErrorPoint, metricDPErrorRange, metricDPStoreErrorRange, metricTTStoreErrorRange       
 
 

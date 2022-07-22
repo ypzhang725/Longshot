@@ -64,14 +64,14 @@ def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
    # metricDPStoreError = np.sum(np.abs(np.array(DPCount) - np.array(trueRecordNum)), axis =1)
    # metricTTStoreError = np.sum(np.abs(np.array(trueCount) - np.array(trueRecordNum)), axis =1)
 
-    metricDPError = np.sum(pow(np.array(DPCount) - np.array(trueCount), 2), axis =1)
-    metricDPStoreError = np.sum(pow(np.array(DPCount) - np.array(trueRecordNum), 2), axis =1)
-    metricTTStoreError = np.sum(pow(np.array(trueCount) - np.array(trueRecordNum), 2), axis =1)
+    metricDPError = np.mean(np.abs(np.array(DPCount) - np.array(trueCount)), axis =1)
+    metricDPStoreError = np.mean(np.abs(np.array(DPCount) - np.array(trueRecordNum)), axis =1)
+    metricTTStoreError = np.mean(np.abs(np.array(trueCount) - np.array(trueRecordNum)), axis =1)
 
-    metricDPErrorRange = np.sum(pow(np.array(DPCountRange) - np.array(trueCountRange), 2), axis =1)
-    metricDPStoreErrorRange = np.sum(pow(np.array(DPCountRange) - np.array(trueRecordNumRange), 2), axis =1)
-    metricTTStoreErrorRange = np.sum(pow(np.array(trueCountRange) - np.array(trueRecordNumRange), 2), axis =1)
-    
+    metricDPErrorRange = np.mean(np.abs(np.array(DPCountRange) - np.array(trueCountRange)), axis =1)
+    metricDPStoreErrorRange = np.mean(np.abs(np.array(DPCountRange) - np.array(trueRecordNumRange)), axis =1)
+    metricTTStoreErrorRange = np.mean(np.abs(np.array(trueCountRange) - np.array(trueRecordNumRange)), axis =1)
+  
     
     return metricDPError, metricDPStoreError, metricTTStoreError, metricDPErrorRange, metricDPStoreErrorRange, metricTTStoreErrorRange, runTimeDPSort, dummyRecordNumCache
 
