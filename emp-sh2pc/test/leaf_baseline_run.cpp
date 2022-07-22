@@ -339,9 +339,6 @@ int main(int argc, char** argv) {
   cout << endl;
   outFile << endl;
 
-
-  cout << "********************************************************************* " << endl;
-  outFile << "********************************************************************* " << endl;
   cout << "metricRunTimeRange: ";
   outFile << "metricRunTimeRange: ";
   for (int i = 0; i < t; i++) {
