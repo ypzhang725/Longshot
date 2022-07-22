@@ -124,7 +124,6 @@ int main(int argc, char** argv) {
     std::vector<int> v_originalDummyMarkers;
     int size = num_real + num_dummy;  // real + dummy
     std::vector<int> randomVect = uniformGenVector(size);
-    cout << "!!!" << i <<endl;
     if (party == ALICE) {
       for (int j = 0; j < bins; j++) {    
         std::vector<int> dummyRecord(int(num_dummy / bins), 446);  // dummy(1,2,3...)
@@ -604,7 +603,7 @@ int main(int argc, char** argv) {
     auto durationDP = duration_cast<microseconds>(afterDP - start);
     auto durationDPSort = duration_cast<microseconds>(afterDPSort - afterDP);
    // cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
-    metricRunTimeDP[i] = durationDP.count() / 1000;
+    metricRunTimeDP[i] = durationDP.count() / 1000000;
     metricRunTimeDPSort[i] = durationDPSort.count() / 1000000;
     cout << ">>>>" << endl;
 
@@ -662,9 +661,9 @@ int main(int argc, char** argv) {
     auto RangeQueryAfter = high_resolution_clock::now();
 
     auto durationPointQuery= duration_cast<microseconds>(PointQueryAfter - PointQueryBefore);
-    metricRunTimePointQuery[i] = durationPointQuery.count();
+    metricRunTimePointQuery[i] = durationPointQuery.count() / 1000;
     auto durationRangeQuery= duration_cast<microseconds>(RangeQueryAfter - RangeQueryBefore);
-    metricRunTimeRangeQuery[i] = durationRangeQuery.count();
+    metricRunTimeRangeQuery[i] = durationRangeQuery.count() / 1000;
 
 
     // compute true histograms that cover 0 -- i
@@ -704,8 +703,8 @@ int main(int argc, char** argv) {
       DPCountErrorR += abs(RdpI[j] - RtrueI[j]);
     }
     // cout << "DPCountError: " << DPCountError << endl;
-    metricDPErrorP[i] = DPCountErrorP;  
-    metricDPErrorR[i] = DPCountErrorR;  
+    metricDPErrorP[i] = DPCountErrorP / bins;  
+    metricDPErrorR[i] = DPCountErrorR / rangeQuerySize;  
 
     // metric sort errors = (dp count - true records)  
     // compute the error for DP store 
@@ -718,8 +717,8 @@ int main(int argc, char** argv) {
       DPStoreErrorR += abs(RdpI[j] - RtrueR[j]);
     }
     // cout << "DPStoreError: " << DPStoreError << endl;
-    metricDPStoreErrorP[i] = DPStoreErrorP;
-    metricDPStoreErrorR[i] = DPStoreErrorR;
+    metricDPStoreErrorP[i] = DPStoreErrorP / bins;  
+    metricDPStoreErrorR[i] = DPStoreErrorR / rangeQuerySize;  
 
     // metric errors = (true count - true records)  
     double TTStoreErrorP = 0;
@@ -730,8 +729,8 @@ int main(int argc, char** argv) {
     for (int j = 0; j < rangeQuerySize; j++) { 
       TTStoreErrorR += abs(RtrueI[j] - RtrueR[j]);
     }
-    metricTTStoreErrorP[i] = TTStoreErrorP;
-    metricTTStoreErrorR[i] = TTStoreErrorR;
+    metricTTStoreErrorP[i] = TTStoreErrorP / bins;  
+    metricTTStoreErrorR[i] = TTStoreErrorR / rangeQuerySize;  
 
     //debug
     if (debugPrint) {

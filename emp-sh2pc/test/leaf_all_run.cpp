@@ -223,7 +223,7 @@ int main(int argc, char** argv) {
     int sizeCache = leftCacheData.size();
     std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
     auto ssBefore = high_resolution_clock::now();
-    // std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins);
+  //  std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins);
     std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDPNew(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins, num_dummy_bin);
     auto ssAfter = high_resolution_clock::now();
     auto durationss = duration_cast<microseconds>(ssAfter - ssBefore);
@@ -297,7 +297,7 @@ int main(int argc, char** argv) {
     auto durationDP = duration_cast<microseconds>(afterDP - start);
     auto durationDPSort = duration_cast<microseconds>(DPMergeBefore - afterDP);  
    // cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
-    metricRunTimeDP[i] = durationDP.count() / 1000;
+    metricRunTimeDP[i] = durationDP.count() / 1000000;
     metricRunTimeDPSort[i] = durationDPSort.count() / 1000000;
 
     // point query ======= 
@@ -330,9 +330,9 @@ int main(int argc, char** argv) {
     auto RangeQueryAfter = high_resolution_clock::now();
 
     auto durationPointQuery= duration_cast<microseconds>(PointQueryAfter - PointQueryBefore);
-    metricRunTimePointQuery[i] = durationPointQuery.count();
+    metricRunTimePointQuery[i] = durationPointQuery.count() / 1000;
     auto durationRangeQuery= duration_cast<microseconds>(RangeQueryAfter - RangeQueryBefore);
-    metricRunTimeRangeQuery[i] = durationRangeQuery.count();
+    metricRunTimeRangeQuery[i] = durationRangeQuery.count() / 1000;
 
     // compute true histograms that cover 0 -- i
     std::vector<std::vector<int> > trueHistgramsT(i+1);
@@ -362,8 +362,8 @@ int main(int argc, char** argv) {
       DPCountErrorR += abs(RdpI[j] - RtrueI[j]);
     }
    // cout << "DPCountError: " << DPCountError << endl;
-    metricDPErrorP[i] = DPCountErrorP;  
-    metricDPErrorR[i] = DPCountErrorR;  
+    metricDPErrorP[i] = DPCountErrorP / bins;  
+    metricDPErrorR[i] = DPCountErrorR / rangeQuerySize;  
 
     // metric sort errors = (dp count - true records)  
     // compute the error for DP store 
@@ -376,8 +376,8 @@ int main(int argc, char** argv) {
       DPStoreErrorR += abs(RdpI[j] - RtrueR[j]);
     }
    // cout << "DPStoreError: " << DPStoreError << endl;
-    metricDPStoreErrorP[i] = DPStoreErrorP;
-    metricDPStoreErrorR[i] = DPStoreErrorR;
+    metricDPStoreErrorP[i] = DPStoreErrorP / bins;  
+    metricDPStoreErrorR[i] = DPStoreErrorR / rangeQuerySize;  
 
     // metric errors = (true count - true records)  
     double TTStoreErrorP = 0;
@@ -388,8 +388,8 @@ int main(int argc, char** argv) {
     for (int j = 0; j < rangeQuerySize; j++) { 
       TTStoreErrorR += abs(RtrueI[j] - RtrueR[j]);
     }
-    metricTTStoreErrorP[i] = TTStoreErrorP;
-    metricTTStoreErrorR[i] = TTStoreErrorR;
+    metricTTStoreErrorP[i] = TTStoreErrorP / bins;  
+    metricTTStoreErrorR[i] = TTStoreErrorR / rangeQuerySize;  
 
     //debug
     if (debugPrint) {

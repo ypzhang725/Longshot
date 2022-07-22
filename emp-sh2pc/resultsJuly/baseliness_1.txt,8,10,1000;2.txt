@@ -1,0 +1,10 @@
+********************************************************************* 
+metricRunTimePoint: 31, 27, 27, 28, 28, 28, 27, 26
+metricDPErrorPoint: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorPoint: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorPoint: 0, 0, 0, 0, 0, 0, 0, 0
+********************************************************************* 
+metricRunTimeRange: 88, 80, 79, 79, 83, 78, 78, 78
+metricDPErrorRange: 0, 0, 0, 0, 0, 0, 0, 0
+metricDPStoreErrorRange: 0, 0, 0, 0, 0, 0, 0, 0
+metricTTStoreErrorRange: 0, 0, 0, 0, 0, 0, 0, 0
