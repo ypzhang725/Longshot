@@ -135,9 +135,9 @@ def metricBaseline(bins, epsilon, T, numReal):
 
 bins = 40
 epsilon = 1
-T = 10
+T = 1000
 numReal = 1000  
-runNum = 3
+runNum = 2
 
 list_metricDPErrorPoint_Baseline = [None]*runNum
 list_metricDPStoreErrorPoint_Baseline = [None]*runNum

@@ -180,7 +180,7 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
 T_list = [1000]
 epsAll_list = [1, 10, 0.1 ]
 numReal_list = [1000, 100]
-runNum = 3
+runNum = 2
 '''
 T_list = [1000]
 epsAll_list = [1]
