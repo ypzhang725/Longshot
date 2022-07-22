@@ -387,7 +387,8 @@ def sortTree(num_dummy, sortOption, gapAgainThreshold, T, numBins, dpHists, orig
             
             #runtime
             # 2m(n*#leafs) + O(n*#leafs  * (log(n*#leafs)  ^ 2))
-            runtimeSortSize = 2*numBins*dataToSortSize + dataToSortSize*math.log(dataToSortSize, math.e)*math.log(dataToSortSize, math.e)
+            # have 
+            runtimeSortSize = dataToSortSize*math.log(dataToSortSize, math.e)*math.log(dataToSortSize, math.e)
             runTimeDPSort[i] = round(runtimeSortSize)
            # print(mainData)
            # print(leftCacheData)
@@ -460,8 +461,8 @@ def sortTree(num_dummy, sortOption, gapAgainThreshold, T, numBins, dpHists, orig
             leftCacheData = sorted_data[totalRecords:sizeDroppedDummy].copy()
             leftCacheDummyMarker = sorted_marker[totalRecords:sizeDroppedDummy].copy()
             #runtime
-            # 2m(n*#leafs) + O(n*#leafs  * (log(n*#leafs)  ^ 2))
-            runtimeSortSize = 2*numBins*dataToSortSize + dataToSortSize*math.log(dataToSortSize, math.e)*math.log(dataToSortSize, math.e)
+            # O(n*#leafs  * (log(n*#leafs)  ^ 2))
+            runtimeSortSize = dataToSortSize*math.log(dataToSortSize, math.e)*math.log(dataToSortSize, math.e)
             runTimeDPSort[i] = round(runtimeSortSize)
             
           #      print("dataCache", dataCache)
