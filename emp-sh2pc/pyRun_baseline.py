@@ -135,9 +135,9 @@ def metricBaseline(bins, epsilon, T, numReal):
 
 bins = 40
 epsilon = 1
-T = 10
+T = 1000
 numReal = 1000  
-runNum = 3
+runNum = 2
 
 list_metricDPErrorPoint_Baseline = [None]*runNum
 list_metricDPStoreErrorPoint_Baseline = [None]*runNum
@@ -160,7 +160,7 @@ mean_metricDPErrorRange_Baseline = np.round(np.mean(list_metricDPErrorRange_Base
 mean_metricDPStoreErrorRange_Baseline = np.round(np.mean(list_metricDPStoreErrorRange_Baseline, axis = 0))
 mean_metricTTStoreErrorRange_Baseline = np.round(np.mean(list_metricTTStoreErrorRange_Baseline, axis = 0))
 
-fileName = "bin40ResultsPY/baseline-T:"+str(T)+",eps:"+str(epsilon)+",N:"+str(numReal)+".json"
+fileName = "resultsJuly/baseline-T:"+str(T)+",eps:"+str(epsilon)+",N:"+str(numReal)+".json"
 
 with open(fileName, 'w') as f:
     entry = {}

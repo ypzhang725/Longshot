@@ -251,7 +251,7 @@ def computeTrueRecordsRange(dpHist, dpStore):
                         trueR[idx] = trueR[idx]+1
 
             idx = idx+1
-
+    return trueR
 
 def computeDummyRecordsCache(cache):
     num = 0
@@ -478,8 +478,8 @@ def sortTree(num_dummy, sortOption, gapAgainThreshold, T, numBins, dpHists, orig
         dummyRecordNumCache[i] = computeDummyRecordsCache(leftCacheDummyMarker)
         intervalss = intervalRangeQ(i) 
         rangeQuery= []
-        for j in range(bins):   
-            for k in range(j, bins, 1):
+        for j in range(numBins):   
+            for k in range(j, numBins, 1):
                 vect = [j, k]
                 rangeQuery.append(vect)
         querySize = len(rangeQuery)
@@ -546,8 +546,8 @@ def sortLeaf(T, numBins, dpHists, originalData, originalDummyMarkers):
       #  print(mainDummyMarker)
       #  print(leftCacheDummyMarker)
         rangeQuery= []
-        for j in range(bins):   
-            for k in range(j, bins, 1):
+        for j in range(numBins):   
+            for k in range(j, numBins, 1):
                 vect = [j, k]
                 rangeQuery.append(vect)
         querySize = len(rangeQuery)
