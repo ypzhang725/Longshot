@@ -177,9 +177,9 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
                     json.dump(entry, f, ensure_ascii=False)
 
 
-T_list = [10, 1000]
-epsAll_list = [10, 1, 0.1]
-numReal_list = [100, 1000]
+T_list = [1000]
+epsAll_list = [1, 10, 0.1 ]
+numReal_list = [1000, 100]
 runNum = 3
 '''
 T_list = [1000]
