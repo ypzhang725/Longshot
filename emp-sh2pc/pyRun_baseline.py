@@ -115,7 +115,7 @@ def metricBaseline(bins, epsilon, T, numReal):
         idx_Range = 0
         for (j, binsPoint) in enumerate(rangeQuery): 
            # print("binsPoint: ", binsPoint)
-            DPCount, trueCount, TrueRecord = processQuery(tempOriginalData.copy(), tempOriginalDummyMarkers.copy(), epsilon, binsPoint)
+            DPCount, trueCount, TrueRecord = processQuery(tempOriginalData.copy(), tempOriginalDummyMarkers.copy(), epsilon / bins, binsPoint)
             DPCountRange[j] = DPCount
             TrueCountRange[j] = trueCount
             TrueRecordRange[j] = TrueRecord
@@ -134,8 +134,8 @@ def metricBaseline(bins, epsilon, T, numReal):
 
 
 bins = 40
-epsilon = 1
 T = 1000
+epsilon = 1 / T
 numReal = 1000  
 runNum = 2
 
