@@ -1,0 +1,9 @@
+********************************************************************* 
+metricRunTimePoint: 4987
+metricDPErrorPoint: 1.575
+metricDPStoreErrorPoint: 0.65
+metricTTStoreErrorPoint: 0.925
+metricRunTimeRange: 101008
+metricDPErrorRange: 56.8098
+metricDPStoreErrorRange: 28.4085
+metricTTStoreErrorRange: 28.4012
