@@ -134,9 +134,9 @@ def metricBaseline(bins, epsilon, T, numReal):
 
 
 bins = 40
-T = 1000
-epsilon = 1 / T
-numReal = 1000  
+T = 10
+epsilon = 1
+numReal = 100  
 runNum = 2
 
 list_metricDPErrorPoint_Baseline = [None]*runNum
@@ -146,7 +146,7 @@ list_metricDPErrorRange_Baseline = [None]*runNum
 list_metricDPStoreErrorRange_Baseline = [None]*runNum
 list_metricTTStoreErrorRange_Baseline = [None]*runNum
 for i in range(runNum):
-    metricDPErrorPoint, metricDPStoreErrorPoint, metricTTStoreErrorPoint, metricDPErrorRange, metricDPStoreErrorRange, metricTTStoreErrorRange = metricBaseline(bins, epsilon, T, numReal)
+    metricDPErrorPoint, metricDPStoreErrorPoint, metricTTStoreErrorPoint, metricDPErrorRange, metricDPStoreErrorRange, metricTTStoreErrorRange = metricBaseline(bins, epsilon/T, T, numReal)
     list_metricDPErrorPoint_Baseline[i] = metricDPErrorPoint
     list_metricDPStoreErrorPoint_Baseline[i] = metricDPStoreErrorPoint
     list_metricTTStoreErrorPoint_Baseline[i] = metricTTStoreErrorPoint
