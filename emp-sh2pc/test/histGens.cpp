@@ -120,7 +120,6 @@ Integer * computeHistNew(Integer * res_d, Integer * res, int bins, int size){
   for(int i = 0; i < bins; ++i){
     res_h[i] = counterValue[i+size];
   }
-  cout << "???" << endl;
   return res_h;
 }
 

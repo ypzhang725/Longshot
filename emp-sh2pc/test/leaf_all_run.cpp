@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
   }
   
   string fileNameOutIndex = argv[7]; // out
-  string fileNameOut = "./resultsJuly/leaf"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
+  string fileNameOut = "./resultsEMP/leaf"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << " out:" << fileNameOutIndex << endl;
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
@@ -326,13 +326,14 @@ int main(int argc, char** argv) {
         idx++;
       }
     } 
+    int rangeQuerySize = RdpI.size();
     std::vector<int> RtrueR = computeTrueRecordRange(PdpI, mainData, mainDummyMarker); 
     auto RangeQueryAfter = high_resolution_clock::now();
 
     auto durationPointQuery= duration_cast<microseconds>(PointQueryAfter - PointQueryBefore);
-    metricRunTimePointQuery[i] = durationPointQuery.count() / 1000;
+    metricRunTimePointQuery[i] = (durationPointQuery.count() / bins) / 1000;
     auto durationRangeQuery= duration_cast<microseconds>(RangeQueryAfter - RangeQueryBefore);
-    metricRunTimeRangeQuery[i] = durationRangeQuery.count() / 1000;
+    metricRunTimeRangeQuery[i] = (durationRangeQuery.count() / rangeQuerySize) / 1000;
 
     // compute true histograms that cover 0 -- i
     std::vector<std::vector<int> > trueHistgramsT(i+1);
@@ -351,7 +352,7 @@ int main(int argc, char** argv) {
         idx2++;
       }
     }
-    int rangeQuerySize = RtrueI.size();
+    
     // compute the error for DP count 
     double DPCountErrorP = 0;
     double DPCountErrorR = 0;

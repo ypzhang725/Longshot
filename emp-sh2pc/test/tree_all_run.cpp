@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
   int gapAgainThreshold = 1;
 
   string fileNameOutIndex = argv[8]; // out
-  string fileNameOut = "./resultsJuly/tree"+fileName_real+","+t_string+","+eps_string+","+N_string+","+sortOption_string+";"+fileNameOutIndex+".txt";
+  string fileNameOut = "./resultsEMP/tree"+fileName_real+","+t_string+","+eps_string+","+N_string+","+sortOption_string+";"+fileNameOutIndex+".txt";
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << "  sortOption: " << sortOption_string << " out:" << fileNameOutIndex << endl;
 
   // prepare input data: original data contains real and dummy records
@@ -605,7 +605,6 @@ int main(int argc, char** argv) {
    // cout << "RunTime: durationDP: " << durationDP.count() << ";  durationDPSort: " << durationDPSort.count() <<endl;
     metricRunTimeDP[i] = durationDP.count() / 1000000;
     metricRunTimeDPSort[i] = durationDPSort.count() / 1000000;
-    cout << ">>>>" << endl;
 
     // DPMerge
     auto DPMergeBefore = high_resolution_clock::now();
@@ -657,13 +656,14 @@ int main(int argc, char** argv) {
         idx++;
       }
     } 
+    int rangeQuerySize = RdpI.size();
     std::vector<int> RtrueR = computeTrueRecordRange(dpItmp, mergedMain, mergedDummyMarker); 
     auto RangeQueryAfter = high_resolution_clock::now();
 
     auto durationPointQuery= duration_cast<microseconds>(PointQueryAfter - PointQueryBefore);
-    metricRunTimePointQuery[i] = durationPointQuery.count() / 1000;
+    metricRunTimePointQuery[i] = (durationPointQuery.count() / bins) / 1000;
     auto durationRangeQuery= duration_cast<microseconds>(RangeQueryAfter - RangeQueryBefore);
-    metricRunTimeRangeQuery[i] = durationRangeQuery.count() / 1000;
+    metricRunTimeRangeQuery[i] = (durationRangeQuery.count() / rangeQuerySize) / 1000;
 
 
     // compute true histograms that cover 0 -- i
@@ -691,7 +691,6 @@ int main(int argc, char** argv) {
         idx2++;
       }
     }
-    int rangeQuerySize = RtrueI.size();
 
     // compute the error for DP count 
     double DPCountErrorP = 0;

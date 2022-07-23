@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
   
   
   string fileNameOutIndex = argv[7]; // out
-  string fileNameOut = "./resultsJuly/baseline"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
+  string fileNameOut = "./resultsEMP/baseline"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << " out:" << fileNameOutIndex << endl;
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
@@ -230,7 +230,7 @@ int main(int argc, char** argv) {
       TTStoreErrorPoint += abs(TrueCountPoint[j] - TrueRecordPoint[j]);
     }
     // for all time point
-    metricRunTimePoint[i] = durationPointQ.count() / 1000;
+    metricRunTimePoint[i] = (durationPointQ.count() / bins) / 1000;
     metricDPErrorPoint[i] = DPErrorPoint / bins;
     metricDPStoreErrorPoint[i] = DPStoreErrorPoint / bins;
     metricTTStoreErrorPoint[i] = TTStoreErrorPoint / bins;
@@ -277,7 +277,7 @@ int main(int argc, char** argv) {
       TTStoreErrorRange += abs(TrueCountRange[j] - TrueRecordRange[j]);
     }
     // for all time point
-    metricRunTimeRange[i] = durationRangeQ.count() / 1000;
+    metricRunTimeRange[i] = (durationRangeQ.count() / querySize) / 1000;
     metricDPErrorRange[i] = DPErrorRange / querySize;
     metricDPStoreErrorRange[i] = DPStoreErrorRange / querySize;
     metricTTStoreErrorRange[i] = TTStoreErrorRange / querySize;
