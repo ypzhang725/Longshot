@@ -1,0 +1,60 @@
+********************************************************************* 
+metricRunTimeDP: 3
+metricRunTimeDPSort: 5
+metricRunTimeDPMerge: 24
+metricRunTimePointQuery: 1
+metricRunTimeRangeQuery: 0
+metricDPErrorP: 0.3
+metricDPStoreErrorP: 25.2
+metricTTStoreErrorP: 25
+metricDPErrorR: 2.7439
+metricDPStoreErrorR: 258.68
+metricTTStoreErrorR: 256.098
+********************************************************************* 
+metricRunTimeDP: 3
+metricRunTimeDPSort: 5
+metricRunTimeDPMerge: 26
+metricRunTimePointQuery: 1
+metricRunTimeRangeQuery: 0
+metricDPErrorP: 0.3
+metricDPStoreErrorP: 25.2
+metricTTStoreErrorP: 25
+metricDPErrorR: 2.7439
+metricDPStoreErrorR: 258.68
+metricTTStoreErrorR: 256.098
+********************************************************************* 
+metricRunTimeDP: 3
+metricRunTimeDPSort: 5
+metricRunTimeDPMerge: 26
+metricRunTimePointQuery: 1
+metricRunTimeRangeQuery: 0
+metricDPErrorP: 0.375
+metricDPStoreErrorP: 25.375
+metricTTStoreErrorP: 25
+metricDPErrorR: 5.6439
+metricDPStoreErrorR: 503.205
+metricTTStoreErrorR: 497.561
+********************************************************************* 
+metricRunTimeDP: 3
+metricRunTimeDPSort: 5
+metricRunTimeDPMerge: 28
+metricRunTimePointQuery: 1
+metricRunTimeRangeQuery: 0
+metricDPErrorP: 0.375
+metricDPStoreErrorP: 25.375
+metricTTStoreErrorP: 25
+metricDPErrorR: 5.6439
+metricDPStoreErrorR: 503.205
+metricTTStoreErrorR: 497.561
+********************************************************************* 
+metricRunTimeDP: 3
+metricRunTimeDPSort: 5
+metricRunTimeDPMerge: 42
+metricRunTimePointQuery: 1
+metricRunTimeRangeQuery: 0
+metricDPErrorP: 1.275
+metricDPStoreErrorP: 0.675
+metricTTStoreErrorP: 0.6
+metricDPErrorR: 3.73659
+metricDPStoreErrorR: 10.0915
+metricTTStoreErrorR: 9.92805

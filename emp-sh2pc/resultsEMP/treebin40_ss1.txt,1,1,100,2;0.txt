@@ -1,0 +1,12 @@
+********************************************************************* 
+metricRunTimeDP: 0
+metricRunTimeDPSort: 0
+metricRunTimeDPMerge: 6
+metricRunTimePointQuery: 0
+metricRunTimeRangeQuery: 0
+metricDPErrorP: 0
+metricDPStoreErrorP: 0.975
+metricTTStoreErrorP: 0.975
+metricDPErrorR: 0
+metricDPStoreErrorR: 1.41707
+metricTTStoreErrorR: 1.41707

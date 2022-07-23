@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
     } 
     dummy_leaf += num_dummy_bin;
     num_dummy = num_dummy_bin * bins;
-    cout << "dummy_leaf: " << dummy_leaf << "  num_dummy: " << num_dummy<< endl;
+    // cout << "dummy_leaf: " << dummy_leaf << "  num_dummy: " << num_dummy<< endl;
 
     int size = num_real + num_dummy;  // real + dummy
     std::vector<int> randomVect = uniformGenVector(size);
@@ -227,8 +227,8 @@ int main(int argc, char** argv) {
     std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDPNew(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins, num_dummy_bin);
     auto ssAfter = high_resolution_clock::now();
     auto durationss = duration_cast<microseconds>(ssAfter - ssBefore);
-    metricss[i] = durationss.count();
-    cout << "ss" << durationss.count() << " num: "<< leftCacheData.size()<<endl;  
+    metricss[i] = durationss.count() / 1000000;
+    cout << "ss" << metricss[i] << " num: "<< leftCacheData.size()<<endl;  
     // total DP count = #records we want to retrieve --> sorted cache + left cache 
     int totalRecords = accumulate(dpHists[i].begin(), dpHists[i].end(), 0);
     std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords, 0);

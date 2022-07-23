@@ -1,0 +1,72 @@
+********************************************************************* 
+metricRunTimeDP: 44
+metricRunTimeDPSort: 73
+metricRunTimeDPMerge: 123
+metricRunTimePointQuery: 14
+metricRunTimeRangeQuery: 0
+metricDPErrorP: 0.325
+metricDPStoreErrorP: 250.325
+metricTTStoreErrorP: 250
+metricDPErrorR: 4.26585
+metricDPStoreErrorR: 4248.17
+metricTTStoreErrorR: 4243.9
+********************************************************************* 
+metricRunTimeDP: 44
+metricRunTimeDPSort: 73
+metricRunTimeDPMerge: 831
+metricRunTimePointQuery: 15
+metricRunTimeRangeQuery: 0
+metricDPErrorP: 0.325
+metricDPStoreErrorP: 250.325
+metricTTStoreErrorP: 250
+metricDPErrorR: 4.26585
+metricDPStoreErrorR: 4248.17
+metricTTStoreErrorR: 4243.9
+********************************************************************* 
+metricRunTimeDP: 42
+metricRunTimeDPSort: 71
+metricRunTimeDPMerge: 112
+metricRunTimePointQuery: 17
+metricRunTimeRangeQuery: 1
+metricDPErrorP: 0.575
+metricDPStoreErrorP: 250.525
+metricTTStoreErrorP: 250
+metricDPErrorR: 7.83171
+metricDPStoreErrorR: 495.62
+metricTTStoreErrorR: 487.805
+********************************************************************* 
+metricRunTimeDP: 42
+metricRunTimeDPSort: 71
+metricRunTimeDPMerge: 110
+metricRunTimePointQuery: 17
+metricRunTimeRangeQuery: 1
+metricDPErrorP: 0.575
+metricDPStoreErrorP: 250.525
+metricTTStoreErrorP: 250
+metricDPErrorR: 7.83171
+metricDPStoreErrorR: 495.62
+metricTTStoreErrorR: 487.805
+********************************************************************* 
+metricRunTimeDP: 42
+metricRunTimeDPSort: 114
+metricRunTimeDPMerge: 214
+metricRunTimePointQuery: 13
+metricRunTimeRangeQuery: 0
+metricDPErrorP: 0.85
+metricDPStoreErrorP: 250.85
+metricTTStoreErrorP: 250
+metricDPErrorR: 12.9195
+metricDPStoreErrorR: 500.724
+metricTTStoreErrorR: 487.805
+********************************************************************* 
+metricRunTimeDP: 43
+metricRunTimeDPSort: 114
+metricRunTimeDPMerge: 136
+metricRunTimePointQuery: 14
+metricRunTimeRangeQuery: 0
+metricDPErrorP: 0.85
+metricDPStoreErrorP: 250.85
+metricTTStoreErrorP: 250
+metricDPErrorR: 12.9195
+metricDPStoreErrorR: 500.724
+metricTTStoreErrorR: 487.805
