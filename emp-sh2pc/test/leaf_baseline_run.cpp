@@ -112,7 +112,8 @@ int main(int argc, char** argv) {
     bins = 40; // bin number
     num_real = std::stod(N_string);
     std::vector<int> vect_ = vect;
-    for (int i = 0; i < t; i++) { 
+    int times = std:ceil(t * num_real / 1310720) - 1;
+    for (int i = 0; i < times; i++) { 
       vect.insert(vect.end(), vect_.begin(), vect_.end());
     }
   } else {

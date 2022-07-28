@@ -81,6 +81,11 @@ int main(int argc, char** argv) {
     double b = 1 / eps;
     double t = log((1/0.01));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
     num_dummy_bin = int(b * t);
+    std::vector<int> vect_ = vect;
+    int times = std:ceil(t * num_real / 1310720) - 1;
+    for (int i = 0; i < times; i++) { 
+      vect.insert(vect.end(), vect_.begin(), vect_.end());
+    }
   } else {
     bins = 5; // bin number
     num_real = 10;  
