@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
     double t = log((1/0.01));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
     num_dummy_bin = int(b * t);
     std::vector<int> vect_ = vect;
-    int times = std:ceil(t * num_real / 1310720) - 1;
+    int times = std::ceil(t * num_real / 1310720) - 1;
     for (int i = 0; i < times; i++) { 
       vect.insert(vect.end(), vect_.begin(), vect_.end());
     }
@@ -112,9 +112,9 @@ int main(int argc, char** argv) {
 
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
-  std::vector<std::vector<int> > originalData(t);  // encoded real + dummy 
-  std::vector<std::vector<int> > originalDataEncodedNot(t);  // not encoded real + dummy
-  std::vector<std::vector<int> > originalDummyMarkers(t);  // dummy markers for real + dummy
+  std::map<int, std::vector<int> > originalData;  // encoded real + dummy 
+  std::map<int, std::vector<int> > originalDataEncodedNot;  // not encoded real + dummy
+  std::map<int, std::vector<int> > originalDummyMarkers;  // dummy markers for real + dummy
   
   for (int i = 0; i < t; i++) {  
     int num_dummy = 0;  
@@ -600,6 +600,9 @@ int main(int argc, char** argv) {
         mainDataEncodedNot.erase (interval);
         mainDummyMarker.erase (interval);
       }
+      originalData.erase (i);
+      originalDataEncodedNot.erase (i);
+      originalDummyMarkers.erase (i);
 
     }
 

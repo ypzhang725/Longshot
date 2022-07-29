@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
     double t = log((1/0.01));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
     num_dummy_bin = int(b * t);
     std::vector<int> vect_ = vect;
-    int times = std:ceil(t * num_real / 1310720) - 1;
+    int times = std::ceil(t * num_real / 1310720) - 1;
     for (int i = 0; i < times; i++) { 
       vect.insert(vect.end(), vect_.begin(), vect_.end());
     }
@@ -99,9 +99,9 @@ int main(int argc, char** argv) {
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << " out:" << fileNameOutIndex << endl;
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
-  std::vector<std::vector<int> > originalData(t);  // encoded real + dummy 
-  std::vector<std::vector<int> > originalDataEncodedNot(t);  // not encoded real + dummy
-  std::vector<std::vector<int> > originalDummyMarkers(t);  // dummy markers for real + dummy
+  std::map<int, std::vector<int> > originalData;  // encoded real + dummy 
+  std::map<int, std::vector<int> > originalDataEncodedNot;  // not encoded real + dummy
+  std::map<int, std::vector<int> > originalDummyMarkers;  // dummy markers for real + dummy
   int dummy_leaf = 0;
   double b = 1 / eps;
   double p = 0.01;
@@ -246,6 +246,10 @@ int main(int argc, char** argv) {
     leftCacheDummyMarker = seperatedDummyMarker.second;
     std::vector<int> sortedRecordEncodedNot = seperatedRecordEncodedNot.first;
     leftCacheDataEncodedNot = seperatedRecordEncodedNot.second;
+
+    originalData.erase (i);
+    originalDataEncodedNot.erase (i);
+    originalDummyMarkers.erase (i);
 
     //debug
     if (debugPrint) {      
