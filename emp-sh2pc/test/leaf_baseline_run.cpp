@@ -18,7 +18,7 @@ using namespace emp;
 using namespace std;
 
 
-std::tuple<std::vector<int>, std::vector<int>, std::vector<int>, int, int>  processQuery(std::vector<int> resultBins, bool debugPrint, double eps, bool constantDP, int party, std::vector<int> originalData, std::vector<int> originalDummyMarkers, std::vector<int> originalDataEncodedNot) {
+std::tuple<int, int>  processQuery(std::vector<int> resultBins, bool debugPrint, double eps, bool constantDP, int party, std::vector<int> originalData, std::vector<int> originalDummyMarkers, std::vector<int> originalDataEncodedNot) {
   // step1: compute DP count and mark records 
   int size = originalData.size(); 
   std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
@@ -55,7 +55,8 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int>, int, int>  proc
       printArray(ansOriginalDummyMarkers_, ansOriginalDummyMarkers.size());
   }
   //debug
-  return std::make_tuple(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCount, TrueCount);
+ // return std::make_tuple(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCount, TrueCount);
+  return std::make_tuple(DPCount, TrueCount);
 }
 
 std::vector<int> readInputs(string fileName){
@@ -206,10 +207,11 @@ int main(int argc, char** argv) {
 
     for (int j = 0; j < bins; j++) {   
       std::vector<int> resultBins{j, j};   // given a query 
-      std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
+   //   std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
       int DPCounter, TrueCounter;
       // note that the returned trueCounter is only for test purpose
-      std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, tempOriginalDataEncodedNot);
+   //   std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, tempOriginalDataEncodedNot);
+      std::tie(DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, tempOriginalDataEncodedNot);
       DPCountPoint[j] = DPCounter;
       TrueCountPoint[j] = TrueCounter;
       // process returned records to filter out dummy -- this is only for trusted clients 
@@ -253,10 +255,11 @@ int main(int argc, char** argv) {
    
     for (int j = 0; j < querySize; j++) {   
       std::vector<int> resultBins = rangeQuery[j];   // given a query 
-      std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
+    //  std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
       int DPCounter, TrueCounter;
       // note that the returned trueCounter is only for test purpose
-      std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps / bins, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, tempOriginalDataEncodedNot);
+   //   std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps / bins, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, tempOriginalDataEncodedNot);
+      std::tie(DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps / bins, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, tempOriginalDataEncodedNot);
       DPCountRange[j] = DPCounter;
       TrueCountRange[j] = TrueCounter;
       // process returned records to filter out dummy -- this is only for trusted clients 
