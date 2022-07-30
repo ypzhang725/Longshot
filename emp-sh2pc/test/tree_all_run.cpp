@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
 
   // metric
   std::vector<double> metricRunTimeDP(t);
-  std::vector<double> metricRunTimeDPMerge(t);
+//  std::vector<double> metricRunTimeDPMerge(t);
   std::vector<double> metricRunTimeDPSort(t);
 
   std::vector<double> metricRunTimePointQuery(t);
@@ -615,7 +615,7 @@ int main(int argc, char** argv) {
     metricRunTimeDPSort[i] = durationDPSort.count() / 1000000;
 
     // DPMerge
-    auto DPMergeBefore = high_resolution_clock::now();
+   // auto DPMergeBefore = high_resolution_clock::now();
     std::vector<string> intervalss;
     int rightI = i;
     while (rightI >= 0) {
@@ -625,6 +625,7 @@ int main(int argc, char** argv) {
       intervalss.push_back(intervalRootDPI);
       rightI = rootLeftI - 1;
     } 
+    /*
     std::vector<int> mergedMain = mainData[intervalss[0]]; 
     std::vector<int> mergedDataEncodedNot = mainDataEncodedNot[intervalss[0]];
     std::vector<int> mergedDummyMarker = mainDummyMarker[intervalss[0]];
@@ -637,7 +638,7 @@ int main(int argc, char** argv) {
     }
     auto DPMergeAfter = high_resolution_clock::now();
     auto durationDPMerge = duration_cast<microseconds>(DPMergeAfter - DPMergeBefore);
-
+    */
     // point query =======
     // metric 2: DP accuracy for query 0 -- i
     // add DP histograms that cover 0 -- i 
@@ -647,8 +648,14 @@ int main(int argc, char** argv) {
       PdpI = addTwoVectors(PdpI, dpHists[intervalss[j]]);
     }
     // compute the #true for each interval's data and then add them up 
-    metricRunTimeDPMerge[i] = durationDPMerge.count();
-    std::vector<int> PtrueR = computeTrueRecords(dpItmp, mergedMain, mergedDummyMarker); 
+   // metricRunTimeDPMerge[i] = durationDPMerge.count();
+
+    std::vector<int> PtrueR(bins, 0);
+    for (int j = 1; j < int(intervalss.size()); j++) { 
+      std::vector<int> PtrueR_ = computeTrueRecords(dpHists[intervalss[j]], mainData[intervalss[j]], mainDummyMarker[intervalss[j]]); 
+      PtrueR = addTwoVectors(PtrueR, PtrueR_);
+    }
+
     auto PointQueryAfter = high_resolution_clock::now();
 
     // range query =======
@@ -665,22 +672,17 @@ int main(int argc, char** argv) {
       }
     } 
     int rangeQuerySize = RdpI.size();
-    std::vector<int> RtrueR = computeTrueRecordRange(dpItmp, mergedMain, mergedDummyMarker); 
+    std::vector<int> RtrueR(rangeQuerySize, 0);
+    for (int j = 1; j < int(intervalss.size()); j++) { 
+      std::vector<int> RtrueR_ = computeTrueRecordRange(dpHists[intervalss[j]], mainData[intervalss[j]], mainDummyMarker[intervalss[j]]); 
+      RtrueR = addTwoVectors(RtrueR, RtrueR_);
+    }
     auto RangeQueryAfter = high_resolution_clock::now();
 
     auto durationPointQuery= duration_cast<microseconds>(PointQueryAfter - PointQueryBefore);
     metricRunTimePointQuery[i] = (durationPointQuery.count() / bins) / 1000;
     auto durationRangeQuery= duration_cast<microseconds>(RangeQueryAfter - RangeQueryBefore);
     metricRunTimeRangeQuery[i] = (durationRangeQuery.count() / rangeQuerySize) / 1000;
-
-
-    // compute true histograms that cover 0 -- i
-    std::vector<std::vector<int> > trueHistgrams(i+1);
-    for (int j = 0; j <= i; j++) { 
-     trueHistgrams[j] = trueHists[j];
-    }
-    std::vector<int> trueI = computeTrueNumber(trueHistgrams, bins);
-
 
     // compute true histograms that cover 0 -- i
     std::vector<std::vector<int> > trueHistgramsT(i+1);
@@ -804,6 +806,7 @@ int main(int argc, char** argv) {
   } 
   cout << endl;
   outFile << endl;
+  /*
   cout << "metricRunTimeDPMerge: ";
   outFile << "metricRunTimeDPMerge: ";
   for (int i = 0; i < t; i++) {
@@ -816,7 +819,7 @@ int main(int argc, char** argv) {
   } 
   cout << endl;
   outFile << endl;
-
+  */
 
   // query processing runtime 
   cout << "metricRunTimePointQuery: ";
