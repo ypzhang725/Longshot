@@ -192,7 +192,7 @@ int main(int argc, char** argv) {
     std::vector<int> tempOriginalDataEncodedNot(num_real*(i+1), 0);
 
     for (int j = 0; j <= i; j++) {
-      for (int k = 0; k < originalData[j].size(); k++) {
+      for (int k = 0; k < int(originalData[j].size()); k++) {
         tempOriginalData[num_real*j+k] = originalData[j][k];
         tempOriginalDummyMarkers[num_real*j+k] = originalData[j][k];
         tempOriginalDataEncodedNot[num_real*j+k] = originalData[j][k];
