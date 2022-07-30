@@ -18,7 +18,7 @@ using namespace emp;
 using namespace std;
 
 
-std::tuple<int, int>  processQuery(std::vector<int> resultBins, bool debugPrint, double eps, bool constantDP, int party, std::vector<int> originalData, std::vector<int> originalDummyMarkers, std::vector<int> originalDataEncodedNot) {
+std::tuple<int, int>  processQuery(std::vector<int> resultBins, bool debugPrint, double eps, bool constantDP, int party, std::vector<int> originalData, std::vector<int> originalDummyMarkers) {
   // step1: compute DP count and mark records 
   int size = originalData.size(); 
   std::vector<int> lapVect;   // todo: check the correctness of lap + move it to each option
@@ -36,12 +36,12 @@ std::tuple<int, int>  processQuery(std::vector<int> resultBins, bool debugPrint,
   // note that the returned trueCounter is only for test purpose
   std::tie(DPCount, resultDummyMarkers, TrueCount) = computeDPCountMark(party, originalData, originalDummyMarkers, randomVect, resultBins, lapVect);
   // step2: sort and retrive first DP count records 
-  std::vector<int> ansOriginalData_, ansOriginalDummyMarkers_, ansOriginalDataEncodedNot_;
-  std::tie(ansOriginalData_, ansOriginalDummyMarkers_, ansOriginalDataEncodedNot_) = sortOneBinDP(party, originalData, originalDummyMarkers, originalDataEncodedNot, resultDummyMarkers, DPCount, size);
+  std::vector<int> ansOriginalData_, ansOriginalDummyMarkers_;
+  std::tie(ansOriginalData_, ansOriginalDummyMarkers_) = sortOneBinDP(party, originalData, originalDummyMarkers, resultDummyMarkers, DPCount, size);
   int count = (DPCount < size) ? DPCount - 1: size - 1;  // - 1 for slicing
   std::vector<int> ansOriginalData = slicing(ansOriginalData_, 0, count);
   std::vector<int> ansOriginalDummyMarkers = slicing(ansOriginalDummyMarkers_, 0, count);
-  std::vector<int> ansOriginalDataEncodedNot = slicing(ansOriginalDataEncodedNot_, 0, count);
+ // std::vector<int> ansOriginalDataEncodedNot = slicing(ansOriginalDataEncodedNot_, 0, count);
 
   //debug
   if (debugPrint) {
@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
   std::vector<std::vector<int> > originalData(t);  // encoded real + dummy 
-  std::vector<std::vector<int> > originalDataEncodedNot(t);  // not encoded real + dummy
+//  std::vector<std::vector<int> > originalDataEncodedNot(t);  // not encoded real + dummy
   std::vector<std::vector<int> > originalDummyMarkers(t);  // dummy markers for real + dummy
 
   for (int i = 0; i < t; i++) { 
@@ -157,8 +157,8 @@ int main(int argc, char** argv) {
     // only categorical; for numerical, need to specify range and bin size
     v_originalDataEncoded = encodeData(party, size, randomVect, v_originalData, v_originalDummyMarkers);
 
-    originalData[i] = v_originalDataEncoded;
-    originalDataEncodedNot[i] = v_originalData;
+    originalData[i] = v_originalData; //v_originalDataEncoded;
+ //   originalDataEncodedNot[i] = v_originalData;
     originalDummyMarkers[i] = v_originalDummyMarkers;
   }
   
@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
   std::vector<double> metricss(t);
   // secure part 
   std::vector<int> mainData(t);
-  std::vector<int> mainDataEncodedNot(t);
+//  std::vector<int> mainDataEncodedNot(t);
   std::vector<int> mainDummyMarker(t);
   std::vector<std::vector<int> > trueHists(t);
   std::vector<std::vector<int> > dpHists(t);
@@ -189,13 +189,13 @@ int main(int argc, char** argv) {
     // process data
     std::vector<int> tempOriginalData(num_real*(i+1), 0);
     std::vector<int> tempOriginalDummyMarkers(num_real*(i+1), 0);
-    std::vector<int> tempOriginalDataEncodedNot(num_real*(i+1), 0);
+  //  std::vector<int> tempOriginalDataEncodedNot(num_real*(i+1), 0);
 
     for (int j = 0; j <= i; j++) {
       for (int k = 0; k < int(originalData[j].size()); k++) {
         tempOriginalData[num_real*j+k] = originalData[j][k];
         tempOriginalDummyMarkers[num_real*j+k] = originalData[j][k];
-        tempOriginalDataEncodedNot[num_real*j+k] = originalData[j][k];
+   //     tempOriginalDataEncodedNot[num_real*j+k] = originalData[j][k];
       }
     }
     // point queries -------------------------------------------------------------------------------------------
@@ -211,7 +211,7 @@ int main(int argc, char** argv) {
       int DPCounter, TrueCounter;
       // note that the returned trueCounter is only for test purpose
    //   std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, tempOriginalDataEncodedNot);
-      std::tie(DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, tempOriginalDataEncodedNot);
+      std::tie(DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps, constantDP, party, tempOriginalData, tempOriginalDummyMarkers);
       DPCountPoint[j] = DPCounter;
       TrueCountPoint[j] = TrueCounter;
       // process returned records to filter out dummy -- this is only for trusted clients 
@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
       int DPCounter, TrueCounter;
       // note that the returned trueCounter is only for test purpose
    //   std::tie(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps / bins, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, tempOriginalDataEncodedNot);
-      std::tie(DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps / bins, constantDP, party, tempOriginalData, tempOriginalDummyMarkers, tempOriginalDataEncodedNot);
+      std::tie(DPCounter, TrueCounter) = processQuery(resultBins, debugPrint, eps / bins, constantDP, party, tempOriginalData, tempOriginalDummyMarkers);
       DPCountRange[j] = DPCounter;
       TrueCountRange[j] = TrueCounter;
       // process returned records to filter out dummy -- this is only for trusted clients 

@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
   std::map<int, std::vector<int> > originalData;  // encoded real + dummy 
-  std::map<int, std::vector<int> > originalDataEncodedNot;  // not encoded real + dummy
+ // std::map<int, std::vector<int> > originalDataEncodedNot;  // not encoded real + dummy
   std::map<int, std::vector<int> > originalDummyMarkers;  // dummy markers for real + dummy
   int dummy_leaf = 0;
   double b = 1 / eps;
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
   double tt = log((1/p));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
   for (int i = 0; i < t; i++) { 
     std::vector<int> v_originalData(vect.begin() + (i*num_real), vect.begin() + ((i+1)*num_real)); // original real data
-    std::vector<int> v_originalDataEncoded;  // encoded 
+ //   std::vector<int> v_originalDataEncoded;  // encoded 
     std::vector<int> v_originalDummyMarkers;    
 
     int num_dummy = 0;      // redefine
@@ -148,10 +148,10 @@ int main(int argc, char** argv) {
     }
 
     // only categorical; for numerical, need to specify range and bin size
-    v_originalDataEncoded = encodeData(party, size, randomVect, v_originalData, v_originalDummyMarkers);
+   // v_originalDataEncoded = encodeData(party, size, randomVect, v_originalData, v_originalDummyMarkers);
 
-    originalData[i] = v_originalDataEncoded;
-    originalDataEncodedNot[i] = v_originalData;
+    originalData[i] = v_originalData; //v_originalDataEncoded;
+ //   originalDataEncodedNot[i] = v_originalData;
     originalDummyMarkers[i] = v_originalDummyMarkers;
   }
   
@@ -172,13 +172,13 @@ int main(int argc, char** argv) {
   std::vector<double> metricss(t);
   // secure part 
   std::vector<int> mainData(t);
-  std::vector<int> mainDataEncodedNot(t);
+//  std::vector<int> mainDataEncodedNot(t);
   std::vector<int> mainDummyMarker(t);
   std::vector<std::vector<int> > trueHists(t);
   std::vector<std::vector<int> > dpHists(t);
   std::map<std::string, std::vector<int> > inconsistDPHists;
   std::vector<int> leftCacheData;
-  std::vector<int> leftCacheDataEncodedNot;
+//  std::vector<int> leftCacheDataEncodedNot;
   std::vector<int> leftCacheDummyMarker;
  // int mainSize = 0;
   // for each update: 
@@ -223,32 +223,33 @@ int main(int argc, char** argv) {
     // step3: sortCacheUsingDP
     // previously left records + new records in the cache --> sort using DP histogram
     leftCacheData.insert(leftCacheData.end(), originalData[i].begin(), originalData[i].end());
-    leftCacheDataEncodedNot.insert(leftCacheDataEncodedNot.end(), originalDataEncodedNot[i].begin(), originalDataEncodedNot[i].end());
+   // leftCacheDataEncodedNot.insert(leftCacheDataEncodedNot.end(), originalDataEncodedNot[i].begin(), originalDataEncodedNot[i].end());
     leftCacheDummyMarker.insert(leftCacheDummyMarker.end(), originalDummyMarkers[i].begin(), originalDummyMarkers[i].end());
     int sizeCache = leftCacheData.size();
     std::vector<int> encodedRecords, dummyMarker, notEncordedRecords;
     auto ssBefore = high_resolution_clock::now();
   //  std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDP(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins);
-    std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDPNew(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins, num_dummy_bin);
+  //  std::tie(encodedRecords, dummyMarker, notEncordedRecords) = sortDPNew(party, leftCacheData, leftCacheDummyMarker, leftCacheDataEncodedNot, dpHists[i], sizeCache, bins, num_dummy_bin);
+    std::tie(encodedRecords, dummyMarker) = sortDPNew(party, leftCacheData, leftCacheDummyMarker, dpHists[i], sizeCache, bins, num_dummy_bin);
     auto ssAfter = high_resolution_clock::now();
     auto durationss = duration_cast<microseconds>(ssAfter - ssBefore);
     metricss[i] = durationss.count() / 1000000;
-    cout << "ss" << metricss[i] << " num: "<< leftCacheData.size()<<endl;  
+  //  cout << "ss" << metricss[i] << " num: "<< leftCacheData.size()<<endl;  
     // total DP count = #records we want to retrieve --> sorted cache + left cache 
     int totalRecords = accumulate(dpHists[i].begin(), dpHists[i].end(), 0);
     std::pair<std::vector<int>, std::vector<int> > seperatedRecord = copy2two(encodedRecords, totalRecords, 0);
     std::pair<std::vector<int>, std::vector<int> > seperatedDummyMarker = copy2two(dummyMarker, totalRecords, 0);
-    std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords, 0);
+  //  std::pair<std::vector<int>, std::vector<int> > seperatedRecordEncodedNot = copy2two(notEncordedRecords, totalRecords, 0);
 
     std::vector<int> sortedRecord = seperatedRecord.first;
     leftCacheData = seperatedRecord.second;
     std::vector<int> sortedDummy = seperatedDummyMarker.first;
     leftCacheDummyMarker = seperatedDummyMarker.second;
-    std::vector<int> sortedRecordEncodedNot = seperatedRecordEncodedNot.first;
-    leftCacheDataEncodedNot = seperatedRecordEncodedNot.second;
+  //  std::vector<int> sortedRecordEncodedNot = seperatedRecordEncodedNot.first;
+  //  leftCacheDataEncodedNot = seperatedRecordEncodedNot.second;
 
     originalData.erase (i);
-    originalDataEncodedNot.erase (i);
+   // originalDataEncodedNot.erase (i);
     originalDummyMarkers.erase (i);
 
     //debug
@@ -286,7 +287,7 @@ int main(int argc, char** argv) {
     // merge main and cache
     mainData = merge2SortedArr(dp_main, dpHists[i], mainData, sortedRecord, bins);
     mainDummyMarker = merge2SortedArr(dp_main, dpHists[i], mainDummyMarker, sortedDummy, bins);
-    mainDataEncodedNot = merge2SortedArr(dp_main, dpHists[i], mainDataEncodedNot, sortedRecordEncodedNot, bins);
+  //  mainDataEncodedNot = merge2SortedArr(dp_main, dpHists[i], mainDataEncodedNot, sortedRecordEncodedNot, bins);
     auto DPMergeAfter = high_resolution_clock::now();
     auto durationDPMerge = duration_cast<microseconds>(DPMergeAfter - DPMergeBefore);
     metricRunTimeDPMerge[i] = durationDPMerge.count();

@@ -132,6 +132,7 @@ Integer * generateSh2(Integer * sh1, Integer * res_h, int bins){
   return sh2;
 }
 
+// we encode data outside of this code 
 std::vector<int> encodeData(int party, int size, std::vector<int> randomVect, std::vector<int> v_originalData, std::vector<int> v_originalDummyMarkers){
   // reconstruct original data
   Integer *res = reconstructArray(v_originalData);

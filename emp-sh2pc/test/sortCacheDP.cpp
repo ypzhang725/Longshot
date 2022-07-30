@@ -207,7 +207,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDP(int par
 
 }
 
-std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDPNew(int party, std::vector<int> encodedData, std::vector<int> dummyMarker, std::vector<int> notEncodedData, std::vector<int> dpHist, int size, int bins, int num_dummy_bin) {
+std::tuple<std::vector<int>, std::vector<int> > sortDPNew(int party, std::vector<int> encodedData, std::vector<int> dummyMarker, std::vector<int> dpHist, int size, int bins, int num_dummy_bin) {
  // cout<< "secret shares" << ' ';
  // printArrayPlaintext(encodedData);
 
@@ -217,7 +217,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDPNew(int 
   std::vector<int> randomVect_res_d = uniformGenVector(size);                                                            
   Integer *sh1_res_d = reconstructArray(randomVect_res_d);
   std::vector<int> randomVect_res_NotEn = uniformGenVector(size);                                                            
-  Integer *sh1_res_NotEn = reconstructArray(randomVect_res_NotEn);
+ // Integer *sh1_res_NotEn = reconstructArray(randomVect_res_NotEn);
 
   std::vector<int> counter = dpHist; 
 
@@ -226,7 +226,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDPNew(int 
   // reconstruct dummy mark                                                                         
   Integer *res_d = reconstructArray(dummyMarker);
   // reconstruct original data not encoded     
-  Integer *res_NotEn = reconstructArray(notEncodedData);
+//  Integer *res_NotEn = reconstructArray(notEncodedData);
 
   Integer zero(32, 0, PUBLIC);
   Integer one(32, 1, PUBLIC);
@@ -276,14 +276,14 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDPNew(int 
   Integer *counterValue = new Integer[newSize];
   Integer *isDummy = new Integer[newSize];
   Integer *dataValue = new Integer[newSize];
-  Integer *dataValueNotEn = new Integer[newSize];
+ // Integer *dataValueNotEn = new Integer[newSize];
   Integer *binValue = new Integer[newSize];
   
   for(int i = 0; i < size; ++i){
     isCounter[i] = Integer(16, 1, BOB);
     counterValue[i] = Integer(32, 0, BOB);
     dataValue[i] = res[i];
-    dataValueNotEn[i] = res_NotEn[i];
+//    dataValueNotEn[i] = res_NotEn[i];
     Bit eq_real = res_d[i] == zero;   
     binValue[i] = If(eq_real, Integer(32, (bins+1)*2-1, BOB), Integer(32, (bins+1)*2, BOB));  
     isDummy[i] = If(eq_real, Integer(16, 0, BOB), Integer(16, 1, BOB));  
@@ -294,7 +294,7 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDPNew(int 
     counterValue[i] = Integer(32, counter[i-size], BOB);
     isDummy[i] = Integer(16, 1, BOB);
     dataValue[i] = Integer(32, i-size+1, BOB);
-    dataValueNotEn[i] = Integer(32, i-size+1, BOB);
+ //   dataValueNotEn[i] = Integer(32, i-size+1, BOB);
     binValue[i] = Integer(32, (bins+1)*2+1, BOB);
   }
 
@@ -331,14 +331,14 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDPNew(int 
   }
   cout << endl;*/
   Integer * sortKey_copy = copyArray(sortKey, newSize);
-  Integer * sortKey_copy2 = copyArray(sortKey, newSize);
+//  Integer * sortKey_copy2 = copyArray(sortKey, newSize);
   Integer * sortKey_copy3 = copyArray(sortKey, newSize);
   Integer * sortKey_copy4 = copyArray(sortKey, newSize);
   Integer * sortKey_copy5 = copyArray(sortKey, newSize);
   Integer * sortKey_copy6 = copyArray(sortKey, newSize);
 
   sort(sortKey_copy, newSize, dataValue);
-  sort(sortKey_copy2, newSize, dataValueNotEn);
+ // sort(sortKey_copy2, newSize, dataValueNotEn);
   sort(sortKey_copy3, newSize, isDummy);
   sort(sortKey_copy4, newSize, isCounter);
   sort(sortKey_copy5, newSize, counterValue);
@@ -392,18 +392,18 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDPNew(int 
 
   // step4: sort by binValue
   Integer * res_b_copy = copyArray(binValue, newSize);
-  Integer * res_b_copy2 = copyArray(binValue, newSize);
+//  Integer * res_b_copy2 = copyArray(binValue, newSize);
   Integer * res_b_copy3 = copyArray(binValue, newSize);
 
   sort(res_b_copy, newSize, dataValue);
-  sort(res_b_copy2, newSize, dataValueNotEn);
+//  sort(res_b_copy2, newSize, dataValueNotEn);
   sort(res_b_copy3, newSize, isDummy);
 
   // step5: drop m counters 
   for(int i = 0; i < size; ++i){
     res[i] = dataValue[i];
     res_d[i] = isDummy[i];
-    res_NotEn[i] = dataValueNotEn[i];
+ //   res_NotEn[i] = dataValueNotEn[i];
   }
 
   /*cout << "after sort" << ' ';
@@ -417,20 +417,20 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDPNew(int 
   // generate secret shares      
   Integer *sh2_res = generateSh2(sh1_res, res, size);
   Integer *sh2_res_d = generateSh2(sh1_res_d, res_d, size);
-  Integer *sh2_res_NotEn = generateSh2(sh1_res_NotEn, res_NotEn, size);
+ // Integer *sh2_res_NotEn = generateSh2(sh1_res_NotEn, res_NotEn, size);
 
   std::vector<int> A_reveal = revealSh(sh1_res, size, ALICE);
   std::vector<int> B_reveal = revealSh(sh2_res, size, BOB);
   std::vector<int> D_A_reveal = revealSh(sh1_res_d, size, ALICE);
   std::vector<int> D_B_reveal = revealSh(sh2_res_d, size, BOB);
-  std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
-  std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
+//  std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
+//  std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
 
   if (party == ALICE) {
-    return std::make_tuple(A_reveal, D_A_reveal, A_reveal_notEn);
+    return std::make_tuple(A_reveal, D_A_reveal);
   }
   else {
-    return std::make_tuple(B_reveal, D_B_reveal, B_reveal_notEn);
+    return std::make_tuple(B_reveal, D_B_reveal);
   }
 
 }
@@ -480,7 +480,7 @@ Integer * assignBinCompaction(Integer *res, Integer *res_d, int size, int binNum
   return res_b;
 }
 
-std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortBinDP(int party, std::vector<int> encodedData, std::vector<int> dummyMarker, std::vector<int> notEncodedData, int dpCount, int size, int binNum) {
+std::tuple<std::vector<int>, std::vector<int> > sortBinDP(int party, std::vector<int> encodedData, std::vector<int> dummyMarker, int dpCount, int size, int binNum) {
  // cout<< "secret shares" << ' ';
  // printArrayPlaintext(encodedData);
 
@@ -489,8 +489,8 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortBinDP(int 
   Integer *sh1_res = reconstructArray(randomVect_res);
   std::vector<int> randomVect_res_d = uniformGenVector(size);                                                            
   Integer *sh1_res_d = reconstructArray(randomVect_res_d);
-  std::vector<int> randomVect_res_NotEn = uniformGenVector(size);                                                            
-  Integer *sh1_res_NotEn = reconstructArray(randomVect_res_NotEn);
+ // std::vector<int> randomVect_res_NotEn = uniformGenVector(size);                                                            
+ // Integer *sh1_res_NotEn = reconstructArray(randomVect_res_NotEn);
 
   std::vector<int> counter(1, dpCount); 
   // reconstruct original data                                                                      
@@ -498,17 +498,17 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortBinDP(int 
   // reconstruct dummy mark                                                                         
   Integer *res_d = reconstructArray(dummyMarker);
   // reconstruct original data not encoded     
-  Integer *res_NotEn = reconstructArray(notEncodedData);
+//  Integer *res_NotEn = reconstructArray(notEncodedData);
   // tag the records for this binNum as 0, otherwise as 1
   Integer *res_b = assignBinCompaction(res, res_d, size, binNum, counter);
 
   Integer * res_b_copy = copyArray(res_b, size);
   Integer * res_b_copy2 = copyArray(res_b, size);
-  Integer * res_b_copy3 = copyArray(res_b, size);
+ // Integer * res_b_copy3 = copyArray(res_b, size);
 
   sort(res_b_copy, size, res);
   sort(res_b_copy2, size, res_d);
-  sort(res_b_copy3, size, res_NotEn);
+ // sort(res_b_copy3, size, res_NotEn);
 
   /*cout << "after sort" << ' ';
   cout << "original records" << ' ';
@@ -521,24 +521,24 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortBinDP(int 
   // generate secret shares      
   Integer *sh2_res = generateSh2(sh1_res, res, size);
   Integer *sh2_res_d = generateSh2(sh1_res_d, res_d, size);
-  Integer *sh2_res_NotEn = generateSh2(sh1_res_NotEn, res_NotEn, size);
+//  Integer *sh2_res_NotEn = generateSh2(sh1_res_NotEn, res_NotEn, size);
 
   std::vector<int> A_reveal = revealSh(sh1_res, size, ALICE);
   std::vector<int> B_reveal = revealSh(sh2_res, size, BOB);
   std::vector<int> D_A_reveal = revealSh(sh1_res_d, size, ALICE);
   std::vector<int> D_B_reveal = revealSh(sh2_res_d, size, BOB);
-  std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
-  std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
+//  std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
+//  std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
 
   if (party == ALICE) {
-    return std::make_tuple(A_reveal, D_A_reveal, A_reveal_notEn);
+    return std::make_tuple(A_reveal, D_A_reveal);
   }
   else {
-    return std::make_tuple(B_reveal, D_B_reveal, B_reveal_notEn);
+    return std::make_tuple(B_reveal, D_B_reveal);
   }
 }
 
-std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortOneBinDP(int party, std::vector<int> encodedData, std::vector<int> dummyMarker, std::vector<int> notEncodedData, std::vector<int> markers, int dpCount, int size) {
+std::tuple<std::vector<int>, std::vector<int> > sortOneBinDP(int party, std::vector<int> encodedData, std::vector<int> dummyMarker, std::vector<int> markers, int dpCount, int size) {
  // cout<< "secret shares" << ' ';
  // printArrayPlaintext(encodedData);
 
@@ -547,25 +547,25 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortOneBinDP(i
   Integer *sh1_res = reconstructArray(randomVect_res);
   std::vector<int> randomVect_res_d = uniformGenVector(size);                                                            
   Integer *sh1_res_d = reconstructArray(randomVect_res_d);
-  std::vector<int> randomVect_res_NotEn = uniformGenVector(size);                                                            
-  Integer *sh1_res_NotEn = reconstructArray(randomVect_res_NotEn);
+ // std::vector<int> randomVect_res_NotEn = uniformGenVector(size);                                                            
+ // Integer *sh1_res_NotEn = reconstructArray(randomVect_res_NotEn);
 
   // reconstruct original data                                                                      
   Integer *res = reconstructArray(encodedData);
   // reconstruct dummy mark                                                                         
   Integer *res_d = reconstructArray(dummyMarker);
   // reconstruct original data not encoded     
-  Integer *res_NotEn = reconstructArray(notEncodedData);
+ // Integer *res_NotEn = reconstructArray(notEncodedData);
   // tag the records for this binNum as 0, otherwise as 1
   Integer *res_b = reconstructArray(markers);
 
   Integer * res_b_copy = copyArray(res_b, size);
   Integer * res_b_copy2 = copyArray(res_b, size);
-  Integer * res_b_copy3 = copyArray(res_b, size);
+//  Integer * res_b_copy3 = copyArray(res_b, size);
 
   sort(res_b_copy, size, res);
   sort(res_b_copy2, size, res_d);
-  sort(res_b_copy3, size, res_NotEn);
+ // sort(res_b_copy3, size, res_NotEn);
 
   /*cout << "after sort" << ' ';
   cout << "original records" << ' ';
@@ -578,19 +578,19 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortOneBinDP(i
   // generate secret shares      
   Integer *sh2_res = generateSh2(sh1_res, res, size);
   Integer *sh2_res_d = generateSh2(sh1_res_d, res_d, size);
-  Integer *sh2_res_NotEn = generateSh2(sh1_res_NotEn, res_NotEn, size);
+//  Integer *sh2_res_NotEn = generateSh2(sh1_res_NotEn, res_NotEn, size);
 
   std::vector<int> A_reveal = revealSh(sh1_res, size, ALICE);
   std::vector<int> B_reveal = revealSh(sh2_res, size, BOB);
   std::vector<int> D_A_reveal = revealSh(sh1_res_d, size, ALICE);
   std::vector<int> D_B_reveal = revealSh(sh2_res_d, size, BOB);
-  std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
-  std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
+//  std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
+ // std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
 
   if (party == ALICE) {
-    return std::make_tuple(A_reveal, D_A_reveal, A_reveal_notEn);
+    return std::make_tuple(A_reveal, D_A_reveal);
   }
   else {
-    return std::make_tuple(B_reveal, D_B_reveal, B_reveal_notEn);
+    return std::make_tuple(B_reveal, D_B_reveal);
   }
 }
