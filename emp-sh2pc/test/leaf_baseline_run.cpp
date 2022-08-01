@@ -206,7 +206,8 @@ int main(int argc, char** argv) {
     std::vector<int> TrueRecordPoint(bins, 0);
 
     for (int j = 0; j < bins; j++) {   
-      std::vector<int> resultBins{j, j};   // given a query 
+      std::vector<int> resultBins{j, j};   // given a query
+      cout << "point query: " << j << endl;
    //   std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
       int DPCounter, TrueCounter;
       // note that the returned trueCounter is only for test purpose
@@ -227,7 +228,7 @@ int main(int argc, char** argv) {
     double DPStoreErrorPoint = 0;
     double DPErrorPoint = 0;
     double TTStoreErrorPoint = 0;
-    for (int j = 0; j < bins; j++) { 
+    for (int j = 0; j < bins; j++) {
       DPStoreErrorPoint += abs(DPCountPoint[j] - TrueRecordPoint[j]);
       DPErrorPoint += abs(DPCountPoint[j] - TrueCountPoint[j]);
       TTStoreErrorPoint += abs(TrueCountPoint[j] - TrueRecordPoint[j]);
@@ -253,7 +254,8 @@ int main(int argc, char** argv) {
     std::vector<int> TrueCountRange(querySize, 0);
     std::vector<int> TrueRecordRange(querySize, 0);
    
-    for (int j = 0; j < querySize; j++) {   
+    for (int j = 0; j < querySize; j++) {
+      cout << "range query: " << j << endl;
       std::vector<int> resultBins = rangeQuery[j];   // given a query 
     //  std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
       int DPCounter, TrueCounter;
