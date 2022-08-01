@@ -42,8 +42,7 @@ std::vector<int> readInputs(string fileName){
 int main(int argc, char** argv) {
   int port, party;
   parse_party_and_port(argv, &party, &port);
-  NetIO * io = new NetIO(party==ALICE ? nullptr : "127.0.0.1", port);
-  setup_semi_honest(io, party);
+  
 
   // read real data from external file.
   string fileName_real = argv[3]; // original
@@ -183,6 +182,9 @@ int main(int argc, char** argv) {
   std::vector<int> leftCacheDummyMarker;
   // for each update: 
   for (int i = 0; i < t; i++) {
+    NetIO * io = new NetIO(party==ALICE ? nullptr : "127.0.0.1", port);
+    setup_semi_honest(io, party);
+
     cout<< "index---------------------------------------------------------------------------: " << i << endl;
     auto start = high_resolution_clock::now();
     // step1: trueHistGen for the path
@@ -776,6 +778,8 @@ int main(int argc, char** argv) {
       cout << endl;
     }
     //debug
+    finalize_semi_honest();
+    delete io;
   }
 
   std::ofstream outFile;
@@ -920,9 +924,6 @@ int main(int argc, char** argv) {
     }
   } 
   cout << endl;
-  outFile << endl;
-
-  finalize_semi_honest();
-  delete io;
+  outFile << endl; 
 }
 
