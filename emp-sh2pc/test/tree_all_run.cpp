@@ -603,9 +603,9 @@ int main(int argc, char** argv) {
   //      mainDataEncodedNot.erase (interval);
         mainDummyMarker.erase (interval);
       }
-      originalData.erase (i);
+      //      originalData.erase (i);
   //    originalDataEncodedNot.erase (i);
-      originalDummyMarkers.erase (i);
+      //   originalDummyMarkers.erase (i);
 
     }
 
