@@ -84,8 +84,6 @@ std::vector<int> readInputs(string fileName){
 int main(int argc, char** argv) {
   int port, party;
   parse_party_and_port(argv, &party, &port);
-  NetIO * io = new NetIO(party==ALICE ? nullptr : "127.0.0.1", port);
-  setup_semi_honest(io, party);
 
   // read real data from external file.
   string fileName_real = argv[3]; // original
@@ -186,6 +184,8 @@ int main(int argc, char** argv) {
   // for each update: 
   for (int i = 0; i < t; i++) {
     cout<< "index---------------------------------------------------------------------------: " << i << endl;
+    NetIO * io = new NetIO(party==ALICE ? nullptr : "127.0.0.1", port);
+    setup_semi_honest(io, party);
     // process data
     std::vector<int> tempOriginalData(num_real*(i+1), 0);
     std::vector<int> tempOriginalDummyMarkers(num_real*(i+1), 0);
@@ -287,6 +287,8 @@ int main(int argc, char** argv) {
     metricDPErrorRange[i] = DPErrorRange / querySize;
     metricDPStoreErrorRange[i] = DPStoreErrorRange / querySize;
     metricTTStoreErrorRange[i] = TTStoreErrorRange / querySize;
+    finalize_semi_honest();
+    delete io;
   }
   
 
@@ -394,7 +396,4 @@ int main(int argc, char** argv) {
   } 
   cout << endl;
   outFile << endl;
-
-  finalize_semi_honest();
-  delete io;
 }
