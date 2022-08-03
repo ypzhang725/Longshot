@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
 
   for (int i = 0; i < t; i++) { 
     std::vector<int> v_originalData(vect.begin() + (i*num_real), vect.begin() + ((i+1)*num_real)); // original real data
-    std::vector<int> v_originalDataEncoded;  // encoded 
+  //  std::vector<int> v_originalDataEncoded;  // encoded 
     std::vector<int> v_originalDummyMarkers;    
 
     int size = num_real ;  // real 
@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
     }
 
     // only categorical; for numerical, need to specify range and bin size
-    v_originalDataEncoded = encodeData(party, size, randomVect, v_originalData, v_originalDummyMarkers);
+  //  v_originalDataEncoded = encodeData(party, size, randomVect, v_originalData, v_originalDummyMarkers);
 
     originalData[i] = v_originalData; //v_originalDataEncoded;
  //   originalDataEncodedNot[i] = v_originalData;
@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
   std::vector<std::vector<int> > dpHists(t);
   std::map<std::string, std::vector<int> > inconsistDPHists;
   std::vector<int> leftCacheData;
-  std::vector<int> leftCacheDataEncodedNot;
+ // std::vector<int> leftCacheDataEncodedNot;
   std::vector<int> leftCacheDummyMarker;
   // int mainSize = 0;
   // for each update: 
@@ -207,7 +207,7 @@ int main(int argc, char** argv) {
 
     for (int j = 0; j < bins; j++) {   
       std::vector<int> resultBins{j, j};   // given a query
-      cout << "point query: " << j << endl;
+    //  cout << "point query: " << j << endl;
    //   std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
       int DPCounter, TrueCounter;
       // note that the returned trueCounter is only for test purpose
@@ -255,7 +255,7 @@ int main(int argc, char** argv) {
     std::vector<int> TrueRecordRange(querySize, 0);
    
     for (int j = 0; j < querySize; j++) {
-      cout << "range query: " << j << endl;
+   //   cout << "range query: " << j << endl;
       std::vector<int> resultBins = rangeQuery[j];   // given a query 
     //  std::vector<int> ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot;
       int DPCounter, TrueCounter;
