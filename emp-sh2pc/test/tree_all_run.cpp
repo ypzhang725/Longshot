@@ -654,7 +654,7 @@ int main(int argc, char** argv) {
    // metricRunTimeDPMerge[i] = durationDPMerge.count();
 
     std::vector<int> PtrueR(bins, 0);
-    for (int j = 1; j < int(intervalss.size()); j++) { 
+    for (int j = 0; j < int(intervalss.size()); j++) { 
       std::vector<int> PtrueR_ = computeTrueRecords(dpHists[intervalss[j]], mainData[intervalss[j]], mainDummyMarker[intervalss[j]]); 
       PtrueR = addTwoVectors(PtrueR, PtrueR_);
     }
@@ -676,7 +676,7 @@ int main(int argc, char** argv) {
     } 
     int rangeQuerySize = RdpI.size();
     std::vector<int> RtrueR(rangeQuerySize, 0);
-    for (int j = 1; j < int(intervalss.size()); j++) { 
+    for (int j = 0; j < int(intervalss.size()); j++) { 
       std::vector<int> RtrueR_ = computeTrueRecordRange(dpHists[intervalss[j]], mainData[intervalss[j]], mainDummyMarker[intervalss[j]]); 
       RtrueR = addTwoVectors(RtrueR, RtrueR_);
     }
