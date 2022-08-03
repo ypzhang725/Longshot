@@ -599,14 +599,19 @@ int main(int argc, char** argv) {
       }
       // delete previous sorted arrays 
       for (string& interval: intervalPrevious){
+        // free up memory
+        std::vector<int>().swap(mainData[interval]);
+        std::vector<int>().swap(mainDummyMarker[interval]);
         mainData.erase (interval);
   //      mainDataEncodedNot.erase (interval);
         mainDummyMarker.erase (interval);
       }
-      //      originalData.erase (i);
+      // free up memory
+      std::vector<int>().swap(originalData[i]);
+      std::vector<int>().swap(originalDummyMarkers[i]);
+      originalData.erase (i);
   //    originalDataEncodedNot.erase (i);
-      //   originalDummyMarkers.erase (i);
-
+      originalDummyMarkers.erase (i);
     }
 
     // metric 1: run time

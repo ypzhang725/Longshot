@@ -249,9 +249,12 @@ int main(int argc, char** argv) {
   //  std::vector<int> sortedRecordEncodedNot = seperatedRecordEncodedNot.first;
   //  leftCacheDataEncodedNot = seperatedRecordEncodedNot.second;
 
-     originalData.erase (i);
+    // free up memory
+    std::vector<int>().swap(originalData[i]);
+    std::vector<int>().swap(originalDummyMarkers[i]);
+    originalData.erase (i);
    // originalDataEncodedNot.erase (i);
-     originalDummyMarkers.erase (i);
+    originalDummyMarkers.erase (i);
 
     //debug
     if (debugPrint) {      

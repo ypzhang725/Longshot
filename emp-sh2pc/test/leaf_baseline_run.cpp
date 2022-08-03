@@ -55,6 +55,15 @@ std::tuple<int, int>  processQuery(std::vector<int> resultBins, bool debugPrint,
       printArray(ansOriginalDummyMarkers_, ansOriginalDummyMarkers.size());
   }
   //debug
+  // free up memory
+  std::vector<int>().swap(resultDummyMarkers);
+  std::vector<int>().swap(ansOriginalData_);
+  std::vector<int>().swap(ansOriginalData);
+  std::vector<int>().swap(ansOriginalDummyMarkers);
+  std::vector<int>().swap(ansOriginalDummyMarkers_);
+  std::vector<int>().swap(randomVect);
+  std::vector<int>().swap(lapVect);
+
  // return std::make_tuple(ansOriginalData, ansOriginalDummyMarkers, ansOriginalDataEncodedNot, DPCount, TrueCount);
   return std::make_tuple(DPCount, TrueCount);
 }
@@ -171,16 +180,6 @@ int main(int argc, char** argv) {
   std::vector<double> metricTTStoreErrorRange(t);  // |true count - true record|
   std::vector<double> metricss(t);
   // secure part 
-  std::vector<int> mainData(t);
-//  std::vector<int> mainDataEncodedNot(t);
-  std::vector<int> mainDummyMarker(t);
-  std::vector<std::vector<int> > trueHists(t);
-  std::vector<std::vector<int> > dpHists(t);
-  std::map<std::string, std::vector<int> > inconsistDPHists;
-  std::vector<int> leftCacheData;
- // std::vector<int> leftCacheDataEncodedNot;
-  std::vector<int> leftCacheDummyMarker;
-  // int mainSize = 0;
   // for each update: 
   for (int i = 0; i < t; i++) {
     cout<< "index---------------------------------------------------------------------------: " << i << endl;
