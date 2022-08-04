@@ -18,6 +18,9 @@ Integer * reconstructArray(std::vector<int> number){
     B[i] = Integer(32, number[i], BOB);
     res[i] = A[i] ^ B[i];
   }
+  std::vector<int>().swap(number);
+  delete[] A;
+  delete[] B;
   return res;   
 }
 

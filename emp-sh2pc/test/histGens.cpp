@@ -250,6 +250,13 @@ std::tuple<int, std::vector<int>, int>  computeDPCountMark(int party, std::vecto
   Integer *sh2 = generateSh2(sh1, res_d, size);  // generate secret shares   
   std::vector<int> realSh1 = revealSh(sh1, size, ALICE);
   std::vector<int> realSh2 = revealSh(sh2, size, BOB);
+
+  delete[] sh1;
+  delete[] sh2;
+  delete[] res;
+  delete[] res_d;
+  delete[] res_lap;
+
   if (party == ALICE) {
     return std::make_tuple(DPCount_pub, realSh1, TrueCount_pub); 
   }

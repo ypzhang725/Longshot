@@ -587,6 +587,16 @@ std::tuple<std::vector<int>, std::vector<int> > sortOneBinDP(int party, std::vec
 //  std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
  // std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
 
+  delete[] sh1_res;
+  delete[] sh1_res_d;
+  delete[] res;
+  delete[] res_d;
+  delete[] res_b;
+  delete[] res_b_copy;
+  delete[] res_b_copy2;
+  delete[] sh2_res;
+  delete[] sh2_res_d;
+
   if (party == ALICE) {
     return std::make_tuple(A_reveal, D_A_reveal);
   }
