@@ -286,6 +286,10 @@ int main(int argc, char** argv) {
     metricDPErrorRange[i] = DPErrorRange / querySize;
     metricDPStoreErrorRange[i] = DPStoreErrorRange / querySize;
     metricTTStoreErrorRange[i] = TTStoreErrorRange / querySize;
+
+    std::vector<int>().swap(tempOriginalData);
+    std::vector<int>().swap(tempOriginalDummyMarkers);
+
     finalize_semi_honest();
     delete io;
   }
