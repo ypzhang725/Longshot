@@ -21,6 +21,8 @@ Integer * addedNoise(std::vector<int> number){
     B[i] = Integer(32, number[i], BOB);
     res[i] = A[i] + B[i];
   }
+  delete[] A;
+  delete[] B;
   return res;
 }
 
@@ -120,6 +122,17 @@ Integer * computeHistNew(Integer * res_d, Integer * res, int bins, int size){
   for(int i = 0; i < bins; ++i){
     res_h[i] = counterValue[i+size];
   }
+
+  delete[] isCounter; 
+  delete[] isDummy; 
+  delete[] counterValue; 
+  delete[] dataValue; 
+  delete[] sortKey; 
+  delete[] sortKey_copy; 
+  delete[] sortKey_copy2; 
+  delete[] sortKey_copy3; 
+  delete[] sortKey_copy4; 
+  
   return res_h;
 }
 
@@ -151,6 +164,11 @@ std::vector<int> encodeData(int party, int size, std::vector<int> randomVect, st
 
   std::vector<int> realSh1 = revealSh(sh1, size, ALICE);
   std::vector<int> realSh2 = revealSh(sh2, size, BOB);
+
+  delete[] res;
+  delete[] sh1;
+  delete[] sh2;
+  delete[] encoded;
 
   if (party == ALICE) {
     return realSh1;
@@ -209,6 +227,12 @@ std::vector<int> trueHistGen(int party, std::vector<int> number, std::vector<int
   printArray(sh1, bins);
   cout << "sh2" << ' ';
   printArray(sh2, bins);*/
+
+  delete[] res;
+  delete[] res_d;
+  delete[] sh1;
+  delete[] res_h;
+  delete[] sh2;
 
   if (party == ALICE) {
     return realSh1;
@@ -282,6 +306,9 @@ std::vector<int> returnTrueRecords(int party, std::vector<int> number, std::vect
       cnt++;
     }
   }
+  delete[] res;
+  delete[] res_d;
+
   return trueRecords;
 }
 
@@ -298,10 +325,13 @@ std::vector<int> computeTrueNumber(std::vector<std::vector<int> > number, int bi
     for(int i = 0; i < bins; ++i){
       res[i] = hist[i] + res[i];
     }
+    delete[] hist;
   }
   for (int i = 0; i < bins; i++) {
     res_num[i] = res[i].reveal<int32_t>();
   }
+
+  delete[] res;
   return res_num;
 }
 
@@ -317,6 +347,7 @@ std::vector<int> dpHistGen(int party, std::vector<std::vector<int> > number, std
     for(int i = 0; i < bins; ++i){
       res[i] = hist[i] + res[i];
     }
+    delete[] hist;
   }
   // reconstruct dp noise
   Integer *res_lap = addedNoise(number2);
@@ -339,6 +370,10 @@ std::vector<int> dpHistGen(int party, std::vector<std::vector<int> > number, std
   for (int i = 0; i < bins; i++) {
     dpHist[i] = res[i].reveal<int32_t>();
   }
+
+  delete[] res;
+  delete[] res_lap;
+
   return dpHist;
 }
 

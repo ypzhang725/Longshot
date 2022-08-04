@@ -84,6 +84,10 @@ std::vector<int> computeTrueRecords(std::vector<int> dpHist, std::vector<int> dp
     }
     trueR[i] = num;
   }
+
+  delete[] dpStoreI;
+  delete[] dpStoreIDummy;
+
   return trueR;
 }
 
@@ -119,6 +123,10 @@ std::vector<int> computeTrueRecordRange(std::vector<int> dpHist, std::vector<int
       idx++;
     }
   }
+
+  delete[] dpStoreI;
+  delete[] dpStoreIDummy;
+  
   return trueR; 
 }
 

@@ -304,6 +304,8 @@ int main(int argc, char** argv) {
       Integer *mainmaindummy = reconstructArray(mainDummyMarker);
       cout << "mainmaindummy: " << ' ';
       printArray(mainmaindummy, mainDummyMarker.size());
+      delete[] mainmain;
+      delete[] mainmaindummy;
     }
     
     // metric 1: run time

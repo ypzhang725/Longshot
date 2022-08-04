@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
   std::map<int, std::vector<int> > originalData;  // encoded real + dummy 
-  std::map<int, std::vector<int> > originalDataEncodedNot;  // not encoded real + dummy
+ //std::map<int, std::vector<int> > originalDataEncodedNot;  // not encoded real + dummy
   std::map<int, std::vector<int> > originalDummyMarkers;  // dummy markers for real + dummy
   
   for (int i = 0; i < t; i++) {  
@@ -346,6 +346,10 @@ int main(int argc, char** argv) {
         printArray(sortedDummysortedDummy, mainDummyMarker[intervalRootDP].size());
         cout << "leftDummy for " << intervalRootDP << ": ";
         printArray(leftDummyleftDummy, leftCacheDummyMarker.size());
+        delete[] sortedRecordsortedRecord;
+        delete[] leftRecordleftRecord;
+        delete[] sortedDummysortedDummy;
+        delete[] leftDummyleftDummy;
        /* Integer *sortedDummysortedDummy = reconstructArray(mainDummyMarker[intervalRootDP]);
         Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
         cout << "sortedDummy for " << intervalRootDP << ": ";
@@ -441,6 +445,8 @@ int main(int argc, char** argv) {
         printArray(sortedRecordsortedRecord, mainData[intervalRootDP].size());
         cout << "leftRecord for " << intervalRootDP << ": ";
         printArray(leftRecordleftRecord, leftCacheData.size());
+        delete[] sortedRecordsortedRecord;
+        delete[] leftRecordleftRecord;
 
        /* Integer *sortedDummysortedDummy = reconstructArray(mainDummyMarker[intervalRootDP]);
         Integer *leftDummyleftDummy = reconstructArray(leftCacheDummyMarker);
@@ -550,6 +556,8 @@ int main(int argc, char** argv) {
         cout << "size: " << encodedRecordsFirst[j].size() << ";";
         }
          cout << endl;
+        delete[] encodedRecords_;
+        delete[] dummyMarker_;
       }
 
       std::vector<std::vector<int> > seperatedBinsRecord = seperateBin(seperatedRecord.first, sortDPdHist);
@@ -586,7 +594,10 @@ int main(int argc, char** argv) {
         printArray(sortedDummysortedDummy, mainDummyMarker[intervalRootDP].size());
         cout << "leftDummy for " << intervalRootDP << ": ";
         printArray(leftDummyleftDummy, leftCacheDummyMarker.size());
-
+        delete[] sortedRecordsortedRecord;
+        delete[] leftRecordleftRecord;
+        delete[] sortedDummysortedDummy;
+        delete[] leftDummyleftDummy;
    /*     Integer *sortedRecordsortedRecordEncodedNot = reconstructArray(mainDataEncodedNot[intervalRootDP]);
         Integer *leftRecordleftRecordEncodedNot = reconstructArray(leftCacheDataEncodedNot);
         cout << "sortedRecordEncodedNot for " << intervalRootDP << ": ";

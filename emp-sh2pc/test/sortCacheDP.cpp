@@ -104,6 +104,11 @@ Integer * assignBin(Integer *res, Integer *res_d, int size, int bins, std::vecto
   }
  // cout << "assigned bin number for each records" << ' ';
  // printArray(res_b, size);
+
+  delete[] counter_A; 
+  delete[] counter_B; 
+  delete[] res_counter; 
+
   return res_b;
 }
 
@@ -197,6 +202,20 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int> > sortDP(int par
   std::vector<int> D_B_reveal = revealSh(sh2_res_d, size, BOB);
   std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
   std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
+
+  delete[] sh1_res;
+  delete[] sh1_res_d;
+  delete[] sh1_res_NotEn;
+  delete[] res;
+  delete[] res_d;
+  delete[] res_NotEn;
+  delete[] res_b;
+  delete[] res_b_copy;
+  delete[] res_b_copy2;
+  delete[] res_b_copy3;
+  delete[] sh2_res;
+  delete[] sh2_res_d;
+  delete[] sh2_res_NotEn;
 
   if (party == ALICE) {
     return std::make_tuple(A_reveal, D_A_reveal, A_reveal_notEn);
@@ -426,6 +445,26 @@ std::tuple<std::vector<int>, std::vector<int> > sortDPNew(int party, std::vector
 //  std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
 //  std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
 
+  delete[] sh1_res;
+  delete[] sh1_res_d;
+  delete[] res;
+  delete[] res_d;
+  delete[] isCounter;
+  delete[] counterValue;
+  delete[] isDummy;
+  delete[] dataValue;
+  delete[] binValue;
+  delete[] sortKey;
+  delete[] sortKey_copy;
+  delete[] sortKey_copy3;
+  delete[] sortKey_copy4;
+  delete[] sortKey_copy5;
+  delete[] sortKey_copy6;
+  delete[] res_b_copy;
+  delete[] res_b_copy3;
+  delete[] sh2_res;
+  delete[] sh2_res_d;
+
   if (party == ALICE) {
     return std::make_tuple(A_reveal, D_A_reveal);
   }
@@ -477,6 +516,10 @@ Integer * assignBinCompaction(Integer *res, Integer *res_d, int size, int binNum
   }
  // cout << "assigned bin number for each records" << ' ';
  // printArray(res_b, size);
+  delete[] counter_A;
+  delete[] counter_B; 
+  delete[] res_counter; 
+  
   return res_b;
 }
 
@@ -529,6 +572,16 @@ std::tuple<std::vector<int>, std::vector<int> > sortBinDP(int party, std::vector
   std::vector<int> D_B_reveal = revealSh(sh2_res_d, size, BOB);
 //  std::vector<int> A_reveal_notEn = revealSh(sh1_res_NotEn, size, ALICE);
 //  std::vector<int> B_reveal_notEn = revealSh(sh2_res_NotEn, size, BOB);
+
+  delete[] sh1_res;
+  delete[] sh1_res_d;
+  delete[] res;
+  delete[] res_d;
+  delete[] res_b;
+  delete[] res_b_copy;
+  delete[] res_b_copy2;
+  delete[] sh2_res;
+  delete[] sh2_res_d;
 
   if (party == ALICE) {
     return std::make_tuple(A_reveal, D_A_reveal);

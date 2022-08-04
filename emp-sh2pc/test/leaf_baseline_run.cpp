@@ -53,6 +53,8 @@ std::tuple<int, int>  processQuery(std::vector<int> resultBins, bool debugPrint,
       Integer *ansOriginalDummyMarkers_ = reconstructArray(ansOriginalDummyMarkers);
       cout << "ansOriginalDummyMarkers: " << ' ';
       printArray(ansOriginalDummyMarkers_, ansOriginalDummyMarkers.size());
+      delete[] ansOriginalData_;
+      delete[] ansOriginalDummyMarkers_;
   }
   //debug
   // free up memory
