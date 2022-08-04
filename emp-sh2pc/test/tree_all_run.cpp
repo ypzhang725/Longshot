@@ -608,22 +608,23 @@ int main(int argc, char** argv) {
    
       // debug
       }
-      // delete previous sorted arrays 
-      for (string& interval: intervalPrevious){
-        // free up memory
-        std::vector<int>().swap(mainData[interval]);
-        std::vector<int>().swap(mainDummyMarker[interval]);
-        mainData.erase (interval);
-  //      mainDataEncodedNot.erase (interval);
-        mainDummyMarker.erase (interval);
-      }
-      // free up memory
-      std::vector<int>().swap(originalData[i]);
-      std::vector<int>().swap(originalDummyMarkers[i]);
-      originalData.erase (i);
-  //    originalDataEncodedNot.erase (i);
-      originalDummyMarkers.erase (i);
     }
+
+    // delete previous sorted arrays 
+    for (string& interval: intervalPrevious){
+      // free up memory
+      std::vector<int>().swap(mainData[interval]);
+      std::vector<int>().swap(mainDummyMarker[interval]);
+      mainData.erase (interval);
+//      mainDataEncodedNot.erase (interval);
+      mainDummyMarker.erase (interval);
+    }
+    // free up memory
+    std::vector<int>().swap(originalData[i]);
+    std::vector<int>().swap(originalDummyMarkers[i]);
+    originalData.erase (i);
+//    originalDataEncodedNot.erase (i);
+    originalDummyMarkers.erase (i);
 
     // metric 1: run time
     auto afterDPSort = high_resolution_clock::now();
