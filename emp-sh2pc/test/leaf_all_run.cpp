@@ -62,20 +62,21 @@ int main(int argc, char** argv) {
   int num_real = 0;  
   int num_dummy_bin = 0; // make sure there are enough dummy records
   string N_string = argv[6]; // num of reals for each cache
+  double p = 0.01;
    // nyc taxi dataset: 1271413 rows; 4 bins; payment_type
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
     num_real = std::stod(N_string);
     //num_dummy = 10;
     double b = 1 / eps;
-    double t = log((1/0.01));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
+    double t = log((1/p));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
     num_dummy_bin = int(b * t);
   } else if ((fileName_real == "bin40_ss1.txt") || (fileName_real == "bin40_ss2.txt")) {
     bins = 40; // bin number
     num_real = std::stod(N_string);
     //num_dummy = 10;
     double b = 1 / eps;
-    double t = log((1/0.01));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
+    double t = log((1/p));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
     num_dummy_bin = int(b * t);
     std::vector<int> vect_ = vect;
     int times = std::ceil(t * num_real / 1310720) - 1;
@@ -102,7 +103,7 @@ int main(int argc, char** argv) {
   std::map<int, std::vector<int> > originalDummyMarkers;  // dummy markers for real + dummy
   int dummy_leaf = 0;
   double b = 1 / eps;
-  double p = 0.01;
+
   double tt = log((1/p));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
   for (int i = 0; i < t; i++) { 
     std::vector<int> v_originalData(vect.begin() + (i*num_real), vect.begin() + ((i+1)*num_real)); // original real data
