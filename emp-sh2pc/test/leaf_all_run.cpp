@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
   int num_dummy_bin = 0; // make sure there are enough dummy records
   string N_string = argv[6]; // num of reals for each cache
    // nyc taxi dataset: 1271413 rows; 4 bins; payment_type
-  double p = 0.1;
+  double p = 0.01;
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
     num_real = std::stod(N_string);
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
   }
   
   string fileNameOutIndex = argv[7]; // out
-  string fileNameOut = "./resultsEMP/leaf"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
+  string fileNameOut = "./resultsEMP2/leaf"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << " out:" << fileNameOutIndex << endl;
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
