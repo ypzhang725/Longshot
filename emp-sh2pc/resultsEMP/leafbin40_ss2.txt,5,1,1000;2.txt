@@ -1,0 +1,12 @@
+********************************************************************* 
+metricRunTimeDP: 2, 3, 2, 3, 3
+metricRunTimeDPSort: 4, 4, 5, 6, 5
+metricRunTimeDPMerge: 12, 20, 21, 24, 25
+metricRunTimePointQuery: 0, 2, 3, 3, 4
+metricRunTimeRangeQuery: 0, 0, 0, 0, 0
+metricDPErrorP: 1.225, 1.85, 2.425, 3.125, 3.25
+metricDPStoreErrorP: 6.475, 8.275, 9.9, 10.4, 10.725
+metricTTStoreErrorP: 6.3, 7.975, 9.575, 9.675, 9.875
+metricDPErrorR: 3.34878, 4.0122, 5.33171, 10.1171, 13.1976
+metricDPStoreErrorR: 12.8073, 23.3976, 33.1476, 40.6695, 45
+metricTTStoreErrorR: 13.2561, 20.9268, 29.5256, 32.0939, 32.8488
