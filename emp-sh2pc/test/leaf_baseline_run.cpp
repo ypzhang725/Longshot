@@ -101,14 +101,15 @@ int main(int argc, char** argv) {
   std::vector<int> vect = readInputs(fileName_real); // original
   // the number of updates
   string t_string = argv[4]; // t 
-  int t = atoi(t_string.c_str());  //  the number of updates
+  int t_eps = atoi(t_string.c_str());  //  the number of updates
+  int t = 10; // run 10 updates no matter how many updates 
   // constant dp noise
   bool constantDP = false; 
   // print 
   bool debugPrint = false;
   // privacy budget
   string eps_string = argv[5]; // eps
-  double eps = std::stod(eps_string) / t;
+  double eps = std::stod(eps_string) / t_eps;
   // bin number 
   int bins = 0;
   // !warning: if there are not enough dummy records, then sortDP and copy2two are incorrect
