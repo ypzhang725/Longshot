@@ -50,7 +50,9 @@ def metrics(treeorLeaf, T, epsAll, numReal, sortOption):
  #   print("trueRecordNum: ", trueRecordNum)
     
    # metricDPError = np.sum(np.abs(np.array(DPCount) - np.array(trueCount)), axis =1)
-    metricDPError = np.sum(pow(np.array(DPCount) - np.array(trueCount), 2), axis =1)
+  #  metricDPError = np.sum(pow(np.array(DPCount) - np.array(trueCount), 2), axis =1)
+    metricDPError = np.mean(np.abs(np.array(DPCount) - np.array(trueCount)), axis =1)
+
 
   #  metricDPStoreError = np.sum(np.abs(np.array(DPCount) - np.array(trueRecordNum)), axis =1)
   #  metricTTStoreError = np.sum(np.abs(np.array(trueCount) - np.array(trueRecordNum)), axis =1)
@@ -135,7 +137,7 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
               #  mean_dummyRecordNumCache_treeA = np.round(np.mean(list_dummyRecordNumCache_treeA, axis = 0))
 
 
-                fileName = "bin1newnewResultsPY/DP-T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
+                fileName = "ResultsEMP2/DP-T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
 
                 with open(fileName, 'w') as f:
                     entry = {}
@@ -166,8 +168,8 @@ numReal_list = [100, 1000, 10000]
 runNum = 10
 '''
 T_list = [1000]
-epsAll_list = [1, 0.1]
-numReal_list = [10000]
-runNum = 100
+epsAll_list = [1]
+numReal_list = [1000]
+runNum = 10
 
 run_all(T_list, epsAll_list, numReal_list, runNum)

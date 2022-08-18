@@ -183,7 +183,7 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
                 mean_metricDPStoreErrorRange_treeA = np.round(np.mean(list_metricDPStoreError_treeA_range, axis = 0))
                 mean_metricTTStoreErrorRange_treeA = np.round(np.mean(list_metricTTStoreError_treeA_range, axis = 0))
 
-                fileName = "resultsJuly/all-T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
+                fileName = "resultsEMP2/all-T:"+str(T)+",eps:"+str(epsAll)+",N:"+str(numReal)+".json"
 
                 with open(fileName, 'w') as f:
                     entry = {}
@@ -226,9 +226,9 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
                     json.dump(entry, f, ensure_ascii=False)
 
 
-T_list = [10]
-epsAll_list = [10, 0.1 ]
-numReal_list = [100]
+T_list = [200]
+epsAll_list = [1]
+numReal_list = [1000]
 runNum = 2
 '''
 T_list = [1000]
