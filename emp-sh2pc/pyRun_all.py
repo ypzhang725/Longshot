@@ -226,7 +226,7 @@ def run_all(T_list, epsAll_list, numReal_list, runNum):
                     json.dump(entry, f, ensure_ascii=False)
 
 
-T_list = [200]
+T_list = [600, 1000]
 epsAll_list = [1]
 numReal_list = [1000]
 runNum = 2
