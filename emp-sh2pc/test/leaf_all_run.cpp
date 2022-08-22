@@ -331,13 +331,17 @@ int main(int argc, char** argv) {
 
     // range query =======
     auto RangeQueryBefore = high_resolution_clock::now();
+    std::vector<int> PdpI_(bins, 0);
+    for (int j = 0; j <= i; j++) { 
+      PdpI_ = addTwoVectors(PdpI_, dpHists[j]);
+    }
     std::vector<int> RdpI;
     int idx = 0;
     for (int j = 0; j < bins; j++) {   
       for (int k = j; k < bins; k++) {   
         RdpI.push_back(0);
         for (int l = j; l <= k; l++){
-          RdpI[idx] = RdpI[idx] + PdpI[l];
+          RdpI[idx] = RdpI[idx] + PdpI_[l];
         }
         idx++;
       }
