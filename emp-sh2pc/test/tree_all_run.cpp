@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
   int num_dummy_bin = 0; // make sure there are enough dummy records
   string N_string = argv[6]; // num of reals for each cache
    // nyc taxi dataset: 1271413 rows; 4 bins; payment_type
-  double p = 0.01;
+  double p = 0.001;
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
     num_real = std::stod(N_string);
