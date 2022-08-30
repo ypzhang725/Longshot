@@ -4,3 +4,4 @@
 # NYCTaxi dataset
 #./bin/test_leaf_all_run 1 12345 taxi_ss1.txt 10 1 1000 2 1 &./bin/test_leaf_all_run 2 12345 taxi_ss2.txt 10 1 1000 2 1
 ./bin/test_leaf_all_run 1 12345 bin40_ss1.txt 1000 1 1000 2 1 &./bin/test_leaf_all_run 2 12345 bin40_ss2.txt 1000 1 1000 2 1
+#./bin/test_leaf_all_run 1 12345 bin40_total_amount_ss1.txt 10 100 10 2 1 &./bin/test_leaf_all_run 2 12345 bin40_total_amount_ss2.txt 10 100 10 2 1
