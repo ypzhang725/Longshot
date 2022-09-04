@@ -7,7 +7,7 @@
 # N = 1000; T = 200; eps = 1; tree_optimized 
 ./bin/test_tree_all_run 1 12345 bin40_total_amount_ss1.txt 200 1 1000 2 0 &./bin/test_tree_all_run 2 12345 bin40_total_amount_ss2.txt 200 1 1000 2 0
 
-# N = 1000; T = 200; eps = 1; tree_optimized 
+# N = 1000; T = 600; eps = 1; tree_optimized 
 ./bin/test_tree_all_run 1 12345 bin40_total_amount_ss1.txt 600 1 1000 2 0 &./bin/test_tree_all_run 2 12345 bin40_total_amount_ss2.txt 600 1 1000 2 0
 
 #Tree approach 
