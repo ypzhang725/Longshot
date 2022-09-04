@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
   if ((fileName_real == "taxi_ss1.txt") || (fileName_real == "taxi_ss2.txt")) {
     bins = 4; // bin number
     num_real = std::stod(N_string);
-  } else if ((fileName_real == "bin40_ss1.txt") || (fileName_real == "bin40_ss2.txt")) {
+  } else if ((fileName_real == "bin40_ss1.txt") || (fileName_real == "bin40_ss2.txt") || (fileName_real == "bin40_total_amount_ss1.txt") || (fileName_real == "bin40_total_amount_ss2.txt")) {
     bins = 40; // bin number
     num_real = std::stod(N_string);
     std::vector<int> vect_ = vect;
@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
   
   
   string fileNameOutIndex = argv[7]; // out
-  string fileNameOut = "./resultsEMP2/baseline"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
+  string fileNameOut = "./resultsEMP4/baseline"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << " out:" << fileNameOutIndex << endl;
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 

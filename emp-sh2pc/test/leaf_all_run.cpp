@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
     double b = 1 / eps;
     double t = log((1/p));    // Pr[|Y| ≥ t · b] = exp(−t) = 0.1.
     num_dummy_bin = int(b * t);
-  } else if ((fileName_real == "bin40_ss1.txt") || (fileName_real == "bin40_ss2.txt")) {
+  } else if ((fileName_real == "bin40_ss1.txt") || (fileName_real == "bin40_ss2.txt") || (fileName_real == "bin40_total_amount_ss1.txt") || (fileName_real == "bin40_total_amount_ss2.txt")) {
     bins = 40; // bin number
     num_real = std::stod(N_string);
     //num_dummy = 10;
