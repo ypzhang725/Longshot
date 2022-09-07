@@ -115,7 +115,12 @@ Integer * computeHistNew(Integer * res_d, Integer * res, int bins, int size){
   }
   
   // step4: sort by isCounter --> counters at the end 
-  sort(isCounter, newSize, counterValue);
+  Integer *sortKey2 = new Integer[newSize];
+  for(int i = 0; i < newSize; ++i){
+    sortKey2[i] = memconcat2(isCounter[i], dataValue[i]);
+  }
+  sort(sortKey2, newSize, counterValue);
+  
   
   // step5: pick the last m counters 
   Integer *res_h = new Integer[bins];
