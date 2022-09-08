@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
   // constant dp noise
   bool constantDP = false; 
   // print 
-  bool debugPrint = true;
+  bool debugPrint = false;
   // privacy budget
   string eps_string = argv[5]; // eps
   double epsALL = std::stod(eps_string);
