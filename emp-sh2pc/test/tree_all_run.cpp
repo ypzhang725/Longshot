@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
   int gapAgainThreshold = 1;
 
   string fileNameOutIndex = argv[8]; // out
-  string fileNameOut = "./resultsEMP4/tree"+fileName_real+","+t_string+","+eps_string+","+N_string+","+sortOption_string+";"+fileNameOutIndex+".txt";
+  string fileNameOut = "./resultsEMPGCP/tree"+fileName_real+","+t_string+","+eps_string+","+N_string+","+sortOption_string+";"+fileNameOutIndex+".txt";
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << "  sortOption: " << sortOption_string << " out:" << fileNameOutIndex << endl;
 
   // prepare input data: original data contains real and dummy records
