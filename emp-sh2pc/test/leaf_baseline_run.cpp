@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
   
   
   string fileNameOutIndex = argv[7]; // out
-  string fileNameOut = "./resultsEMP4/baseline"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
+  string fileNameOut = "./resultsEMPGCP/baseline"+fileName_real+","+t_string+","+eps_string+","+N_string+";"+fileNameOutIndex+".txt";
   cout << "fileName: " << fileName_real << "  T: " << t_string << "  eps: " << eps_string << "  N: " << N_string << " out:" << fileNameOutIndex << endl;
   // prepare input data: original data contains real and dummy records
   // trigger update for each t 
