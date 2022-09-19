@@ -13,6 +13,8 @@
 #include "sortCacheDP.cpp"
 #include "merge2SortedArrs.cpp"
 #include <chrono>
+#include <algorithm>
+
 using namespace std::chrono;
 using namespace emp;
 using namespace std;
@@ -182,6 +184,14 @@ int main(int argc, char** argv) {
   std::vector<double> metricDPStoreErrorRange(t);  // |DP count - true record|
   std::vector<double> metricTTStoreErrorRange(t);  // |true count - true record|
   std::vector<double> metricss(t);
+
+  std::vector<double> metricRelDPErrorPoint(t);  // |DP count - true count| / max(true, 5)
+  std::vector<double> metricRelDPStoreErrorPoint(t);  // |DP count - true record| / max(true, 5)
+  std::vector<double> metricRelTTStoreErrorPoint(t);  // |true count - true record| / max(true, 5)
+  std::vector<double> metricRelDPErrorRange(t);  // |DP count - true count| / max(true, 5)
+  std::vector<double> metricRelDPStoreErrorRange(t);  // |DP count - true record| / max(true, 5)
+  std::vector<double> metricRelTTStoreErrorRange(t);  // |true count - true record| / max(true, 5)
+
   // secure part 
   // for each update: 
   for (int i = 0; i < t; i++) {
@@ -230,16 +240,26 @@ int main(int argc, char** argv) {
     double DPStoreErrorPoint = 0;
     double DPErrorPoint = 0;
     double TTStoreErrorPoint = 0;
+    double RelDPStoreErrorPoint = 0;
+    double RelDPErrorPoint = 0;
+    double RelTTStoreErrorPoint = 0;
     for (int j = 0; j < bins; j++) {
       DPStoreErrorPoint += abs(DPCountPoint[j] - TrueRecordPoint[j]);
       DPErrorPoint += abs(DPCountPoint[j] - TrueCountPoint[j]);
       TTStoreErrorPoint += abs(TrueCountPoint[j] - TrueRecordPoint[j]);
+      RelDPStoreErrorPoint += abs(DPCountPoint[j] - TrueRecordPoint[j]) / max(TrueRecordPoint[j], 5);
+      RelDPErrorPoint += abs(DPCountPoint[j] - TrueCountPoint[j]) / max(TrueCountPoint[j], 5);
+      RelTTStoreErrorPoint += abs(TrueCountPoint[j] - TrueRecordPoint[j]) / max(TrueRecordPoint[j], 5);
     }
     // for all time point
     metricRunTimePoint[i] = (durationPointQ.count() / bins) / 1000;
     metricDPErrorPoint[i] = DPErrorPoint / bins;
     metricDPStoreErrorPoint[i] = DPStoreErrorPoint / bins;
     metricTTStoreErrorPoint[i] = TTStoreErrorPoint / bins;
+
+    metricRelDPErrorPoint[i] = RelDPStoreErrorPoint / bins;
+    metricRelDPStoreErrorPoint[i] = RelDPStoreErrorPoint / bins;
+    metricRelTTStoreErrorPoint[i] = RelTTStoreErrorPoint / bins;
     
     // range queries -------------------------------------------------------------------------------------------
     auto startRangeQ = high_resolution_clock::now();
@@ -279,16 +299,26 @@ int main(int argc, char** argv) {
     double DPStoreErrorRange = 0;
     double DPErrorRange = 0;
     double TTStoreErrorRange = 0;
+    double RelDPStoreErrorRange = 0;
+    double RelDPErrorRange = 0;
+    double RelTTStoreErrorRange = 0;
     for (int j = 0; j < querySize; j++) { 
       DPStoreErrorRange += abs(DPCountRange[j] - TrueRecordRange[j]);
       DPErrorRange += abs(DPCountRange[j] - TrueCountRange[j]);
       TTStoreErrorRange += abs(TrueCountRange[j] - TrueRecordRange[j]);
+      RelDPStoreErrorRange += abs(DPCountRange[j] - TrueRecordRange[j]) / max(TrueRecordRange[j], 5);
+      RelDPErrorRange += abs(DPCountRange[j] - TrueCountRange[j]) / max(TrueCountRange[j], 5);
+      RelTTStoreErrorRange += abs(TrueCountRange[j] - TrueRecordRange[j]) / max(TrueRecordRange[j], 5);
     }
     // for all time point
     metricRunTimeRange[i] = (durationRangeQ.count() / querySize) / 1000;
     metricDPErrorRange[i] = DPErrorRange / querySize;
     metricDPStoreErrorRange[i] = DPStoreErrorRange / querySize;
     metricTTStoreErrorRange[i] = TTStoreErrorRange / querySize;
+
+    metricRelDPErrorRange[i] = RelDPErrorRange / querySize;
+    metricRelDPStoreErrorRange[i] = RelDPStoreErrorRange / querySize;
+    metricRelTTStoreErrorRange[i] = RelTTStoreErrorRange / querySize;
 
     std::vector<int>().swap(tempOriginalData);
     std::vector<int>().swap(tempOriginalDummyMarkers);
@@ -395,6 +425,80 @@ int main(int argc, char** argv) {
   for (int i = 0; i < t; i++) {
     cout << metricTTStoreErrorRange[i];
     outFile << metricTTStoreErrorRange[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  
+  cout << "metricRelDPErrorPoint: ";
+  outFile << "metricRelDPErrorPoint: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRelDPErrorPoint[i];
+    outFile << metricRelDPErrorPoint[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  cout << "metricRelDPStoreErrorPoint: ";
+  outFile << "metricRelDPStoreErrorPoint: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRelDPStoreErrorPoint[i];
+    outFile << metricRelDPStoreErrorPoint[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl; 
+  cout << "metricRelTTStoreErrorPoint: ";
+  outFile << "metricRelTTStoreErrorPoint: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRelTTStoreErrorPoint[i];
+    outFile << metricRelTTStoreErrorPoint[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  
+  cout << "metricRelDPErrorRange: ";
+  outFile << "metricRelDPErrorRange: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRelDPErrorRange[i];
+    outFile << metricRelDPErrorRange[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  cout << "metricRelDPStoreErrorRange: ";
+  outFile << "metricRelDPStoreErrorRange: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRelDPStoreErrorRange[i];
+    outFile << metricRelDPStoreErrorRange[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl; 
+  cout << "metricRelTTStoreErrorRange: ";
+  outFile << "metricRelTTStoreErrorRange: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRelTTStoreErrorRange[i];
+    outFile << metricRelTTStoreErrorRange[i];
     if (i != t-1){
      cout << ", ";
      outFile << ", ";

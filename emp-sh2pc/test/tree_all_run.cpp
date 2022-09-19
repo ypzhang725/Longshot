@@ -13,6 +13,8 @@
 #include "sortCacheDP.cpp"
 #include "merge2SortedArrs.cpp"
 #include <chrono>
+#include <algorithm>
+
 using namespace std::chrono;
 using namespace emp;
 using namespace std;
@@ -170,6 +172,13 @@ int main(int argc, char** argv) {
   std::vector<double> metricDPErrorR(t);  // |DP count - true count|
   std::vector<double> metricDPStoreErrorR(t);  // |DP count - true record|
   std::vector<double> metricTTStoreErrorR(t);  // |true count - true record|
+
+  std::vector<double> metricRelDPErrorP(t);  // |DP count - true count| / max(true, 5)
+  std::vector<double> metricRelDPStoreErrorP(t);  // |DP count - true record| / max(true, 5) 
+  std::vector<double> metricRelTTStoreErrorP(t);  // |true count - true record| / max(true, 5)
+  std::vector<double> metricRelDPErrorR(t);  // |DP count - true count| / max(true, 5)
+  std::vector<double> metricRelDPStoreErrorR(t);  // |DP count - true record| / max(true, 5)
+  std::vector<double> metricRelTTStoreErrorR(t);  // |true count - true record| / max(true, 5)
   
   // secure part 
   std::map<std::string, std::vector<int> > mainData;
@@ -730,41 +739,59 @@ int main(int argc, char** argv) {
     // compute the error for DP count 
     double DPCountErrorP = 0;
     double DPCountErrorR = 0;
+    double RelDPCountErrorP = 0;
+    double RelDPCountErrorR = 0;
     for (int j = 0; j < bins; j++) { 
       DPCountErrorP += abs(PdpI[j] - PtrueI[j]);
+      RelDPCountErrorP += abs(PdpI[j] - PtrueI[j]) / max(PtrueI[j], 5);
     }
     for (int j = 0; j < rangeQuerySize; j++) { 
       DPCountErrorR += abs(RdpI[j] - RtrueI[j]);
+      RelDPCountErrorR += abs(RdpI[j] - RtrueI[j]) / max(RtrueI[j], 5);
     }
     // cout << "DPCountError: " << DPCountError << endl;
     metricDPErrorP[i] = DPCountErrorP / bins;  
     metricDPErrorR[i] = DPCountErrorR / rangeQuerySize;  
+    metricRelDPErrorP[i] = RelDPCountErrorP / bins;  
+    metricRelDPErrorR[i] = RelDPCountErrorR / rangeQuerySize;  
 
     // metric sort errors = (dp count - true records)  
     // compute the error for DP store 
     double DPStoreErrorP = 0;
     double DPStoreErrorR = 0;
+    double RelDPStoreErrorP = 0;
+    double RelDPStoreErrorR = 0;
     for (int j = 0; j < bins; j++) { 
-      DPStoreErrorP += abs(PdpI[j] - PtrueR[j]);
+      DPStoreErrorP += abs(PdpI[j] - PtrueR[j]); 
+      RelDPStoreErrorP += abs(PdpI[j] - PtrueR[j]) / max(PtrueR[j], 5);
     }
     for (int j = 0; j < rangeQuerySize; j++) { 
       DPStoreErrorR += abs(RdpI[j] - RtrueR[j]);
+      RelDPStoreErrorR += abs(RdpI[j] - RtrueR[j]) / max(RtrueR[j], 5);
     }
     // cout << "DPStoreError: " << DPStoreError << endl;
     metricDPStoreErrorP[i] = DPStoreErrorP / bins;  
     metricDPStoreErrorR[i] = DPStoreErrorR / rangeQuerySize;  
+    metricRelDPStoreErrorP[i] = RelDPStoreErrorP / bins;  
+    metricRelDPStoreErrorR[i] = RelDPStoreErrorR / rangeQuerySize;  
 
     // metric errors = (true count - true records)  
     double TTStoreErrorP = 0;
     double TTStoreErrorR = 0;
+    double RelTTStoreErrorP = 0;
+    double RelTTStoreErrorR = 0;
     for (int j = 0; j < bins; j++) { 
       TTStoreErrorP += abs(PtrueI[j] - PtrueR[j]);
+      RelTTStoreErrorP += abs(PtrueI[j] - PtrueR[j]) / max(PtrueR[j], 5);
     }
     for (int j = 0; j < rangeQuerySize; j++) { 
       TTStoreErrorR += abs(RtrueI[j] - RtrueR[j]);
+      RelTTStoreErrorR += abs(RtrueI[j] - RtrueR[j]) / max(RtrueR[j], 5);
     }
     metricTTStoreErrorP[i] = TTStoreErrorP / bins;  
     metricTTStoreErrorR[i] = TTStoreErrorR / rangeQuerySize;  
+    metricRelTTStoreErrorP[i] = RelTTStoreErrorP / bins;  
+    metricRelTTStoreErrorR[i] = RelTTStoreErrorR / rangeQuerySize;  
 
     //debug
     if (debugPrint) {
@@ -940,6 +967,82 @@ int main(int argc, char** argv) {
   for (int i = 0; i < t; i++) {
     cout << metricTTStoreErrorR[i];
     outFile << metricTTStoreErrorR[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl; 
+
+ 
+  // query processing error  
+  cout << "metricRelDPErrorP: ";
+  outFile << "metricRelDPErrorP: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRelDPErrorP[i];
+    outFile << metricRelDPErrorP[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  cout << "metricRelDPStoreErrorP: ";
+  outFile << "metricRelDPStoreErrorP: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRelDPStoreErrorP[i];
+    outFile << metricRelDPStoreErrorP[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl; 
+  cout << "metricRelTTStoreErrorP: ";
+  outFile << "metricRelTTStoreErrorP: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRelTTStoreErrorP[i];
+    outFile << metricRelTTStoreErrorP[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+
+  cout << "metricRelDPErrorR: ";
+  outFile << "metricRelDPErrorR: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRelDPErrorR[i];
+    outFile << metricRelDPErrorR[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl;
+  cout << "metricRelDPStoreErrorR: ";
+  outFile << "metricRelDPStoreErrorR: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRelDPStoreErrorR[i];
+    outFile << metricRelDPStoreErrorR[i];
+    if (i != t-1){
+     cout << ", ";
+     outFile << ", ";
+    }
+  } 
+  cout << endl;
+  outFile << endl; 
+  cout << "metricRelTTStoreErrorR: ";
+  outFile << "metricRelTTStoreErrorR: ";
+  for (int i = 0; i < t; i++) {
+    cout << metricRelTTStoreErrorR[i];
+    outFile << metricRelTTStoreErrorR[i];
     if (i != t-1){
      cout << ", ";
      outFile << ", ";
