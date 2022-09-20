@@ -27,5 +27,4 @@ echo "#T=200, eps= 1, N=1000, different p"
 ./bin/test_tree_all_run 1 12345 bin40_total_amount_ss1.txt 200 1 1000 2 0 0.01 &./bin/test_tree_all_run 2 12345 bin40_total_amount_ss2.txt 200 1 1000 2 0 0.01 
 
 
-
 ./bin/test_leaf_baseline_run 1 12345 bin40_total_amount_ss1.txt 200 1 1000 2 1 0.001 &./bin/test_leaf_baseline_run 2 12345 bin40_total_amount_ss2.txt 200 1 1000 2 1 0.001 
