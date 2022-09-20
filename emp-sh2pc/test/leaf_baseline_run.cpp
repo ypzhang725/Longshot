@@ -129,6 +129,14 @@ int main(int argc, char** argv) {
     for (int i = 0; i < times; i++) { 
       vect.insert(vect.end(), vect_.begin(), vect_.end());
     }
+  } else if ((fileName_real == "bin265_PULocationID_ss1.txt") || (fileName_real == "bin265_PULocationID_ss2.txt")) {
+    bins = 265; // bin number
+    num_real = std::stod(N_string);
+    std::vector<int> vect_ = vect;
+    int times = std::ceil(t * num_real / 1369765) - 1;
+    for (int i = 0; i < times; i++) { 
+      vect.insert(vect.end(), vect_.begin(), vect_.end());
+    }
   } else {
     bins = 5; // bin number
     num_real = 10;  
