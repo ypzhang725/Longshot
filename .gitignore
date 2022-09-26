@@ -11,3 +11,4 @@ bin/
 CMakeFiles/
 *libemp-tool.dylib
 *.pdf
+*.so
